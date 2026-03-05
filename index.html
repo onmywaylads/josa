@@ -1,0 +1,575 @@
+<!DOCTYPE html>
+
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>바로고 현장사업부 — 상점 조회</title>
+<script src="https://dapi.kakao.com/v2/maps/sdk.js?appkey=78e983d226a652ebe7a1581d063fefb9&libraries=services"></script>
+<link href="https://fonts.googleapis.com/css2?family=Pretendard:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg:#080c18; --surface:#0f1623; --surface2:#161f30; --surface3:#1c2840;
+    --border:#1e2d45; --border2:#263650;
+    --accent:#00c2ff; --accent2:#0066ff;
+    --green:#00e5a0; --red:#ff4060; --yellow:#ffcc44; --orange:#ff8c42;
+    --text:#dde8f5; --text-dim:#4d6080; --text-mid:#8099bb;
+  }
+  *{margin:0;padding:0;box-sizing:border-box;}
+  body{font-family:'Pretendard',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;}
+
+/* 탭 */
+.nav{display:flex;background:var(–surface);border-bottom:1px solid var(–border);position:sticky;top:0;z-index:200;}
+.nav-tab{flex:1;padding:15px;text-align:center;font-size:13px;font-weight:700;color:var(–text-dim);cursor:pointer;transition:all 0.2s;border-bottom:2px solid transparent;}
+.nav-tab.active{color:var(–accent);border-bottom-color:var(–accent);}
+
+.page{display:none;}
+.page.active{display:block;}
+.wrap{max-width:960px;margin:0 auto;padding:24px 20px 80px;}
+
+/* 카드 */
+.card{background:var(–surface);border:1px solid var(–border);border-radius:14px;padding:22px;margin-bottom:14px;position:relative;overflow:hidden;}
+.card::after{content:’’;position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(–accent2),var(–accent),transparent);}
+.card-label{font-size:11px;font-weight:700;color:var(–accent);letter-spacing:0.1em;text-transform:uppercase;margin-bottom:14px;display:flex;align-items:center;gap:8px;}
+.card-label::before{content:’’;width:3px;height:12px;background:var(–accent);border-radius:2px;}
+
+/* 입력 */
+.input-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px;}
+.field{display:flex;flex-direction:column;gap:6px;}
+.field-label{font-size:11px;font-weight:600;color:var(–text-mid);letter-spacing:0.06em;text-transform:uppercase;}
+.inp{background:var(–surface2);border:1px solid var(–border2);border-radius:9px;padding:11px 14px;color:var(–text);font-family:‘Pretendard’,sans-serif;font-size:14px;font-weight:500;outline:none;transition:all 0.2s;width:100%;}
+.inp:focus{border-color:var(–accent);box-shadow:0 0 0 3px rgba(0,194,255,0.1);}
+.inp::placeholder{color:var(–text-dim);}
+.inp.big{font-size:15px;font-weight:700;}
+
+/* 버튼 */
+.btn-primary{width:100%;padding:13px;background:linear-gradient(135deg,var(–accent2),var(–accent));border:none;border-radius:9px;color:#fff;font-family:‘Pretendard’,sans-serif;font-size:14px;font-weight:800;cursor:pointer;transition:all 0.2s;display:flex;align-items:center;justify-content:center;gap:8px;}
+.btn-primary:hover{transform:translateY(-1px);box-shadow:0 8px 24px rgba(0,100,255,0.3);}
+.btn{padding:9px 16px;border-radius:8px;font-family:‘Pretendard’,sans-serif;font-size:13px;font-weight:700;cursor:pointer;transition:all 0.15s;border:none;}
+.btn-ghost{background:transparent;border:1px solid var(–border2);color:var(–text-mid);}
+.btn-ghost:hover{border-color:var(–accent);color:var(–accent);}
+
+/* 스탯 */
+.stats{display:flex;background:var(–surface);border:1px solid var(–border);border-radius:12px;margin-bottom:18px;overflow:hidden;}
+.stat{flex:1;padding:13px 14px;display:flex;flex-direction:column;gap:3px;border-right:1px solid var(–border);}
+.stat:last-child{border-right:none;}
+.stat-n{font-size:19px;font-weight:900;}
+.stat-l{font-size:10px;color:var(–text-dim);letter-spacing:0.06em;text-transform:uppercase;}
+
+/* 결과 */
+.result-wrap{animation:fadeUp 0.3s ease;}
+@keyframes fadeUp{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+.res-card{background:var(–surface);border:1px solid var(–border);border-radius:14px;padding:22px;margin-bottom:12px;position:relative;overflow:hidden;}
+.res-card.possible{border-color:rgba(0,229,160,0.25);}
+.res-card.impossible{border-color:rgba(255,64,96,0.25);}
+.res-card.check{border-color:rgba(255,204,68,0.25);}
+.res-card::before{content:’’;position:absolute;top:0;left:0;right:0;height:2px;}
+.res-card.possible::before{background:linear-gradient(90deg,var(–green),transparent);}
+.res-card.impossible::before{background:linear-gradient(90deg,var(–red),transparent);}
+.res-card.check::before{background:linear-gradient(90deg,var(–yellow),transparent);}
+
+.res-top{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:16px;}
+.res-name{font-size:19px;font-weight:900;}
+.res-addr{font-size:12px;color:var(–text-dim);margin-top:4px;}
+
+.status-pill{display:inline-flex;align-items:center;gap:5px;padding:5px 12px;border-radius:20px;font-size:12px;font-weight:700;white-space:nowrap;flex-shrink:0;}
+.status-pill.possible{background:rgba(0,229,160,0.1);border:1px solid rgba(0,229,160,0.25);color:var(–green);}
+.status-pill.impossible{background:rgba(255,64,96,0.1);border:1px solid rgba(255,64,96,0.25);color:var(–red);}
+.status-pill.check{background:rgba(255,204,68,0.1);border:1px solid rgba(255,204,68,0.25);color:var(–yellow);}
+.sdot{width:6px;height:6px;border-radius:50%;background:currentColor;}
+
+.info-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:14px;}
+.itile{background:var(–surface2);border:1px solid var(–border);border-radius:9px;padding:12px;}
+.itile-l{font-size:10px;font-weight:700;color:var(–text-dim);letter-spacing:0.07em;text-transform:uppercase;margin-bottom:6px;}
+.itile-v{font-size:14px;font-weight:700;}
+.c-accent{color:var(–accent)}.c-green{color:var(–green)}.c-red{color:var(–red)}.c-yellow{color:var(–yellow)}.c-orange{color:var(–orange)}.c-dim{color:var(–text-mid)}
+
+/* 할증 배지 */
+.surcharge-badge{display:inline-flex;align-items:center;gap:6px;background:rgba(255,140,66,0.12);border:1px solid rgba(255,140,66,0.3);border-radius:8px;padding:10px 14px;font-size:13px;font-weight:700;color:var(–orange);margin-bottom:14px;}
+
+.memo{background:rgba(255,204,68,0.05);border:1px solid rgba(255,204,68,0.15);border-radius:8px;padding:10px 13px;font-size:12px;color:var(–yellow);margin-bottom:14px;display:flex;gap:7px;line-height:1.5;}
+
+.score-sec{border-top:1px solid var(–border);padding-top:14px;}
+.score-title{font-size:10px;font-weight:700;color:var(–text-dim);letter-spacing:0.08em;text-transform:uppercase;margin-bottom:10px;}
+.srow{display:flex;align-items:center;gap:10px;margin-bottom:7px;}
+.srow-l{font-size:11px;color:var(–text-mid);width:90px;flex-shrink:0;}
+.sbar{flex:1;height:4px;background:var(–surface2);border-radius:2px;overflow:hidden;}
+.sfill{height:100%;border-radius:2px;width:0%;transition:width 0.8s cubic-bezier(0.16,1,0.3,1);}
+.spct{font-size:11px;font-weight:700;width:32px;text-align:right;flex-shrink:0;}
+.stotal{display:flex;justify-content:space-between;align-items:center;margin-top:12px;padding-top:12px;border-top:1px solid var(–border);}
+.stotal-l{font-size:12px;color:var(–text-mid);}
+.stotal-v{font-size:18px;font-weight:900;color:var(–accent);}
+
+.action-row{display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap;}
+
+.similar-card{background:var(–surface);border:1px solid var(–border);border-radius:12px;padding:18px;}
+.sim-list{display:flex;flex-direction:column;gap:7px;margin-top:12px;}
+.sim-item{display:flex;align-items:center;justify-content:space-between;background:var(–surface2);border:1px solid var(–border);border-radius:8px;padding:10px 13px;cursor:pointer;transition:all 0.15s;}
+.sim-item:hover{border-color:rgba(0,194,255,0.3);transform:translateX(2px);}
+.sim-name{font-size:13px;font-weight:700;}
+.sim-addr{font-size:11px;color:var(–text-dim);margin-top:2px;}
+.sim-right{display:flex;align-items:center;gap:7px;flex-shrink:0;}
+.chips{display:flex;gap:3px;}
+.chip{font-size:10px;font-weight:700;padding:2px 6px;border-radius:4px;}
+.chip-n{background:rgba(0,194,255,0.1);color:var(–accent);}
+.chip-d{background:rgba(0,229,160,0.1);color:var(–green);}
+.chip-k{background:rgba(255,204,68,0.1);color:var(–yellow);}
+
+.no-match{background:var(–surface);border:1px solid rgba(255,204,68,0.2);border-radius:14px;padding:36px;text-align:center;}
+.no-match-icon{font-size:40px;margin-bottom:12px;}
+.no-match-title{font-size:17px;font-weight:800;color:var(–yellow);margin-bottom:8px;}
+.no-match-desc{font-size:13px;color:var(–text-mid);line-height:1.7;}
+
+.format-tip{background:rgba(0,194,255,0.05);border:1px solid rgba(0,194,255,0.12);border-radius:7px;padding:9px 13px;font-size:12px;color:var(–text-mid);margin-top:12px;}
+.format-tip code{background:rgba(0,194,255,0.12);color:var(–accent);padding:1px 6px;border-radius:3px;font-family:monospace;}
+
+/* ── 지도 ── */
+#mapContainer{width:100%;height:calc(100vh - 49px);position:relative;}
+#kakaoMap{width:100%;height:100%;}
+
+.map-toolbar{position:absolute;top:12px;left:12px;z-index:100;display:flex;flex-direction:column;gap:8px;max-width:230px;}
+.map-panel{background:rgba(8,12,24,0.93);backdrop-filter:blur(12px);border:1px solid var(–border);border-radius:12px;padding:16px;}
+.map-panel-title{font-size:11px;font-weight:700;color:var(–accent);letter-spacing:0.08em;text-transform:uppercase;margin-bottom:12px;}
+
+.hub-select{background:var(–surface2);border:1px solid var(–border2);border-radius:8px;padding:9px 12px;color:var(–text);font-family:‘Pretendard’,sans-serif;font-size:13px;outline:none;width:100%;margin-bottom:10px;cursor:pointer;}
+
+/* 레이어 선택 탭 */
+.layer-tabs{display:flex;gap:6px;margin-bottom:10px;}
+.layer-tab{flex:1;padding:7px;border-radius:7px;font-family:‘Pretendard’,sans-serif;font-size:11px;font-weight:700;cursor:pointer;border:none;transition:all 0.15s;text-align:center;}
+.layer-tab.zone{background:rgba(0,194,255,0.1);border:1px solid rgba(0,194,255,0.2);color:var(–accent);}
+.layer-tab.zone.active{background:rgba(0,194,255,0.25);border-color:var(–accent);}
+.layer-tab.surcharge{background:rgba(255,140,66,0.1);border:1px solid rgba(255,140,66,0.2);color:var(–orange);}
+.layer-tab.surcharge.active{background:rgba(255,140,66,0.25);border-color:var(–orange);}
+
+.draw-btns{display:flex;flex-direction:column;gap:6px;}
+.draw-btn{padding:9px 12px;border-radius:8px;font-family:‘Pretendard’,sans-serif;font-size:12px;font-weight:700;cursor:pointer;transition:all 0.15s;border:1px solid var(–border);background:var(–surface2);color:var(–text-mid);display:flex;align-items:center;gap:7px;}
+.draw-btn:hover{border-color:var(–accent);color:var(–accent);}
+.draw-btn.drawing{background:rgba(0,194,255,0.15);border-color:var(–accent);color:var(–accent);}
+.draw-btn.drawing-surcharge{background:rgba(255,140,66,0.15);border-color:var(–orange);color:var(–orange);}
+.draw-btn.save{background:linear-gradient(135deg,var(–accent2),var(–accent));border:none;color:#fff;}
+.draw-btn.del{background:rgba(255,64,96,0.1);border-color:rgba(255,64,96,0.2);color:var(–red);}
+
+/* 저장된 허브 목록 */
+.hub-list{display:flex;flex-direction:column;gap:6px;max-height:200px;overflow-y:auto;}
+.hub-row{display:flex;align-items:center;justify-content:space-between;padding:7px 0;border-bottom:1px solid var(–border);font-size:12px;}
+.hub-row:last-child{border-bottom:none;}
+.hub-dot{width:9px;height:9px;border-radius:50%;margin-right:7px;flex-shrink:0;}
+.hub-tags{display:flex;gap:4px;}
+.hub-tag{font-size:10px;font-weight:700;padding:2px 6px;border-radius:4px;}
+.hub-tag.zone-tag{background:rgba(0,194,255,0.1);color:var(–accent);}
+.hub-tag.sur-tag{background:rgba(255,140,66,0.1);color:var(–orange);}
+
+.map-status{position:absolute;bottom:16px;left:50%;transform:translateX(-50%);z-index:100;background:rgba(8,12,24,0.92);border:1px solid var(–border);border-radius:20px;padding:8px 18px;font-size:12px;color:var(–text-mid);white-space:nowrap;}
+.map-status.zone{border-color:var(–accent);color:var(–accent);}
+.map-status.surcharge{border-color:var(–orange);color:var(–orange);}
+
+@media(max-width:640px){
+.input-row{grid-template-columns:1fr;}
+.info-grid{grid-template-columns:1fr 1fr;}
+.stats{flex-wrap:wrap;}
+}
+</style>
+
+</head>
+<body>
+
+<div class="nav">
+  <div class="nav-tab active" onclick="showPage('search',this)">🔍 상점 조회</div>
+  <div class="nav-tab" onclick="showPage('map',this)">🗺 권역 관리</div>
+</div>
+
+<!-- ══════════ 상점 조회 ══════════ -->
+
+<div class="page active" id="page-search">
+<div class="wrap">
+  <div class="stats">
+    <div class="stat"><div class="stat-n">247</div><div class="stat-l">전체</div></div>
+    <div class="stat"><div class="stat-n" style="color:var(--green)">189</div><div class="stat-l">가능</div></div>
+    <div class="stat"><div class="stat-n" style="color:var(--red)">41</div><div class="stat-l">불가</div></div>
+    <div class="stat"><div class="stat-n" style="color:var(--yellow)">17</div><div class="stat-l">확인필요</div></div>
+    <div class="stat"><div class="stat-n">12</div><div class="stat-l">허브</div></div>
+  </div>
+  <div class="card">
+    <div class="card-label">신규 실수행 조사 상점 입력</div>
+    <div class="input-row">
+      <div class="field">
+        <div class="field-label">상점명</div>
+        <input class="inp big" id="storeInput" placeholder="맥도날드[강남점]" autocomplete="off"/>
+      </div>
+      <div class="field">
+        <div class="field-label">주소</div>
+        <input class="inp" id="addrInput" placeholder="서울시 강남구 강남대로 396"/>
+      </div>
+    </div>
+    <button class="btn-primary" onclick="doSearch()">🔍 &nbsp;DB 매칭 조회</button>
+    <div class="format-tip">💡 형식: <code>브랜드명[상점명]</code> 예) <code>맥도날드[강남점]</code></div>
+  </div>
+  <div id="resultWrap"></div>
+</div>
+</div>
+
+<!-- ══════════ 권역 관리 ══════════ -->
+
+<div class="page" id="page-map">
+  <div id="mapContainer">
+    <div id="kakaoMap"></div>
+
+```
+<div class="map-toolbar">
+  <!-- 그리기 패널 -->
+  <div class="map-panel">
+    <div class="map-panel-title">✏️ 권역 그리기</div>
+
+    <select class="hub-select" id="hubSelect">
+      <option value="">— 허브 선택 —</option>
+      <option value="강남허브">강남허브</option>
+      <option value="서초허브">서초허브</option>
+      <option value="송파허브">송파허브</option>
+      <option value="마포허브">마포허브</option>
+      <option value="광진허브">광진허브</option>
+      <option value="논현허브">논현허브</option>
+    </select>
+
+    <!-- 레이어 선택: 기본권역 / 할증구역 -->
+    <div class="layer-tabs">
+      <button class="layer-tab zone active" id="tabZone" onclick="setLayer('zone')">🔵 기본 권역</button>
+      <button class="layer-tab surcharge" id="tabSur" onclick="setLayer('surcharge')">🟠 할증 구역</button>
+    </div>
+
+    <div class="draw-btns">
+      <button class="draw-btn" id="drawToggle" onclick="toggleDraw()">✏️ 그리기 시작</button>
+      <button class="draw-btn" onclick="undoLast()">↩️ 마지막 점 취소</button>
+      <button class="draw-btn save" onclick="saveZone()">💾 저장</button>
+      <button class="draw-btn del" onclick="clearCurrent()">🗑 현재 취소</button>
+    </div>
+  </div>
+
+  <!-- 저장된 권역 목록 -->
+  <div class="map-panel">
+    <div class="map-panel-title">📋 저장된 권역</div>
+    <div class="hub-list" id="hubList">
+      <div style="font-size:12px;color:var(--text-dim)">아직 없음</div>
+    </div>
+  </div>
+</div>
+
+<div class="map-status" id="mapStatus">허브 선택 후 레이어를 고르고 그리기 시작</div>
+```
+
+  </div>
+</div>
+
+<script>
+// ══════════════════════════════════════════
+// 샘플 DB
+// ══════════════════════════════════════════
+const DB = [
+  {key:"맥도날드[강남점]",  brand:"맥도날드", store:"강남점",  address:"서울시 강남구 강남대로 396",   dong:"역삼동", lat:37.4979,lng:127.0276, status:"가능",    hub:"강남허브", sharedHub:"서초허브", zone:"강남-A", preDeduct:"Y", memo:"주차 협소, 픽업 후문"},
+  {key:"맥도날드[역삼점]",  brand:"맥도날드", store:"역삼점",  address:"서울시 강남구 테헤란로 108",   dong:"역삼동", lat:37.5007,lng:127.0368, status:"가능",    hub:"강남허브", sharedHub:"",         zone:"강남-B", preDeduct:"N", memo:""},
+  {key:"맥도날드[신촌점]",  brand:"맥도날드", store:"신촌점",  address:"서울시 서대문구 신촌로 83",    dong:"창천동", lat:37.5556,lng:126.9368, status:"불가",    hub:"",         sharedHub:"",         zone:"",       preDeduct:"",  memo:"협소도로 진입불가"},
+  {key:"BBQ[강남직영점]",   brand:"BBQ",      store:"강남직영점",address:"서울시 강남구 논현로 507",   dong:"역삼동", lat:37.5077,lng:127.0387, status:"가능",    hub:"강남허브", sharedHub:"논현허브", zone:"강남-A", preDeduct:"Y", memo:""},
+  {key:"롯데리아[잠실점]",  brand:"롯데리아", store:"잠실점",  address:"서울시 송파구 올림픽로 240",   dong:"잠실동", lat:37.5133,lng:127.1002, status:"가능",    hub:"송파허브", sharedHub:"",         zone:"송파-A", preDeduct:"N", memo:"주말 피크타임 주의"},
+  {key:"롯데리아[강변점]",  brand:"롯데리아", store:"강변점",  address:"서울시 광진구 강변역로 50",    dong:"구의동", lat:37.5349,lng:127.0944, status:"확인필요",hub:"광진허브", sharedHub:"",         zone:"광진-B", preDeduct:"",  memo:"권역 경계 상점"},
+  {key:"버거킹[홍대점]",    brand:"버거킹",   store:"홍대점",  address:"서울시 마포구 와우산로 94",    dong:"서교동", lat:37.5563,lng:126.9239, status:"가능",    hub:"마포허브", sharedHub:"",         zone:"마포-A", preDeduct:"Y", memo:""},
+  {key:"교촌치킨[강남본점]",brand:"교촌치킨", store:"강남본점",address:"서울시 강남구 봉은사로 114",  dong:"삼성동", lat:37.5096,lng:127.0613, status:"가능",    hub:"강남허브", sharedHub:"강남2허브",zone:"강남-A", preDeduct:"N", memo:""},
+];
+
+// 브랜드별 기본 반경 (km)
+const BRAND_RADIUS = {
+  "맥도날드":2, "BBQ":2, "롯데리아":2, "버거킹":2, "교촌치킨":2,
+};
+const DEFAULT_RADIUS = 2;
+
+// 허브 색상
+const HUB_COLORS = {
+  "강남허브":"#00c2ff","서초허브":"#00e5a0","송파허브":"#ffcc44",
+  "마포허브":"#ff6b6b","광진허브":"#a78bfa","논현허브":"#fb923c"
+};
+
+// 저장된 권역 데이터
+// savedZones[허브명] = { zonePolygon, surPolygon, zonePath:[{lat,lng}], surPath:[{lat,lng}], color }
+let savedZones = {};
+
+// ══════════════════════════════════════════
+// 탭 전환
+// ══════════════════════════════════════════
+function showPage(name, el) {
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.nav-tab').forEach(t=>t.classList.remove('active'));
+  document.getElementById('page-'+name).classList.add('active');
+  el.classList.add('active');
+  if (name==='map' && !mapInitialized) initMap();
+}
+
+// ══════════════════════════════════════════
+// 매칭 로직
+// ══════════════════════════════════════════
+function parseKey(raw){const m=raw.match(/^(.+?)\[(.+?)\]$/);return m?{brand:m[1].trim(),store:m[2].trim()}:{brand:raw.trim(),store:""};}
+function extractDong(a){const m=(a||"").match(/([가-힣]+동|[가-힣]+가)\b/);return m?m[1]:"";}
+function norm(s){return(s||"").replace(/\s/g,"").toLowerCase();}
+function strSim(a,b){a=norm(a);b=norm(b);if(!a||!b)return 0;if(a===b)return 1;if(a.includes(b)||b.includes(a))return 0.9;let h=0;for(const c of a){if(b.includes(c))h++;}return h/Math.max(a.length,b.length);}
+function haversine(la1,lo1,la2,lo2){const R=6371,d=Math.PI/180,dla=(la2-la1)*d,dlo=(lo2-lo1)*d,av=Math.sin(dla/2)**2+Math.cos(la1*d)*Math.cos(la2*d)*Math.sin(dlo/2)**2;return R*2*Math.atan2(Math.sqrt(av),Math.sqrt(1-av));}
+function distScore(km){if(km<0.3)return 1;if(km<1)return 0.85-(km-0.3)*0.2;if(km<3)return 0.7-(km-1)*0.3;if(km<5)return 0.1;return 0;}
+function guessCoord(addr){const t=[["강남구",37.5172,127.0473],["서초구",37.4837,127.0324],["송파구",37.5145,127.1059],["마포구",37.5663,126.9014],["서대문구",37.5791,126.9368],["광진구",37.5384,127.0822],["용산구",37.5311,126.981],["성동구",37.5634,127.0369]];for(const[k,la,lo]of t){if(addr.includes(k))return{lat:la,lng:lo};}return null;}
+
+function getCoordFromAddr(addr){
+  return new Promise(resolve=>{
+    try{
+      const gc=new kakao.maps.services.Geocoder();
+      gc.addressSearch(addr,(res,st)=>{
+        if(st===kakao.maps.services.Status.OK) resolve({lat:parseFloat(res[0].y),lng:parseFloat(res[0].x)});
+        else resolve(guessCoord(addr));
+      });
+    }catch(e){resolve(guessCoord(addr));}
+  });
+}
+
+// 점이 폴리곤 안에 있는지 (Ray casting)
+function pointInPolygon(lat, lng, path) {
+  let inside = false;
+  for (let i=0, j=path.length-1; i<path.length; j=i++) {
+    const xi=path[i].lat, yi=path[i].lng;
+    const xj=path[j].lat, yj=path[j].lng;
+    if(((yi>lng)!==(yj>lng)) && (lat < (xj-xi)*(lng-yi)/(yj-yi)+xi)) inside=!inside;
+  }
+  return inside;
+}
+
+async function doSearch() {
+  const raw  = document.getElementById('storeInput').value.trim();
+  const addr = document.getElementById('addrInput').value.trim();
+  if(!raw){alert('상점명을 입력해주세요.\n형식: 브랜드명[상점명]');return;}
+
+  const wrap = document.getElementById('resultWrap');
+  wrap.innerHTML='<div style="text-align:center;padding:40px;color:var(--text-dim)">🔍 매칭 중...</div>';
+
+  const inputCoord = addr ? await getCoordFromAddr(addr) : null;
+  const parsed = parseKey(raw);
+
+  const scored = DB.map(item=>{
+    const ns = strSim(parsed.brand,item.brand)*0.6+strSim(parsed.store,item.store)*0.4;
+    const inDong=extractDong(addr);
+    const dong=(inDong&&item.dong&&inDong===item.dong)?1:0;
+    let dSc=0,km=null;
+    if(inputCoord){km=haversine(inputCoord.lat,inputCoord.lng,item.lat,item.lng);dSc=distScore(km);}
+    const total=ns*0.50+dong*0.25+dSc*0.25;
+    return{...item,_km:km?km.toFixed(2):null,score:total,sd:{name:Math.round(ns*100),dong:Math.round(dong*100),dist:Math.round(dSc*100),total:Math.round(total*100)}};
+  }).sort((a,b)=>b.score-a.score);
+
+  const best=scored[0];
+  const others=scored.slice(1,4).filter(x=>x.score>0.05);
+
+  // 할증구역 체크
+  let hasSurcharge = false;
+  if (inputCoord && best.hub && savedZones[best.hub]?.surPath?.length >= 3) {
+    hasSurcharge = pointInPolygon(inputCoord.lat, inputCoord.lng, savedZones[best.hub].surPath);
+  }
+
+  wrap.innerHTML = best.score<0.12 ? noMatchHTML(raw) : resultHTML(best, others, hasSurcharge);
+  requestAnimationFrame(()=>requestAnimationFrame(()=>{
+    document.querySelectorAll('.sfill[data-w]').forEach(el=>{el.style.width=el.dataset.w+'%';});
+  }));
+}
+
+function sc(s){return s==='가능'?'possible':s==='불가'?'impossible':'check';}
+function bc(p){return p>=70?'var(--green)':p>=40?'var(--accent)':'var(--yellow)';}
+
+function resultHTML(item, others, hasSurcharge) {
+  const d=item.sd;
+  return `
+  <div class="res-card ${sc(item.status)}">
+    <div class="res-top">
+      <div>
+        <div class="res-name">
+          <span style="color:var(--text)">${item.brand}</span><span style="color:var(--text-dim)">[</span><span style="color:var(--accent)">${item.store}</span><span style="color:var(--text-dim)">]</span>
+        </div>
+        <div class="res-addr">📍 ${item.address}${item.dong?` · <span style="color:var(--green)">${item.dong}</span>`:''}${item._km?` · ${item._km}km`:''}</div>
+      </div>
+      <div class="status-pill ${sc(item.status)}"><div class="sdot"></div>${item.status}</div>
+    </div>
+
+    ${hasSurcharge?`<div class="surcharge-badge">⚡ 할증 구역 포함 — 이 상점은 할증 권역에 위치합니다</div>`:''}
+
+    <div class="info-grid">
+      <div class="itile"><div class="itile-l">권역</div><div class="itile-v c-accent">${item.zone||'—'}</div></div>
+      <div class="itile"><div class="itile-l">수행허브</div><div class="itile-v">${item.hub||'—'}</div></div>
+      <div class="itile"><div class="itile-l">공유허브</div><div class="itile-v c-dim">${item.sharedHub||'없음'}</div></div>
+      <div class="itile"><div class="itile-l">선차감</div><div class="itile-v ${item.preDeduct==='Y'?'c-green':item.preDeduct==='N'?'c-red':'c-yellow'}">${item.preDeduct==='Y'?'적용':item.preDeduct==='N'?'미적용':'확인필요'}</div></div>
+    </div>
+    <div class="itile" style="margin-bottom:14px">
+      <div class="itile-l">할증 여부</div>
+      <div class="itile-v ${hasSurcharge?'c-orange':'c-dim'}">${hasSurcharge?'⚡ 할증 구역':'해당 없음'}</div>
+    </div>
+
+    ${item.memo?`<div class="memo">⚠️ <span>${item.memo}</span></div>`:''}
+
+    <div class="score-sec">
+      <div class="score-title">매칭 신뢰도 분석</div>
+      <div class="srow"><div class="srow-l">상점명 유사도</div><div class="sbar"><div class="sfill" data-w="${d.name}" style="background:${bc(d.name)}"></div></div><div class="spct" style="color:${bc(d.name)}">${d.name}%</div></div>
+      <div class="srow"><div class="srow-l">법정동 일치</div><div class="sbar"><div class="sfill" data-w="${d.dong}" style="background:${bc(d.dong)}"></div></div><div class="spct" style="color:${bc(d.dong)}">${d.dong}%</div></div>
+      <div class="srow"><div class="srow-l">거리 근접도</div><div class="sbar"><div class="sfill" data-w="${d.dist}" style="background:${bc(d.dist)}"></div></div><div class="spct" style="color:${bc(d.dist)}">${d.dist}%</div></div>
+      <div class="stotal"><div class="stotal-l">종합 매칭 신뢰도</div><div class="stotal-v">${d.total}%</div></div>
+    </div>
+  </div>
+
+  <div class="action-row">
+    <button class="btn btn-ghost" onclick="alert('구글시트 반영!')">📋 시트에 반영</button>
+    <button class="btn btn-ghost" onclick="copyMsg('${item.key}','${item.address}',${d.total},${hasSurcharge})">📋 카톡 메시지 복사</button>
+    <button class="btn btn-ghost" onclick="clearResult()">↩ 다시</button>
+  </div>
+
+  ${others.length>0?`
+  <div class="similar-card">
+    <div class="card-label">유사 상점 후보</div>
+    <div class="sim-list">
+      ${others.map(o=>`
+        <div class="sim-item" onclick="fillAndSearch('${o.key}','${o.address}')">
+          <div>
+            <div class="sim-name">${o.brand}<span style="color:var(--text-dim)">[</span><span style="color:var(--accent)">${o.store}</span><span style="color:var(--text-dim)">]</span></div>
+            <div class="sim-addr">📍 ${o.address}${o.dong?' · '+o.dong:''}${o._km?' · '+o._km+'km':''}</div>
+          </div>
+          <div class="sim-right">
+            <div class="chips"><span class="chip chip-n">명 ${o.sd.name}%</span><span class="chip chip-d">동 ${o.sd.dong}%</span><span class="chip chip-k">거 ${o.sd.dist}%</span></div>
+            <div class="status-pill ${sc(o.status)}" style="font-size:11px;padding:3px 9px"><div class="sdot"></div>${o.status}</div>
+          </div>
+        </div>`).join('')}
+    </div>
+  </div>`:''}`;
+}
+
+function noMatchHTML(raw){return`<div class="no-match"><div class="no-match-icon">🔍</div><div class="no-match-title">일치 데이터 없음</div><div class="no-match-desc"><strong>${raw}</strong>에 대한 기존 데이터가 없습니다.</div><div style="display:flex;gap:8px;justify-content:center;margin-top:16px"><button class="btn btn-ghost" onclick="alert('신규 등록!')">➕ 신규 등록</button><button class="btn btn-ghost" onclick="clearResult()">↩ 다시</button></div></div>`;}
+function clearResult(){document.getElementById('resultWrap').innerHTML='';document.getElementById('storeInput').value='';document.getElementById('addrInput').value='';}
+function fillAndSearch(key,addr){document.getElementById('storeInput').value=key;document.getElementById('addrInput').value=addr;doSearch();}
+function copyMsg(key,addr,conf,sur){
+  const msg=`안녕하세요! 현장사업부입니다 🙂\n\nB2B 상점 수행 가능 여부 확인 요청드립니다.\n\n📍 상점명: ${key}\n📍 주소: ${addr}\n${sur?'⚡ 할증 구역 포함\n':''}\n확인 부탁드립니다!\n✅ 수행 가능 여부\n✅ 권역 정보\n✅ 수행허브\n✅ 선차감 여부${sur?'\n✅ 할증 적용 여부':''}\n\n감사합니다 🙏`;
+  navigator.clipboard.writeText(msg).then(()=>alert('복사됐어요! 카톡에 붙여넣기 하세요 😊'));
+}
+document.addEventListener('keydown',e=>{if(e.key==='Enter')doSearch();});
+
+// ══════════════════════════════════════════
+// 카카오맵 + 권역/할증 그리기
+// ══════════════════════════════════════════
+let map, mapInitialized=false;
+let currentLayer='zone'; // 'zone' | 'surcharge'
+let isDrawing=false, currentPath=[], tempPolyline=null, tempPolygon=null;
+
+function initMap(){
+  mapInitialized=true;
+  map=new kakao.maps.Map(document.getElementById('kakaoMap'),{center:new kakao.maps.LatLng(37.5172,127.0473),level:8});
+  kakao.maps.event.addListener(map,'click',onMapClick);
+  renderHubList();
+}
+
+function setLayer(layer){
+  currentLayer=layer;
+  document.getElementById('tabZone').classList.toggle('active',layer==='zone');
+  document.getElementById('tabSur').classList.toggle('active',layer==='surcharge');
+  if(isDrawing){isDrawing=false;clearCurrent();}
+}
+
+function onMapClick(e){
+  if(!isDrawing)return;
+  currentPath.push(new kakao.maps.LatLng(e.latLng.getLat(),e.latLng.getLng()));
+  updateTempDraw();
+  const hub=document.getElementById('hubSelect').value;
+  setStatus(`[${hub}] ${currentLayer==='zone'?'기본권역':'할증구역'} — 점 ${currentPath.length}개 · 저장하려면 💾`);
+}
+
+function updateTempDraw(){
+  if(tempPolyline) tempPolyline.setMap(null);
+  if(tempPolygon)  tempPolygon.setMap(null);
+  const hub=document.getElementById('hubSelect').value;
+  const color=currentLayer==='surcharge'?'#ff8c42':(HUB_COLORS[hub]||'#00c2ff');
+  if(currentPath.length>=2){
+    tempPolygon=new kakao.maps.Polygon({map,path:currentPath,strokeWeight:2,strokeColor:color,strokeOpacity:0.9,fillColor:color,fillOpacity:0.15});
+  }
+  tempPolyline=new kakao.maps.Polyline({map,path:currentPath,strokeWeight:2,strokeColor:color,strokeOpacity:1});
+}
+
+function toggleDraw(){
+  const hub=document.getElementById('hubSelect').value;
+  if(!hub){alert('허브를 먼저 선택해주세요!');return;}
+  isDrawing=!isDrawing;
+  const btn=document.getElementById('drawToggle');
+  if(isDrawing){
+    btn.className=`draw-btn ${currentLayer==='surcharge'?'drawing-surcharge':'drawing'}`;
+    btn.textContent=`⏹️ 그리기 중단`;
+    setStatus(`[${hub}] ${currentLayer==='zone'?'🔵 기본 권역':'🟠 할증 구역'} 그리는 중 — 지도 클릭으로 경계 그리기`, currentLayer);
+  } else {
+    btn.className='draw-btn';btn.textContent='✏️ 그리기 시작';
+    setStatus('그리기 중단');
+  }
+}
+
+function undoLast(){if(currentPath.length>0){currentPath.pop();updateTempDraw();}}
+
+function saveZone(){
+  const hub=document.getElementById('hubSelect').value;
+  if(!hub){alert('허브를 선택해주세요!');return;}
+  if(currentPath.length<3){alert('최소 3개 이상 점을 찍어주세요!');return;}
+  if(!savedZones[hub]) savedZones[hub]={zonePolygon:null,surPolygon:null,zonePath:[],surPath:[],color:HUB_COLORS[hub]||'#00c2ff'};
+
+  const color=currentLayer==='surcharge'?'#ff8c42':(HUB_COLORS[hub]||'#00c2ff');
+  const fillOp=currentLayer==='surcharge'?0.25:0.15;
+
+  // 기존 같은 레이어 제거
+  if(currentLayer==='zone' && savedZones[hub].zonePolygon) savedZones[hub].zonePolygon.setMap(null);
+  if(currentLayer==='surcharge' && savedZones[hub].surPolygon) savedZones[hub].surPolygon.setMap(null);
+
+  const polygon=new kakao.maps.Polygon({map,path:currentPath,strokeWeight:2,strokeColor:color,strokeOpacity:1,fillColor:color,fillOpacity:fillOp});
+  const pathData=currentPath.map(p=>({lat:p.getLat(),lng:p.getLng()}));
+
+  if(currentLayer==='zone'){savedZones[hub].zonePolygon=polygon;savedZones[hub].zonePath=pathData;}
+  else{savedZones[hub].surPolygon=polygon;savedZones[hub].surPath=pathData;}
+
+  clearCurrent();
+  isDrawing=false;
+  document.getElementById('drawToggle').className='draw-btn';
+  document.getElementById('drawToggle').textContent='✏️ 그리기 시작';
+  setStatus(`[${hub}] ${currentLayer==='zone'?'기본 권역':'할증 구역'} 저장 완료! ✅`);
+  renderHubList();
+}
+
+function clearCurrent(){
+  if(tempPolyline) tempPolyline.setMap(null);
+  if(tempPolygon)  tempPolygon.setMap(null);
+  currentPath=[];tempPolyline=null;tempPolygon=null;isDrawing=false;
+  document.getElementById('drawToggle').className='draw-btn';
+  document.getElementById('drawToggle').textContent='✏️ 그리기 시작';
+  setStatus('취소됨');
+}
+
+function deleteZone(hub, layer){
+  if(!savedZones[hub]) return;
+  if(layer==='zone' && savedZones[hub].zonePolygon){savedZones[hub].zonePolygon.setMap(null);savedZones[hub].zonePolygon=null;savedZones[hub].zonePath=[];}
+  if(layer==='sur' && savedZones[hub].surPolygon){savedZones[hub].surPolygon.setMap(null);savedZones[hub].surPolygon=null;savedZones[hub].surPath=[];}
+  if(!savedZones[hub].zonePolygon && !savedZones[hub].surPolygon) delete savedZones[hub];
+  renderHubList();
+}
+
+function renderHubList(){
+  const panel=document.getElementById('hubList');
+  const keys=Object.keys(savedZones);
+  if(!keys.length){panel.innerHTML='<div style="font-size:12px;color:var(--text-dim)">아직 없음</div>';return;}
+  panel.innerHTML=keys.map(hub=>`
+    <div class="hub-row">
+      <div style="display:flex;align-items:center">
+        <div class="hub-dot" style="background:${savedZones[hub].color}"></div>
+        <span style="font-size:12px">${hub}</span>
+      </div>
+      <div class="hub-tags">
+        ${savedZones[hub].zonePath?.length?`<span class="hub-tag zone-tag" style="cursor:pointer" onclick="deleteZone('${hub}','zone')">기본 ✕</span>`:''}
+        ${savedZones[hub].surPath?.length?`<span class="hub-tag sur-tag" style="cursor:pointer" onclick="deleteZone('${hub}','sur')">할증 ✕</span>`:''}
+      </div>
+    </div>`).join('');
+}
+
+function setStatus(msg, type=''){
+  const el=document.getElementById('mapStatus');
+  el.textContent=msg;
+  el.className='map-status'+(type?' '+type:'');
+}
+</script>
+
+</body>
+</html>
