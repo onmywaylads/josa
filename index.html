@@ -368,11 +368,81 @@ const DB=[
 // 색상 팔레트
 const COLORS=["#2563eb","#059669","#d97706","#dc2626","#7c3aed","#ea580c","#0891b2","#be185d","#15803d","#b45309"];
 
+const SCRIPT_URL='https://script.google.com/macros/s/AKfycbwBt4hJMPjXRT2RaKhWyRCVYLg4vO6Bev_8gULP52OhWz6SRPDr3nQLayNulzF8kjsDWA/exec';
+
 // 허브 목록 (동적 관리)
 let hubList=[];
 let savedZones={};
 let pendingHubName='';
 let pendingColor=COLORS[0];
+
+// ══════════════════════════════
+// 구글시트 연동
+// ══════════════════════════════
+async function loadZonesFromSheet(){
+  try{
+    const res=await fetch(SCRIPT_URL+'?action=getZones');
+    const data=await res.json();
+    hubList=data.hubList||[];
+    Object.entries(data.zones||{}).forEach(([k,v])=>{
+      savedZones[k]={zonePolygon:null,surPolygon:null,zonePath:v.zonePath||[],surPath:v.surPath||[]};
+    });
+    renderHubSelect();
+    renderHubMgrList();
+  }catch(e){console.log('시트 로드 실패',e);}
+}
+
+async function saveZonesToSheet(){
+  try{
+    const zonesData={};
+    Object.entries(savedZones).forEach(([k,v])=>{
+      zonesData[k]={zonePath:v.zonePath||[],surPath:v.surPath||[]};
+    });
+    await fetch(SCRIPT_URL,{
+      method:'POST',
+      body:JSON.stringify({action:'saveZones',zones:zonesData,hubList})
+    });
+  }catch(e){console.log('시트 저장 실패',e);}
+}
+
+// localStorage 백업도 유지
+function saveToStorage(){
+  try{
+    const data={hubList,zones:Object.fromEntries(Object.entries(savedZones).map(([k,v])=>([k,{zonePath:v.zonePath,surPath:v.surPath}])))};
+    localStorage.setItem('barogo_data',JSON.stringify(data));
+  }catch(e){}
+}
+
+function loadFromStorage(){
+  try{
+    const raw=localStorage.getItem('barogo_data');
+    if(!raw) return false;
+    const data=JSON.parse(raw);
+    hubList=data.hubList||[];
+    Object.entries(data.zones||{}).forEach(([k,v])=>{
+      savedZones[k]={zonePolygon:null,surPolygon:null,zonePath:v.zonePath||[],surPath:v.surPath||[]};
+    });
+    renderHubSelect();
+    renderHubMgrList();
+    return true;
+  }catch(e){return false;}
+}
+
+function restorePolygonsOnMap(){
+  Object.entries(savedZones).forEach(([hub,v])=>{
+    const hubColor=getHubColor(hub);
+    if(v.zonePath?.length>=3){
+      v.zonePolygon=new kakao.maps.Polygon({map,path:v.zonePath.map(p=>new kakao.maps.LatLng(p.lat,p.lng)),strokeWeight:2,strokeColor:hubColor,strokeOpacity:1,fillColor:hubColor,fillOpacity:0.15});
+    }
+    if(v.surPath?.length>=3){
+      v.surPolygon=new kakao.maps.Polygon({map,path:v.surPath.map(p=>new kakao.maps.LatLng(p.lat,p.lng)),strokeWeight:2,strokeColor:'#ea580c',strokeOpacity:1,fillColor:'#ea580c',fillOpacity:0.25});
+    }
+  });
+}
+
+// 페이지 로드 시 - localStorage 먼저, 그다음 시트에서 최신 데이터
+loadFromStorage();
+loadZonesFromSheet();
 
 // ══════════════════════════════
 // 탭
@@ -427,7 +497,8 @@ function confirmAddHub(){
   closeColorModal();
   renderHubSelect();
   renderHubMgrList();
-  // 방금 추가한 허브 자동 선택
+  saveToStorage();
+  saveZonesToSheet();
   document.getElementById('hubSelect').value=pendingHubName;
 }
 
@@ -441,6 +512,8 @@ function deleteHub(name){
   }
   renderHubSelect();
   renderHubMgrList();
+  saveToStorage();
+  saveZonesToSheet();
 }
 
 function renderHubSelect(){
@@ -799,6 +872,7 @@ function initMap(){
   mapInitialized=true;
   map=new kakao.maps.Map(document.getElementById('kakaoMap'),{center:new kakao.maps.LatLng(37.5172,127.0473),level:8});
   kakao.maps.event.addListener(map,'click',onMapClick);
+  restorePolygonsOnMap();
 }
 
 function getHubColor(name){return hubList.find(h=>h.name===name)?.color||'#2563eb';}
@@ -860,6 +934,8 @@ function saveZone(){
   document.getElementById('drawToggle').textContent='✏️ 그리기 시작';
   setStatus(`[${hub}] ${currentLayer==='zone'?'기본 권역':'할증 구역'} 저장 완료! ✅`);
   renderHubMgrList();
+  saveToStorage();
+  saveZonesToSheet();
 }
 
 function clearCurrent(){
