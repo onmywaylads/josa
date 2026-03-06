@@ -765,27 +765,40 @@ async function renderInlineMap(item, hasSurcharge) {
   });
   inlineOverlays.push(circle);
 
-  // 2. 허브 기본 권역 → 파란색
-  console.log('허브:', item.hub, '저장된 zones:', JSON.stringify(Object.keys(savedZones)), 'zonePath 길이:', savedZones[item.hub]?.zonePath?.length);
+  // 2. 2km원 ∩ 허브 기본 권역 교집합 → 파란색
   if(item.hub && savedZones[item.hub]?.zonePath?.length>=3){
-    const path = savedZones[item.hub].zonePath.map(p=>new kakao.maps.LatLng(p.lat,p.lng));
-    const poly = new kakao.maps.Polygon({
-      map:inlineMap, path,
-      strokeWeight:2, strokeColor:'#2563eb', strokeOpacity:0.9,
-      fillColor:'#2563eb', fillOpacity:0.25
-    });
-    inlineOverlays.push(poly);
+    const circlePoly = circleToPolygon(item.lat, item.lng, 2.0);
+    const hubPoly = savedZones[item.hub].zonePath;
+    const inter1 = clipPolygon(circlePoly, hubPoly);
+    const inter2 = clipPolygon(hubPoly, circlePoly);
+    const intersection = inter1.length >= inter2.length ? inter1 : inter2;
+    if(intersection.length>=3){
+      const path = intersection.map(p=>new kakao.maps.LatLng(p.lat,p.lng));
+      const poly = new kakao.maps.Polygon({
+        map:inlineMap, path,
+        strokeWeight:2, strokeColor:'#2563eb', strokeOpacity:0.9,
+        fillColor:'#2563eb', fillOpacity:0.35
+      });
+      inlineOverlays.push(poly);
+    }
   }
 
-  // 3. 할증 구역 → 빨간색
+  // 3. 2km원 ∩ 할증 구역 교집합 → 빨간색
   if(item.hub && savedZones[item.hub]?.surPath?.length>=3){
-    const surPath = savedZones[item.hub].surPath.map(p=>new kakao.maps.LatLng(p.lat,p.lng));
-    const surPoly = new kakao.maps.Polygon({
-      map:inlineMap, path:surPath,
-      strokeWeight:2, strokeColor:'#dc2626', strokeOpacity:1,
-      fillColor:'#dc2626', fillOpacity:0.3
-    });
-    inlineOverlays.push(surPoly);
+    const circlePoly = circleToPolygon(item.lat, item.lng, 2.0);
+    const surPoly = savedZones[item.hub].surPath;
+    const inter1 = clipPolygon(circlePoly, surPoly);
+    const inter2 = clipPolygon(surPoly, circlePoly);
+    const intersection = inter1.length >= inter2.length ? inter1 : inter2;
+    if(intersection.length>=3){
+      const path = intersection.map(p=>new kakao.maps.LatLng(p.lat,p.lng));
+      const poly = new kakao.maps.Polygon({
+        map:inlineMap, path,
+        strokeWeight:2, strokeColor:'#dc2626', strokeOpacity:1,
+        fillColor:'#dc2626', fillOpacity:0.4
+      });
+      inlineOverlays.push(poly);
+    }
   }
 
   // 4. 마커
