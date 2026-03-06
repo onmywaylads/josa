@@ -706,38 +706,42 @@ function circleToPolygon(lat, lng, radiusKm, numPoints=64) {
   return points;
 }
 
-// 두 폴리곤의 교차 영역 계산 (Sutherland-Hodgman 알고리즘)
-function clipPolygon(subjectPoly, clipPoly) {
-  let output=[...subjectPoly];
+// 두 폴리곤의 교차 영역 계산 (Sutherland-Hodgman)
+// subject = 자를 대상, clip = 자르는 기준
+function clipPolygon(subject, clip) {
+  let output = subject.map(p=>({lat:p.lat, lng:p.lng}));
   if(!output.length) return [];
-  for(let i=0;i<clipPoly.length;i++){
-    const input=[...output];
-    output=[];
-    const A=clipPoly[i];
-    const B=clipPoly[(i+1)%clipPoly.length];
-    for(let j=0;j<input.length;j++){
-      const P=input[j];
-      const Q=input[(j+1)%input.length];
-      const insideP=isInside(P,A,B);
-      const insideQ=isInside(Q,A,B);
-      if(insideP){
+  for(let i=0; i<clip.length; i++){
+    if(!output.length) return [];
+    const input = [...output];
+    output = [];
+    const A = clip[i];
+    const B = clip[(i+1) % clip.length];
+    for(let j=0; j<input.length; j++){
+      const P = input[j];
+      const Q = input[(j+1) % input.length];
+      const pIn = side(P,A,B);
+      const qIn = side(Q,A,B);
+      if(pIn){
         output.push(P);
-        if(!insideQ) output.push(intersect(P,Q,A,B));
-      } else if(insideQ){
-        output.push(intersect(P,Q,A,B));
+        if(!qIn) output.push(lineIntersect(P,Q,A,B));
+      } else if(qIn){
+        output.push(lineIntersect(P,Q,A,B));
       }
     }
-    if(!output.length) return [];
   }
   return output;
 }
-function isInside(p,a,b){return (b.lng-a.lng)*(p.lat-a.lat)-(b.lat-a.lat)*(p.lng-a.lng)>=0;}
-function intersect(p,q,a,b){
-  const A1=q.lat-p.lat, B1=p.lng-q.lng, C1=A1*p.lng+B1*p.lat;
-  const A2=b.lat-a.lat, B2=a.lng-b.lng, C2=A2*a.lng+B2*a.lat;
-  const det=A1*B2-A2*B1;
-  if(Math.abs(det)<1e-10) return p;
-  return {lat:(B2*C1-B1*C2)/det, lng:(A1*C2-A2*C1)/det};
+function side(p,a,b){
+  return ((b.lat-a.lat)*(p.lng-a.lng) - (b.lng-a.lng)*(p.lat-a.lat)) >= 0;
+}
+function lineIntersect(p,q,a,b){
+  const d1lat=q.lat-p.lat, d1lng=q.lng-p.lng;
+  const d2lat=b.lat-a.lat, d2lng=b.lng-a.lng;
+  const denom = d1lat*d2lng - d1lng*d2lat;
+  if(Math.abs(denom)<1e-12) return {...p};
+  const t = ((a.lat-p.lat)*d2lng - (a.lng-p.lng)*d2lat) / denom;
+  return {lat: p.lat + t*d1lat, lng: p.lng + t*d1lng};
 }
 
 async function renderInlineMap(item, hasSurcharge) {
@@ -769,9 +773,7 @@ async function renderInlineMap(item, hasSurcharge) {
   if(item.hub && savedZones[item.hub]?.zonePath?.length>=3){
     const circlePoly = circleToPolygon(item.lat, item.lng, 2.0);
     const hubPoly = savedZones[item.hub].zonePath;
-    const inter1 = clipPolygon(circlePoly, hubPoly);
-    const inter2 = clipPolygon(hubPoly, circlePoly);
-    const intersection = inter1.length >= inter2.length ? inter1 : inter2;
+    const intersection = clipPolygon(hubPoly, circlePoly);
     if(intersection.length>=3){
       const path = intersection.map(p=>new kakao.maps.LatLng(p.lat,p.lng));
       const poly = new kakao.maps.Polygon({
@@ -787,9 +789,7 @@ async function renderInlineMap(item, hasSurcharge) {
   if(item.hub && savedZones[item.hub]?.surPath?.length>=3){
     const circlePoly = circleToPolygon(item.lat, item.lng, 2.0);
     const surPoly = savedZones[item.hub].surPath;
-    const inter1 = clipPolygon(circlePoly, surPoly);
-    const inter2 = clipPolygon(surPoly, circlePoly);
-    const intersection = inter1.length >= inter2.length ? inter1 : inter2;
+    const intersection = clipPolygon(surPoly, circlePoly);
     if(intersection.length>=3){
       const path = intersection.map(p=>new kakao.maps.LatLng(p.lat,p.lng));
       const poly = new kakao.maps.Polygon({
