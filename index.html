@@ -694,7 +694,60 @@ document.addEventListener('keydown',e=>{if(e.key==='Enter')doSearch();});
 // ══════════════════════════════
 let inlineMap=null, inlineOverlays=[];
 
-// 원을 폴리곤 근사값으로 변환 (교차 계산용)
+// 원과 폴리곤 교집합 - 각 엣지를 원으로 클리핑
+function clipByCircle(poly, cLat, cLng, radiusKm) {
+  const R = radiusKm;
+  function dist(p) {
+    const dlat = (p.lat - cLat) * 111;
+    const dlng = (p.lng - cLng) * 111 * Math.cos(cLat * Math.PI / 180);
+    return Math.sqrt(dlat*dlat + dlng*dlng);
+  }
+  function inCircle(p) { return dist(p) <= R; }
+  function circleIntersect(p, q) {
+    // p→q 선분과 원의 교점
+    const dlat = (q.lat - p.lat) * 111;
+    const dlng = (q.lng - p.lng) * 111 * Math.cos(cLat * Math.PI / 180);
+    const plat = (p.lat - cLat) * 111;
+    const plng = (p.lng - cLng) * 111 * Math.cos(cLat * Math.PI / 180);
+    const a = dlat*dlat + dlng*dlng;
+    const b = 2*(plat*dlat + plng*dlng);
+    const c = plat*plat + plng*plng - R*R;
+    const disc = b*b - 4*a*c;
+    if(disc < 0 || a < 1e-12) return null;
+    const results = [];
+    const sq = Math.sqrt(disc);
+    [(-b-sq)/(2*a), (-b+sq)/(2*a)].forEach(t => {
+      if(t >= 0 && t <= 1) {
+        results.push({lat: p.lat + t*(q.lat-p.lat), lng: p.lng + t*(q.lng-p.lng)});
+      }
+    });
+    return results;
+  }
+
+  let result = [];
+  for(let i = 0; i < poly.length; i++) {
+    const P = poly[i];
+    const Q = poly[(i+1) % poly.length];
+    const pIn = inCircle(P);
+    const qIn = inCircle(Q);
+    if(pIn) {
+      result.push(P);
+      if(!qIn) {
+        const pts = circleIntersect(P, Q);
+        if(pts) pts.forEach(pt => result.push(pt));
+      }
+    } else {
+      const pts = circleIntersect(P, Q);
+      if(pts && pts.length > 0) {
+        pts.forEach(pt => result.push(pt));
+        if(qIn) {} // Q는 다음 iteration에서 추가됨
+      }
+    }
+  }
+  return result;
+}
+
+// 원을 폴리곤 근사값으로 변환
 function circleToPolygon(lat, lng, radiusKm, numPoints=64) {
   const points=[];
   for(let i=0;i<numPoints;i++){
@@ -769,15 +822,13 @@ async function renderInlineMap(item, hasSurcharge) {
   });
   inlineOverlays.push(circle);
 
-  // 2. 2km원 ∩ 허브 기본 권역 교집합 → 파란색
+  // 2. 2km원 ∩ 허브 기본 권역 → 파란색
   if(item.hub && savedZones[item.hub]?.zonePath?.length>=3){
-    const circlePoly = circleToPolygon(item.lat, item.lng, 2.0);
-    const hubPoly = savedZones[item.hub].zonePath;
-    const intersection = clipPolygon(hubPoly, circlePoly);
-    if(intersection.length>=3){
-      const path = intersection.map(p=>new kakao.maps.LatLng(p.lat,p.lng));
+    const clipped = clipByCircle(savedZones[item.hub].zonePath, item.lat, item.lng, 2.0);
+    if(clipped.length>=3){
       const poly = new kakao.maps.Polygon({
-        map:inlineMap, path,
+        map:inlineMap,
+        path: clipped.map(p=>new kakao.maps.LatLng(p.lat,p.lng)),
         strokeWeight:2, strokeColor:'#2563eb', strokeOpacity:0.9,
         fillColor:'#2563eb', fillOpacity:0.35
       });
@@ -785,15 +836,13 @@ async function renderInlineMap(item, hasSurcharge) {
     }
   }
 
-  // 3. 2km원 ∩ 할증 구역 교집합 → 빨간색
+  // 3. 2km원 ∩ 할증 구역 → 빨간색
   if(item.hub && savedZones[item.hub]?.surPath?.length>=3){
-    const circlePoly = circleToPolygon(item.lat, item.lng, 2.0);
-    const surPoly = savedZones[item.hub].surPath;
-    const intersection = clipPolygon(surPoly, circlePoly);
-    if(intersection.length>=3){
-      const path = intersection.map(p=>new kakao.maps.LatLng(p.lat,p.lng));
+    const clipped = clipByCircle(savedZones[item.hub].surPath, item.lat, item.lng, 2.0);
+    if(clipped.length>=3){
       const poly = new kakao.maps.Polygon({
-        map:inlineMap, path,
+        map:inlineMap,
+        path: clipped.map(p=>new kakao.maps.LatLng(p.lat,p.lng)),
         strokeWeight:2, strokeColor:'#dc2626', strokeOpacity:1,
         fillColor:'#dc2626', fillOpacity:0.4
       });
