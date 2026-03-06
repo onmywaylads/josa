@@ -4,7 +4,22 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>바로고 현장사업부 — 상점 조회</title>
-<script src="https://dapi.kakao.com/v2/maps/sdk.js?appkey=609abf3a790dfc40f87487e053dddfe8&libraries=services"></script>
+<script>
+  // 카카오맵 SDK 동적 로드
+  window.kakaoMapReady = false;
+  function loadKakaoMap() {
+    const script = document.createElement('script');
+    script.src = 'https://dapi.kakao.com/v2/maps/sdk.js?appkey=609abf3a790dfc40f87487e053dddfe8&libraries=services&autoload=false';
+    script.onload = function() {
+      kakao.maps.load(function() {
+        window.kakaoMapReady = true;
+        if (window.pendingMapInit) initMap();
+      });
+    };
+    document.head.appendChild(script);
+  }
+  loadKakaoMap();
+</script>
 <link href="https://fonts.googleapis.com/css2?family=Pretendard:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
 <style>
   :root {
@@ -337,7 +352,9 @@ function showPage(name,el){
   document.getElementById('page-'+name).classList.add('active');
   el.classList.add('active');
   if(name==='map'&&!mapInitialized){
-  setTimeout(()=>initMap(), 100);
+    if(window.kakaoMapReady)initMap();
+    else window.pendingMapInit=true;
+  }
 }
 
 // ══════════════════════════════
