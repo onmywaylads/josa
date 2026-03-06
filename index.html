@@ -578,8 +578,9 @@ function resultHTML(item,others,hasSurcharge){
     <div style="font-size:12px;color:var(--text-mid);margin-bottom:10px">${item.key} · 반경 2km${hasSurcharge?' · <span style="color:var(--orange);font-weight:700">⚡ 할증 구역 포함</span>':''}</div>
     <div id="inlineMap" style="width:100%;height:320px;border-radius:10px;overflow:hidden;border:1px solid var(--border)"></div>
     <div style="display:flex;gap:12px;margin-top:10px;font-size:11px;color:var(--text-mid);flex-wrap:wrap">
-      <span>🔵 2km 반경</span>
-      ${hasSurcharge?'<span>🟠 할증 구역</span>':''}
+      <span>⬜ 2km 반경</span>
+      <span>🔵 수행 가능 권역</span>
+      ${hasSurcharge?'<span>🔴 할증 구역</span>':''}
       <span>📍 상점 위치</span>
     </div>
   </div>
@@ -616,42 +617,103 @@ document.addEventListener('keydown',e=>{if(e.key==='Enter')doSearch();});
 // ══════════════════════════════
 let inlineMap=null, inlineOverlays=[];
 
+// 원을 폴리곤 근사값으로 변환 (교차 계산용)
+function circleToPolygon(lat, lng, radiusKm, numPoints=64) {
+  const points=[];
+  for(let i=0;i<numPoints;i++){
+    const angle=(i/numPoints)*2*Math.PI;
+    const dlat=(radiusKm/111)*Math.cos(angle);
+    const dlng=(radiusKm/(111*Math.cos(lat*Math.PI/180)))*Math.sin(angle);
+    points.push({lat:lat+dlat, lng:lng+dlng});
+  }
+  return points;
+}
+
+// 두 폴리곤의 교차 영역 계산 (Sutherland-Hodgman 알고리즘)
+function clipPolygon(subjectPoly, clipPoly) {
+  let output=[...subjectPoly];
+  if(!output.length) return [];
+  for(let i=0;i<clipPoly.length;i++){
+    const input=[...output];
+    output=[];
+    const A=clipPoly[i];
+    const B=clipPoly[(i+1)%clipPoly.length];
+    for(let j=0;j<input.length;j++){
+      const P=input[j];
+      const Q=input[(j+1)%input.length];
+      const insideP=isInside(P,A,B);
+      const insideQ=isInside(Q,A,B);
+      if(insideP){
+        output.push(P);
+        if(!insideQ) output.push(intersect(P,Q,A,B));
+      } else if(insideQ){
+        output.push(intersect(P,Q,A,B));
+      }
+    }
+    if(!output.length) return [];
+  }
+  return output;
+}
+function isInside(p,a,b){return (b.lng-a.lng)*(p.lat-a.lat)-(b.lat-a.lat)*(p.lng-a.lng)>=0;}
+function intersect(p,q,a,b){
+  const A1=q.lat-p.lat, B1=p.lng-q.lng, C1=A1*p.lng+B1*p.lat;
+  const A2=b.lat-a.lat, B2=a.lng-b.lng, C2=A2*a.lng+B2*a.lat;
+  const det=A1*B2-A2*B1;
+  if(Math.abs(det)<1e-10) return p;
+  return {lat:(B2*C1-B1*C2)/det, lng:(A1*C2-A2*C1)/det};
+}
+
 async function renderInlineMap(item, hasSurcharge) {
   if(!window.kakaoMapReady) return;
-  const coord = {lat: item.lat, lng: item.lng};
   const container = document.getElementById('inlineMap');
   if(!container) return;
 
-  const center = new kakao.maps.LatLng(coord.lat, coord.lng);
+  const center = new kakao.maps.LatLng(item.lat, item.lng);
   inlineMap = new kakao.maps.Map(container, {center, level:6});
 
   inlineOverlays.forEach(o=>{try{o.setMap(null);}catch(e){}});
   inlineOverlays=[];
 
-  // 2km 원
+  // 1. 2km 원 (연한 회색 배경)
   const circle = new kakao.maps.Circle({
     map:inlineMap, center, radius:2000,
-    strokeWeight:2, strokeColor:'#2563eb', strokeOpacity:0.9,
-    fillColor:'#2563eb', fillOpacity:0.12
+    strokeWeight:2, strokeColor:'#94a3b8', strokeOpacity:0.6, strokeStyle:'dashed',
+    fillColor:'#f1f5f9', fillOpacity:0.5
   });
   inlineOverlays.push(circle);
 
-  // 할증 구역
-  if(hasSurcharge && item.hub && savedZones[item.hub]?.surPath?.length) {
+  // 2. 2km원 ∩ 허브 기본 권역 → 파란색
+  if(item.hub && savedZones[item.hub]?.zonePath?.length>=3){
+    const circlePoly = circleToPolygon(item.lat, item.lng, 2.0);
+    const hubPoly = savedZones[item.hub].zonePath;
+    const intersection = clipPolygon(circlePoly, hubPoly);
+    if(intersection.length>=3){
+      const path = intersection.map(p=>new kakao.maps.LatLng(p.lat,p.lng));
+      const poly = new kakao.maps.Polygon({
+        map:inlineMap, path,
+        strokeWeight:2, strokeColor:'#2563eb', strokeOpacity:0.9,
+        fillColor:'#2563eb', fillOpacity:0.25
+      });
+      inlineOverlays.push(poly);
+    }
+  }
+
+  // 3. 할증 구역 → 빨간색
+  if(item.hub && savedZones[item.hub]?.surPath?.length>=3){
+    const surPath = savedZones[item.hub].surPath.map(p=>new kakao.maps.LatLng(p.lat,p.lng));
     const surPoly = new kakao.maps.Polygon({
-      map:inlineMap,
-      path: savedZones[item.hub].surPath.map(p=>new kakao.maps.LatLng(p.lat,p.lng)),
-      strokeWeight:2, strokeColor:'#ea580c', strokeOpacity:1,
-      fillColor:'#ea580c', fillOpacity:0.3
+      map:inlineMap, path:surPath,
+      strokeWeight:2, strokeColor:'#dc2626', strokeOpacity:1,
+      fillColor:'#dc2626', fillOpacity:0.3
     });
     inlineOverlays.push(surPoly);
   }
 
-  // 마커
+  // 4. 마커
   const marker = new kakao.maps.Marker({map:inlineMap, position:center});
   inlineOverlays.push(marker);
 
-  // 상점명
+  // 5. 상점명
   const info = new kakao.maps.InfoWindow({
     content:`<div style="padding:6px 10px;font-size:12px;font-weight:700;white-space:nowrap">${item.key}${hasSurcharge?' ⚡':''}</div>`,
     removable:false
