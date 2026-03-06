@@ -336,7 +336,8 @@ function showPage(name,el){
   document.querySelectorAll('.nav-tab').forEach(t=>t.classList.remove('active'));
   document.getElementById('page-'+name).classList.add('active');
   el.classList.add('active');
-  if(name==='map'&&!mapInitialized)initMap();
+  if(name==='map'&&!mapInitialized){
+  setTimeout(()=>initMap(), 100);
 }
 
 // ══════════════════════════════
