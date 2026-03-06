@@ -305,6 +305,34 @@
 
 <!-- 색상 선택 모달 -->
 <div class="modal-bg" id="colorModal">
+
+<!-- 권역 지도 모달 -->
+<div class="modal-bg" id="zoneMapModal" style="z-index:600">
+  <div style="background:#fff;border-radius:16px;width:92%;max-width:700px;max-height:90vh;overflow:hidden;box-shadow:0 20px 60px rgba(0,0,0,0.2);display:flex;flex-direction:column;">
+    <!-- 헤더 -->
+    <div style="padding:16px 20px;border-bottom:1px solid #e4e8f0;display:flex;justify-content:space-between;align-items:center;flex-shrink:0">
+      <div>
+        <div id="zoneMapTitle" style="font-size:16px;font-weight:800;color:#111827"></div>
+        <div id="zoneMapSub" style="font-size:12px;color:#6b7280;margin-top:2px"></div>
+      </div>
+      <div style="display:flex;gap:8px;align-items:center">
+        <button onclick="saveZoneMapImage()" style="padding:8px 16px;background:#2563eb;border:none;border-radius:8px;color:#fff;font-size:13px;font-weight:700;cursor:pointer">💾 이미지 저장</button>
+        <button onclick="closeZoneMap()" style="padding:8px 12px;background:#f3f4f6;border:none;border-radius:8px;font-size:13px;cursor:pointer">✕</button>
+      </div>
+    </div>
+    <!-- 지도 -->
+    <div id="zoneMapContainer" style="flex:1;min-height:400px;position:relative">
+      <div id="zoneMap" style="width:100%;height:100%;min-height:400px"></div>
+      <!-- 범례 -->
+      <div style="position:absolute;bottom:12px;left:12px;background:rgba(255,255,255,0.95);border:1px solid #e4e8f0;border-radius:10px;padding:10px 14px;font-size:11px;font-weight:600;z-index:10">
+        <div style="display:flex;align-items:center;gap:6px;margin-bottom:5px"><div style="width:12px;height:12px;border-radius:50%;background:#2563eb;opacity:0.3;border:2px solid #2563eb"></div> 허브 기본 권역</div>
+        <div style="display:flex;align-items:center;gap:6px;margin-bottom:5px"><div style="width:12px;height:12px;border-radius:50%;background:#ea580c;opacity:0.3;border:2px solid #ea580c"></div> 할증 구역</div>
+        <div style="display:flex;align-items:center;gap:6px;margin-bottom:5px"><div style="width:12px;height:12px;border-radius:50%;background:#10b981;opacity:0.2;border:2px solid #10b981"></div> 상점 반경 2km</div>
+        <div style="display:flex;align-items:center;gap:6px"><div style="width:12px;height:12px;border-radius:2px;background:#dc2626"></div> 📍 상점 위치</div>
+      </div>
+    </div>
+  </div>
+</div>
   <div class="modal">
     <div class="modal-title">허브 색상 선택</div>
     <div class="modal-field">
@@ -502,6 +530,7 @@ async function doSearch(){
   wrap.innerHTML=best.score<0.12?noMatchHTML(raw):resultHTML(best,others,hasSurcharge);
   requestAnimationFrame(()=>requestAnimationFrame(()=>{
     document.querySelectorAll('.sfill[data-w]').forEach(el=>{el.style.width=el.dataset.w+'%';});
+    if(best.score>=0.12) renderInlineMap(best, hasSurcharge);
   }));
 }
 
@@ -544,6 +573,16 @@ function resultHTML(item,others,hasSurcharge){
     <button class="btn btn-outline" onclick="copyMsg('${item.key}','${item.address}',${d.total},${hasSurcharge})">💬 카톡 메시지 복사</button>
     <button class="btn btn-ghost" onclick="clearResult()">↩ 다시</button>
   </div>
+  <div class="card" id="inlineMapCard">
+    <div class="card-label">🗺 권역 지도</div>
+    <div style="font-size:12px;color:var(--text-mid);margin-bottom:10px">${item.key} · 반경 2km${hasSurcharge?' · <span style="color:var(--orange);font-weight:700">⚡ 할증 구역 포함</span>':''}</div>
+    <div id="inlineMap" style="width:100%;height:320px;border-radius:10px;overflow:hidden;border:1px solid var(--border)"></div>
+    <div style="display:flex;gap:12px;margin-top:10px;font-size:11px;color:var(--text-mid);flex-wrap:wrap">
+      <span>🔵 2km 반경</span>
+      ${hasSurcharge?'<span>🟠 할증 구역</span>':''}
+      <span>📍 상점 위치</span>
+    </div>
+  </div>
   ${others.length>0?`
   <div class="similar-card">
     <div class="card-label">유사 상점 후보</div>
@@ -571,6 +610,123 @@ function copyMsg(key,addr,conf,sur){
   navigator.clipboard.writeText(msg).then(()=>alert('복사됐어요! 카톡에 붙여넣기 하세요 😊'));
 }
 document.addEventListener('keydown',e=>{if(e.key==='Enter')doSearch();});
+
+// ══════════════════════════════
+// 인라인 지도 (상점 조회 결과 아래)
+// ══════════════════════════════
+let inlineMap=null, inlineOverlays=[];
+
+async function renderInlineMap(item, hasSurcharge) {
+  if(!window.kakaoMapReady) return;
+  const coord = {lat: item.lat, lng: item.lng};
+  const container = document.getElementById('inlineMap');
+  if(!container) return;
+
+  const center = new kakao.maps.LatLng(coord.lat, coord.lng);
+  inlineMap = new kakao.maps.Map(container, {center, level:6});
+
+  inlineOverlays.forEach(o=>{try{o.setMap(null);}catch(e){}});
+  inlineOverlays=[];
+
+  // 2km 원
+  const circle = new kakao.maps.Circle({
+    map:inlineMap, center, radius:2000,
+    strokeWeight:2, strokeColor:'#2563eb', strokeOpacity:0.9,
+    fillColor:'#2563eb', fillOpacity:0.12
+  });
+  inlineOverlays.push(circle);
+
+  // 할증 구역
+  if(hasSurcharge && item.hub && savedZones[item.hub]?.surPath?.length) {
+    const surPoly = new kakao.maps.Polygon({
+      map:inlineMap,
+      path: savedZones[item.hub].surPath.map(p=>new kakao.maps.LatLng(p.lat,p.lng)),
+      strokeWeight:2, strokeColor:'#ea580c', strokeOpacity:1,
+      fillColor:'#ea580c', fillOpacity:0.3
+    });
+    inlineOverlays.push(surPoly);
+  }
+
+  // 마커
+  const marker = new kakao.maps.Marker({map:inlineMap, position:center});
+  inlineOverlays.push(marker);
+
+  // 상점명
+  const info = new kakao.maps.InfoWindow({
+    content:`<div style="padding:6px 10px;font-size:12px;font-weight:700;white-space:nowrap">${item.key}${hasSurcharge?' ⚡':''}</div>`,
+    removable:false
+  });
+  info.open(inlineMap, marker);
+  inlineOverlays.push(info);
+
+  setTimeout(()=>inlineMap.relayout(), 150);
+}
+
+async function showZoneMap(key, addr, hub, hasSurcharge) {
+  document.getElementById('zoneMapModal').classList.add('show');
+  document.getElementById('zoneMapTitle').textContent = key;
+  document.getElementById('zoneMapSub').textContent = addr + (hasSurcharge ? '  ⚡ 할증 구역 포함' : '');
+
+  const coord = await getCoordFromAddr(addr);
+  if (!coord) { alert('주소 좌표를 찾을 수 없어요!'); return; }
+
+  const container = document.getElementById('zoneMap');
+  const center = new kakao.maps.LatLng(coord.lat, coord.lng);
+  if (!zoneMap) {
+    zoneMap = new kakao.maps.Map(container, {center, level:6});
+  } else {
+    zoneMap.setCenter(center);
+    zoneMap.setLevel(6);
+  }
+
+  // 기존 오버레이 제거
+  zoneMapOverlays.forEach(o=>{try{o.setMap(null);}catch(e){}});
+  zoneMapOverlays=[];
+
+  // 1. 상점 반경 2km 원
+  const circle = new kakao.maps.Circle({
+    map:zoneMap, center, radius:2000,
+    strokeWeight:2, strokeColor:'#2563eb', strokeOpacity:0.9,
+    fillColor:'#2563eb', fillOpacity:0.12
+  });
+  zoneMapOverlays.push(circle);
+
+  // 2. 할증 구역 (있을 때만, 2km 원 위에 겹쳐서 표시)
+  if (hub && savedZones[hub]?.surPath?.length) {
+    const surPoly = new kakao.maps.Polygon({
+      map:zoneMap,
+      path: savedZones[hub].surPath.map(p=>new kakao.maps.LatLng(p.lat,p.lng)),
+      strokeWeight:2, strokeColor:'#ea580c', strokeOpacity:1,
+      fillColor:'#ea580c', fillOpacity:0.3
+    });
+    zoneMapOverlays.push(surPoly);
+  }
+
+  // 3. 상점 마커
+  const marker = new kakao.maps.Marker({map:zoneMap, position:center});
+  zoneMapOverlays.push(marker);
+
+  // 4. 상점명 인포윈도우
+  const info = new kakao.maps.InfoWindow({
+    content:`<div style="padding:8px 12px;font-size:12px;font-weight:700;white-space:nowrap">${key}${hasSurcharge?' ⚡':''}</div>`,
+    removable:false
+  });
+  info.open(zoneMap, marker);
+  zoneMapOverlays.push(info);
+
+  setTimeout(()=>zoneMap.relayout(), 100);
+}
+
+function closeZoneMap() {
+  document.getElementById('zoneMapModal').classList.remove('show');
+}
+
+function saveZoneMapImage() {
+  // 카카오맵은 직접 캔버스 캡쳐가 안되므로 Static Map API 활용
+  const title = document.getElementById('zoneMapTitle').textContent;
+  const sub = document.getElementById('zoneMapSub').textContent;
+  alert(`"${title}" 권역 지도\n\n카카오맵 보안 정책상 직접 캡쳐는 제한돼요.\n브라우저에서 직접 스크린샷(Print Screen 또는 캡쳐 도구)을 사용해주세요!\n\nWindows: Win+Shift+S\nMac: Cmd+Shift+4`);
+}
 
 // ══════════════════════════════
 // 카카오맵 + 그리기
