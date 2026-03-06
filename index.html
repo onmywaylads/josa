@@ -20,6 +20,7 @@
   }
   loadKakaoMap();
 </script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Turf.js/6.5.0/turf.min.js"></script>
 <link href="https://fonts.googleapis.com/css2?family=Pretendard:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
 <style>
   :root {
@@ -747,6 +748,23 @@ function clipByCircle(poly, cLat, cLng, radiusKm) {
   return result;
 }
 
+// turf.js로 폴리곤과 원의 교집합 계산
+function turfIntersect(pathData, cLat, cLng, radiusKm) {
+  try {
+    const circle = turf.circle([cLng, cLat], radiusKm, {steps:64, units:'kilometers'});
+    const coords = pathData.map(p=>[p.lng, p.lat]);
+    coords.push(coords[0]); // 닫기
+    const polygon = turf.polygon([coords]);
+    const inter = turf.intersect(polygon, circle);
+    if(!inter) return null;
+    const result = inter.geometry.coordinates[0];
+    return result.map(c=>new kakao.maps.LatLng(c[1], c[0]));
+  } catch(e) {
+    console.log('turf 교집합 오류:', e);
+    return null;
+  }
+}
+
 // 원을 폴리곤 근사값으로 변환
 function circleToPolygon(lat, lng, radiusKm, numPoints=64) {
   const points=[];
@@ -822,13 +840,12 @@ async function renderInlineMap(item, hasSurcharge) {
   });
   inlineOverlays.push(circle);
 
-  // 2. 2km원 ∩ 허브 기본 권역 → 파란색
+  // 2. 허브 기본 권역 ∩ 2km원 교집합 → 파란색
   if(item.hub && savedZones[item.hub]?.zonePath?.length>=3){
-    const clipped = clipByCircle(savedZones[item.hub].zonePath, item.lat, item.lng, 2.0);
-    if(clipped.length>=3){
+    const inter = turfIntersect(savedZones[item.hub].zonePath, item.lat, item.lng, 2.0);
+    if(inter){
       const poly = new kakao.maps.Polygon({
-        map:inlineMap,
-        path: clipped.map(p=>new kakao.maps.LatLng(p.lat,p.lng)),
+        map:inlineMap, path: inter,
         strokeWeight:2, strokeColor:'#2563eb', strokeOpacity:0.9,
         fillColor:'#2563eb', fillOpacity:0.35
       });
@@ -836,13 +853,12 @@ async function renderInlineMap(item, hasSurcharge) {
     }
   }
 
-  // 3. 2km원 ∩ 할증 구역 → 빨간색
+  // 3. 할증 구역 ∩ 2km원 교집합 → 빨간색
   if(item.hub && savedZones[item.hub]?.surPath?.length>=3){
-    const clipped = clipByCircle(savedZones[item.hub].surPath, item.lat, item.lng, 2.0);
-    if(clipped.length>=3){
+    const inter = turfIntersect(savedZones[item.hub].surPath, item.lat, item.lng, 2.0);
+    if(inter){
       const poly = new kakao.maps.Polygon({
-        map:inlineMap,
-        path: clipped.map(p=>new kakao.maps.LatLng(p.lat,p.lng)),
+        map:inlineMap, path: inter,
         strokeWeight:2, strokeColor:'#dc2626', strokeOpacity:1,
         fillColor:'#dc2626', fillOpacity:0.4
       });
