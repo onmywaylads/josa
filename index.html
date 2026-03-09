@@ -144,8 +144,8 @@
   #mapContainer{width:100%;height:calc(100vh - 49px);position:relative;}
   #kakaoMap{width:100%;height:100%;}
 
-  .map-toolbar{position:absolute;top:12px;left:12px;z-index:100;display:flex;flex-direction:column;gap:8px;width:260px;}
-  .map-panel{background:rgba(255,255,255,0.97);backdrop-filter:blur(10px);border:1px solid var(--border);border-radius:12px;padding:16px;box-shadow:var(--shadow-md);}
+  .map-toolbar{position:absolute;top:12px;left:12px;z-index:100;display:flex;flex-direction:column;gap:8px;width:300px;}
+  .map-panel{background:rgba(255,255,255,0.97);backdrop-filter:blur(10px);border:1px solid var(--border);border-radius:12px;padding:14px;box-shadow:var(--shadow-md);}
   .map-panel-title{font-size:11px;font-weight:700;color:var(--accent);letter-spacing:0.08em;text-transform:uppercase;margin-bottom:12px;}
 
   /* 허브 선택 드롭다운 */
@@ -484,13 +484,24 @@ function renderHubSelect(){
 let hubVisible = {};
 
 function toggleHubVisible(name) {
-  if(hubVisible[name] === undefined) hubVisible[name] = true;
-  hubVisible[name] = !hubVisible[name];
+  hubVisible[name] = hubVisible[name] === false ? true : false;
+  if(!map) return;
   const z = savedZones[name];
   if(!z) return;
   const show = hubVisible[name];
-  if(z.zonePolygon) z.zonePolygon.setMap(show ? map : null);
-  if(z.surPolygon) z.surPolygon.setMap(show ? map : null);
+
+  // 폴리곤 객체 없으면 새로 생성
+  if(show) {
+    if(!z.zonePolygon && z.zonePath?.length>=3) {
+      z.zonePolygon = new kakao.maps.Polygon({map, path:z.zonePath.map(p=>new kakao.maps.LatLng(p.lat,p.lng)), strokeWeight:2,strokeColor:'#2563eb',strokeOpacity:1,fillColor:'#2563eb',fillOpacity:0.15});
+    } else if(z.zonePolygon) z.zonePolygon.setMap(map);
+    if(!z.surPolygon && z.surPath?.length>=3) {
+      z.surPolygon = new kakao.maps.Polygon({map, path:z.surPath.map(p=>new kakao.maps.LatLng(p.lat,p.lng)), strokeWeight:2,strokeColor:'#ea580c',strokeOpacity:1,fillColor:'#ea580c',fillOpacity:0.25});
+    } else if(z.surPolygon) z.surPolygon.setMap(map);
+  } else {
+    if(z.zonePolygon) z.zonePolygon.setMap(null);
+    if(z.surPolygon) z.surPolygon.setMap(null);
+  }
 }
 
 function renderHubMgrList(){
