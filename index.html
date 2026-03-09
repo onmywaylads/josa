@@ -185,10 +185,10 @@
   .hub-tag.sur-tag{background:#fed7aa;color:var(--orange);}
 
   /* 허브 관리 목록 (설정 패널) */
-  .hub-mgr-list{display:flex;flex-direction:column;gap:6px;margin-top:12px;max-height:200px;overflow-y:auto;}
-  .hub-mgr-item{display:flex;align-items:center;justify-content:space-between;background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:9px 12px;}
-  .hub-mgr-left{display:flex;align-items:center;gap:8px;}
-  .hub-mgr-name{font-size:13px;font-weight:700;}
+  .hub-mgr-list{display:flex;flex-direction:column;gap:6px;margin-top:12px;max-height:300px;overflow-y:auto;}
+  .hub-mgr-item{display:flex;align-items:center;justify-content:space-between;background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:7px 10px;}
+  .hub-mgr-left{display:flex;align-items:center;gap:6px;flex:1;min-width:0;}
+  .hub-mgr-name{font-size:13px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
 
   /* 색상 선택 */
   .color-dots{display:flex;gap:5px;}
@@ -304,9 +304,6 @@
   </div>
 </div>
 
-<!-- 색상 선택 모달 -->
-<div class="modal-bg" id="colorModal">
-
 <!-- 권역 지도 모달 -->
 <div class="modal-bg" id="zoneMapModal" style="z-index:600">
   <div style="background:#fff;border-radius:16px;width:92%;max-width:700px;max-height:90vh;overflow:hidden;box-shadow:0 20px 60px rgba(0,0,0,0.2);display:flex;flex-direction:column;">
@@ -334,23 +331,6 @@
     </div>
   </div>
 </div>
-  <div class="modal">
-    <div class="modal-title">허브 색상 선택</div>
-    <div class="modal-field">
-      <div class="modal-label">허브명</div>
-      <div id="modalHubName" style="font-size:15px;font-weight:700;margin-top:4px"></div>
-    </div>
-    <div class="modal-field">
-      <div class="modal-label">색상</div>
-      <div class="color-dots" id="colorDots"></div>
-    </div>
-    <div class="modal-btns">
-      <button class="btn btn-primary" style="flex:1" onclick="confirmAddHub()">추가하기</button>
-      <button class="btn btn-ghost" onclick="closeColorModal()">취소</button>
-    </div>
-  </div>
-</div>
-
 <script>
 // ══════════════════════════════
 // DB (샘플)
@@ -366,16 +346,11 @@ const DB=[
   {key:"교촌치킨[강남본점]",brand:"교촌치킨", store:"강남본점", address:"서울시 강남구 봉은사로 114",   dong:"삼성동", lat:37.5096,lng:127.0613, status:"가능",    hub:"강남허브", sharedHub:"강남2허브", zone:"강남-A", preDeduct:"N", memo:""},
 ];
 
-// 색상 팔레트
-const COLORS=["#2563eb","#059669","#d97706","#dc2626","#7c3aed","#ea580c","#0891b2","#be185d","#15803d","#b45309"];
-
 const SCRIPT_URL='https://script.google.com/macros/s/AKfycbwBt4hJMPjXRT2RaKhWyRCVYLg4vO6Bev_8gULP52OhWz6SRPDr3nQLayNulzF8kjsDWA/exec';
 
 // 허브 목록 (동적 관리)
 let hubList=[];
 let savedZones={};
-let pendingHubName='';
-let pendingColor=COLORS[0];
 
 // ══════════════════════════════
 // 구글시트 연동
@@ -467,41 +442,13 @@ function addHub(){
   const name=document.getElementById('hubAddInp').value.trim();
   if(!name){alert('허브명을 입력해주세요!');return;}
   if(hubList.find(h=>h.name===name)){alert('이미 존재하는 허브입니다!');return;}
-  pendingHubName=name;
-  pendingColor=COLORS[hubList.length % COLORS.length];
-  openColorModal(name);
-}
-
-function openColorModal(name){
-  document.getElementById('modalHubName').textContent=name;
-  const dots=document.getElementById('colorDots');
-  dots.innerHTML=COLORS.map((c,i)=>`
-    <div class="color-dot ${c===pendingColor?'selected':''}"
-      style="background:${c}"
-      onclick="selectColor('${c}',this)">
-    </div>`).join('');
-  document.getElementById('colorModal').classList.add('show');
-}
-
-function selectColor(color,el){
-  pendingColor=color;
-  document.querySelectorAll('.color-dot').forEach(d=>d.classList.remove('selected'));
-  el.classList.add('selected');
-}
-
-function closeColorModal(){
-  document.getElementById('colorModal').classList.remove('show');
+  hubList.push({name});
   document.getElementById('hubAddInp').value='';
-}
-
-function confirmAddHub(){
-  hubList.push({name:pendingHubName, color:pendingColor});
-  closeColorModal();
   renderHubSelect();
   renderHubMgrList();
   saveToStorage();
   saveZonesToSheet();
-  document.getElementById('hubSelect').value=pendingHubName;
+  document.getElementById('hubSelect').value=name;
 }
 
 function deleteHub(name){
@@ -552,8 +499,8 @@ function renderHubMgrList(){
       <div class="hub-mgr-left">
         <label style="display:flex;align-items:center;gap:6px;cursor:pointer">
           <input type="checkbox" ${visible?'checked':''} onchange="toggleHubVisible('${h.name}')"
-            style="width:15px;height:15px;accent-color:${h.color};cursor:pointer">
-          <div class="hub-dot" style="background:${h.color};width:10px;height:10px;border-radius:50%"></div>
+            style="width:15px;height:15px;accent-color:#2563eb;cursor:pointer">
+          <div class="hub-dot" style="background:#2563eb;width:10px;height:10px;border-radius:50%"></div>
           <div class="hub-mgr-name">${h.name}</div>
         </label>
         <div style="display:flex;gap:3px;margin-left:4px">
@@ -561,7 +508,7 @@ function renderHubMgrList(){
           ${savedZones[h.name]?.surPath?.length?'<span style="font-size:10px;background:#fed7aa;color:#ea580c;padding:1px 5px;border-radius:3px;font-weight:700">할증</span>':''}
         </div>
       </div>
-      <button class="btn btn-sm btn-danger" onclick="deleteHub('${h.name}')">삭제</button>
+      <button class="btn btn-sm btn-danger" style="font-size:11px;padding:3px 8px;flex-shrink:0" onclick="deleteHub('${h.name}')">삭제</button>
     </div>`;
   }).join('');
 }
@@ -979,7 +926,7 @@ function initMap(){
   restorePolygonsOnMap();
 }
 
-function getHubColor(name){return hubList.find(h=>h.name===name)?.color||'#2563eb';}
+function getHubColor(name){return '#2563eb';}
 
 function setLayer(layer){
   currentLayer=layer;
