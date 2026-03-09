@@ -153,11 +153,11 @@
   .hub-select:focus{border-color:var(--accent);}
 
   /* 허브 추가 인풋 */
-  .hub-add-row{display:flex;gap:6px;margin-bottom:10px;}
-  .hub-add-inp{flex:1;background:var(--bg);border:1.5px solid var(--border);border-radius:8px;padding:8px 10px;color:var(--text);font-family:'Pretendard',sans-serif;font-size:12px;font-weight:600;outline:none;}
-  .hub-add-inp:focus{border-color:var(--accent);}
+  .hub-add-row{display:flex;gap:0;margin-bottom:12px;border:1.5px solid var(--border);border-radius:10px;overflow:hidden;transition:border-color 0.2s;background:var(--white);}
+  .hub-add-row:focus-within{border-color:var(--accent);}
+  .hub-add-inp{flex:1;background:transparent;border:none;padding:10px 12px;color:var(--text);font-family:'Pretendard',sans-serif;font-size:13px;font-weight:600;outline:none;}
   .hub-add-inp::placeholder{color:var(--text-dim);}
-  .hub-add-btn{padding:8px 12px;background:var(--accent);border:none;border-radius:8px;color:#fff;font-family:'Pretendard',sans-serif;font-size:12px;font-weight:700;cursor:pointer;white-space:nowrap;}
+  .hub-add-btn{padding:10px 16px;background:var(--accent);border:none;color:#fff;font-family:'Pretendard',sans-serif;font-size:13px;font-weight:700;cursor:pointer;white-space:nowrap;transition:background 0.15s;}
   .hub-add-btn:hover{background:var(--accent2);}
 
   .layer-tabs{display:flex;gap:6px;margin-bottom:10px;}
@@ -185,7 +185,7 @@
   .hub-tag.sur-tag{background:#fed7aa;color:var(--orange);}
 
   /* 허브 관리 목록 (설정 패널) */
-  .hub-mgr-list{display:flex;flex-direction:column;gap:6px;margin-top:12px;max-height:300px;overflow-y:auto;}
+  .hub-mgr-list{display:flex;flex-direction:column;gap:6px;margin-top:12px;max-height:420px;overflow-y:auto;}
   .hub-mgr-item{display:flex;align-items:center;justify-content:space-between;background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:7px 10px;}
   .hub-mgr-left{display:flex;align-items:center;gap:6px;flex:1;min-width:0;}
   .hub-mgr-name{font-size:13px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
@@ -227,7 +227,7 @@
 <div class="page active" id="page-search">
 <div class="wrap">
   <div class="page-header">
-    <h1>바로고 현장사업부</h1>
+    <h1>바로고 북부광역사업부</h1>
     <p>B2B 실수행 상점 조회 시스템</p>
   </div>
   <div class="stats">
@@ -481,6 +481,7 @@ function renderHubSelect(){
 let hubVisible = {};
 
 function toggleHubVisible(name) {
+  if(hubVisible[name] === undefined) hubVisible[name] = true;
   hubVisible[name] = !hubVisible[name];
   const z = savedZones[name];
   if(!z) return;
@@ -500,13 +501,8 @@ function renderHubMgrList(){
         <label style="display:flex;align-items:center;gap:6px;cursor:pointer">
           <input type="checkbox" ${visible?'checked':''} onchange="toggleHubVisible('${h.name}')"
             style="width:15px;height:15px;accent-color:#2563eb;cursor:pointer">
-          <div class="hub-dot" style="background:#2563eb;width:10px;height:10px;border-radius:50%"></div>
           <div class="hub-mgr-name">${h.name}</div>
         </label>
-        <div style="display:flex;gap:3px;margin-left:4px">
-          ${savedZones[h.name]?.zonePath?.length?'<span style="font-size:10px;background:#dbeafe;color:#2563eb;padding:1px 5px;border-radius:3px;font-weight:700">기본</span>':''}
-          ${savedZones[h.name]?.surPath?.length?'<span style="font-size:10px;background:#fed7aa;color:#ea580c;padding:1px 5px;border-radius:3px;font-weight:700">할증</span>':''}
-        </div>
       </div>
       <button class="btn btn-sm btn-danger" style="font-size:11px;padding:3px 8px;flex-shrink:0" onclick="deleteHub('${h.name}')">삭제</button>
     </div>`;
@@ -652,7 +648,7 @@ function noMatchHTML(raw){return`<div class="no-match"><div class="no-match-icon
 function clearResult(){document.getElementById('resultWrap').innerHTML='';document.getElementById('storeInput').value='';document.getElementById('addrInput').value='';}
 function fillAndSearch(key,addr){document.getElementById('storeInput').value=key;document.getElementById('addrInput').value=addr;doSearch();}
 function copyMsg(key,addr,conf,sur){
-  const msg=`안녕하세요! 현장사업부입니다 🙂\n\nB2B 상점 수행 가능 여부 확인 요청드립니다.\n\n📍 상점명: ${key}\n📍 주소: ${addr}\n${sur?'⚡ 할증 구역 포함\n':''}\n확인 부탁드립니다!\n✅ 수행 가능 여부\n✅ 권역 정보\n✅ 수행허브\n✅ 선차감 여부${sur?'\n✅ 할증 적용 여부':''}\n\n감사합니다 🙏`;
+  const msg=`안녕하세요! 북부광역사업부입니다 🙂\n\nB2B 상점 수행 가능 여부 확인 요청드립니다.\n\n📍 상점명: ${key}\n📍 주소: ${addr}\n${sur?'⚡ 할증 구역 포함\n':''}\n확인 부탁드립니다!\n✅ 수행 가능 여부\n✅ 권역 정보\n✅ 수행허브\n✅ 선차감 여부${sur?'\n✅ 할증 적용 여부':''}\n\n감사합니다 🙏`;
   navigator.clipboard.writeText(msg).then(()=>alert('복사됐어요! 카톡에 붙여넣기 하세요 😊'));
 }
 document.addEventListener('keydown',e=>{if(e.key==='Enter')doSearch();});
