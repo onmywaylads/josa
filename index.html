@@ -144,7 +144,7 @@
   #mapContainer{width:100%;height:calc(100vh - 49px);position:relative;}
   #kakaoMap{width:100%;height:100%;}
 
-  .map-toolbar{position:absolute;top:12px;left:12px;z-index:100;display:flex;flex-direction:column;gap:8px;width:230px;}
+  .map-toolbar{position:absolute;top:12px;left:12px;z-index:100;display:flex;flex-direction:column;gap:8px;width:260px;}
   .map-panel{background:rgba(255,255,255,0.97);backdrop-filter:blur(10px);border:1px solid var(--border);border-radius:12px;padding:16px;box-shadow:var(--shadow-md);}
   .map-panel-title{font-size:11px;font-weight:700;color:var(--accent);letter-spacing:0.08em;text-transform:uppercase;margin-bottom:12px;}
 
@@ -406,13 +406,16 @@ function loadFromStorage(){
 
 function restorePolygonsOnMap(){
   Object.entries(savedZones).forEach(([hub,v])=>{
-    hubVisible[hub] = hubVisible[hub] !== false; // 기본 true
-    const hubColor=getHubColor(hub);
+    if(hubVisible[hub] === undefined) hubVisible[hub] = true;
+    const show = hubVisible[hub];
+    const hubColor='#2563eb';
     if(v.zonePath?.length>=3){
       v.zonePolygon=new kakao.maps.Polygon({map,path:v.zonePath.map(p=>new kakao.maps.LatLng(p.lat,p.lng)),strokeWeight:2,strokeColor:hubColor,strokeOpacity:1,fillColor:hubColor,fillOpacity:0.15});
+      if(!show) v.zonePolygon.setMap(null);
     }
     if(v.surPath?.length>=3){
       v.surPolygon=new kakao.maps.Polygon({map,path:v.surPath.map(p=>new kakao.maps.LatLng(p.lat,p.lng)),strokeWeight:2,strokeColor:'#ea580c',strokeOpacity:1,fillColor:'#ea580c',fillOpacity:0.25});
+      if(!show) v.surPolygon.setMap(null);
     }
   });
 }
