@@ -157,7 +157,7 @@
   .hub-add-row:focus-within{border-color:var(--accent);}
   .hub-add-inp{flex:1;background:transparent;border:none;padding:10px 12px;color:var(--text);font-family:'Pretendard',sans-serif;font-size:13px;font-weight:600;outline:none;}
   .hub-add-inp::placeholder{color:var(--text-dim);}
-  .hub-add-btn{padding:10px 16px;background:var(--accent);border:none;color:#fff;font-family:'Pretendard',sans-serif;font-size:13px;font-weight:700;cursor:pointer;white-space:nowrap;transition:background 0.15s;}
+  .hub-add-btn{padding:10px 14px;background:var(--accent);border:none;color:#fff;font-family:'Pretendard',sans-serif;font-size:16px;font-weight:700;cursor:pointer;white-space:nowrap;transition:background 0.15s;flex-shrink:0;}
   .hub-add-btn:hover{background:var(--accent2);}
 
   .layer-tabs{display:flex;gap:6px;margin-bottom:10px;}
@@ -170,9 +170,10 @@
   .draw-btn:hover{border-color:var(--accent);color:var(--accent);}
   .draw-btn.drawing{background:#dbeafe;border-color:var(--accent);color:var(--accent);}
   .draw-btn.drawing-sur{background:#fed7aa;border-color:var(--orange);color:var(--orange);}
-  .draw-btn.save{background:var(--accent);border-color:var(--accent);color:#fff;}
-  .draw-btn.save:hover{background:var(--accent2);}
-  .draw-btn.del{background:#fef2f2;border-color:#fca5a5;color:var(--red);}
+  .draw-btn.save{background:var(--bg);border-color:var(--accent);color:var(--accent);}
+  .draw-btn.save:hover{background:#dbeafe;border-color:var(--accent);}
+  .draw-btn.del{background:var(--bg);border-color:#fca5a5;color:var(--red);}
+  .draw-btn.del:hover{background:#fef2f2;border-color:var(--red);}
 
   /* 저장된 허브 목록 */
   .hub-list-panel{max-height:180px;overflow-y:auto;}
@@ -272,9 +273,9 @@
         </select>
 
         <!-- 허브 추가 -->
-        <div class="hub-add-row">
-          <input class="hub-add-inp" id="hubAddInp" placeholder="새 허브명 입력" />
-          <button class="hub-add-btn" onclick="addHub()">+ 추가</button>
+        <div style="margin-bottom:12px;">
+          <input class="hub-add-inp" id="hubAddInp" placeholder="새 허브명 입력" style="width:100%;border:1.5px solid var(--border);border-radius:8px;padding:9px 12px;font-family:'Pretendard',sans-serif;font-size:13px;font-weight:600;outline:none;color:var(--text);background:var(--white);margin-bottom:6px;" />
+          <button class="hub-add-btn" onclick="addHub()" style="width:100%;padding:9px;background:var(--accent);border:none;border-radius:8px;color:#fff;font-family:'Pretendard',sans-serif;font-size:13px;font-weight:700;cursor:pointer;">+ 허브 추가</button>
         </div>
 
         <div class="layer-tabs">
@@ -361,7 +362,10 @@ async function loadZonesFromSheet(){
     const data=await res.json();
     hubList=data.hubList||[];
     Object.entries(data.zones||{}).forEach(([k,v])=>{
-      savedZones[k]={zonePolygon:null,surPolygon:null,zonePath:v.zonePath||[],surPath:v.surPath||[]};
+      if(!savedZones[k]) savedZones[k]={zonePolygon:null,surPolygon:null,zonePath:[],surPath:[]};
+      // 데이터만 업데이트, 폴리곤 객체는 건드리지 않음
+      savedZones[k].zonePath=v.zonePath||[];
+      savedZones[k].surPath=v.surPath||[];
     });
     renderHubSelect();
     renderHubMgrList();
