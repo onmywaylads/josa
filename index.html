@@ -221,7 +221,7 @@
 
 <div class="nav">
   <div class="nav-tab active" onclick="showPage('search',this)">🔍 상점 조회</div>
-  <div class="nav-tab" onclick="showPage('map',this)">🗺 권역 관리</div>
+  <div class="nav-tab" onclick="showPage('map',this)">📐 권역 관리</div>
 </div>
 
 <!-- 상점 조회 -->
@@ -566,9 +566,6 @@ async function doSearch(){
   const wrap=document.getElementById('resultWrap');
   wrap.innerHTML='<div style="text-align:center;padding:40px;color:var(--text-dim)">🔍 매칭 중...</div>';
   
-  // 시트 데이터 확실히 불러오기
-  await loadZonesFromSheet();
-  
   const inputCoord=addr?await getCoordFromAddr(addr):null;
   const parsed=parseKey(raw);
   const scored=DB.map(item=>{
@@ -798,11 +795,6 @@ function lineIntersect(p,q,a,b){
 
 async function renderInlineMap(item, hasSurcharge) {
   if(!window.kakaoMapReady) return;
-  
-  // 시트 데이터 아직 없으면 다시 불러오기
-  if(!savedZones[item.hub]?.zonePath?.length) {
-    await loadZonesFromSheet();
-  }
 
   const container = document.getElementById('inlineMap');
   if(!container) return;
