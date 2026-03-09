@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>바로고 현장사업부 — 상점 조회</title>
+<title>바로고 북부광역사업부 — 상점 조회</title>
 <script>
   // 카카오맵 SDK 동적 로드
   window.kakaoMapReady = false;
@@ -431,6 +431,7 @@ function loadFromStorage(){
 
 function restorePolygonsOnMap(){
   Object.entries(savedZones).forEach(([hub,v])=>{
+    hubVisible[hub] = hubVisible[hub] !== false; // 기본 true
     const hubColor=getHubColor(hub);
     if(v.zonePath?.length>=3){
       v.zonePolygon=new kakao.maps.Polygon({map,path:v.zonePath.map(p=>new kakao.maps.LatLng(p.lat,p.lng)),strokeWeight:2,strokeColor:hubColor,strokeOpacity:1,fillColor:hubColor,fillOpacity:0.15});
@@ -529,21 +530,40 @@ function renderHubSelect(){
   if(hubList.find(h=>h.name===cur))sel.value=cur;
 }
 
+// 허브 표시 여부 (기본 모두 표시)
+let hubVisible = {};
+
+function toggleHubVisible(name) {
+  hubVisible[name] = !hubVisible[name];
+  const z = savedZones[name];
+  if(!z) return;
+  const show = hubVisible[name];
+  if(z.zonePolygon) z.zonePolygon.setMap(show ? map : null);
+  if(z.surPolygon) z.surPolygon.setMap(show ? map : null);
+}
+
 function renderHubMgrList(){
   const panel=document.getElementById('hubMgrList');
   if(!hubList.length){panel.innerHTML='<div style="font-size:12px;color:var(--text-dim)">추가된 허브 없음</div>';return;}
-  panel.innerHTML=hubList.map(h=>`
+  panel.innerHTML=hubList.map(h=>{
+    const visible = hubVisible[h.name] !== false;
+    return `
     <div class="hub-mgr-item">
       <div class="hub-mgr-left">
-        <div class="hub-dot" style="background:${h.color};width:10px;height:10px;border-radius:50%"></div>
-        <div class="hub-mgr-name">${h.name}</div>
+        <label style="display:flex;align-items:center;gap:6px;cursor:pointer">
+          <input type="checkbox" ${visible?'checked':''} onchange="toggleHubVisible('${h.name}')"
+            style="width:15px;height:15px;accent-color:${h.color};cursor:pointer">
+          <div class="hub-dot" style="background:${h.color};width:10px;height:10px;border-radius:50%"></div>
+          <div class="hub-mgr-name">${h.name}</div>
+        </label>
         <div style="display:flex;gap:3px;margin-left:4px">
           ${savedZones[h.name]?.zonePath?.length?'<span style="font-size:10px;background:#dbeafe;color:#2563eb;padding:1px 5px;border-radius:3px;font-weight:700">기본</span>':''}
           ${savedZones[h.name]?.surPath?.length?'<span style="font-size:10px;background:#fed7aa;color:#ea580c;padding:1px 5px;border-radius:3px;font-weight:700">할증</span>':''}
         </div>
       </div>
       <button class="btn btn-sm btn-danger" onclick="deleteHub('${h.name}')">삭제</button>
-    </div>`).join('');
+    </div>`;
+  }).join('');
 }
 
 // ══════════════════════════════
