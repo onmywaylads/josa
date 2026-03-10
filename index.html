@@ -588,18 +588,58 @@ function renderHubMgrList(){
     const surBadge = surCount>0 ? `<span style="font-size:10px;color:#ea580c;background:#fff7ed;border:1px solid #fed7aa;border-radius:4px;padding:1px 6px;flex-shrink:0">할증 ${surCount}개</span>` : '';
     return `
     <div class="hub-mgr-item" style="flex-direction:column;align-items:stretch;gap:4px">
-      <div style="display:flex;align-items:center;justify-content:space-between">
+      <div style="display:flex;align-items:center;justify-content:space-between;gap:4px">
         <label style="display:flex;align-items:center;gap:6px;cursor:pointer;flex:1;min-width:0">
           <input type="checkbox" ${visible?'checked':''} onchange="toggleHubVisible('${h.name}')"
             style="width:15px;height:15px;accent-color:#2563eb;cursor:pointer;flex-shrink:0">
           <div class="hub-mgr-name">${h.name}</div>
           ${surBadge}
         </label>
-        <button class="btn btn-sm btn-danger" style="font-size:11px;padding:3px 8px;flex-shrink:0" onclick="deleteHub('${h.name}')">삭제</button>
+        <div style="display:flex;gap:4px;flex-shrink:0">
+          <button class="btn btn-sm" style="font-size:11px;padding:3px 8px;border:1px solid var(--border);background:var(--white)" onclick="renameHub('${h.name}')">✏️ 허브명 변경</button>
+          <button class="btn btn-sm" style="font-size:11px;padding:3px 8px;border:1px solid #bfdbfe;background:#eff6ff;color:var(--accent)" onclick="redrawHub('${h.name}')">🔄 권역 다시 그리기</button>
+          <button class="btn btn-sm btn-danger" style="font-size:11px;padding:3px 8px" onclick="deleteHub('${h.name}')">삭제</button>
+        </div>
       </div>
-      ${surCount>0 ? `<div style="padding-left:21px;display:flex;flex-wrap:wrap;gap:4px">${(savedZones[h.name].surPaths||[]).map((_,i)=>`<button onclick="deleteSurPath('${h.name}',${i})" style="font-size:10px;padding:2px 7px;border:1px solid #fca5a5;border-radius:4px;background:#fff;color:#dc2626;cursor:pointer">⚡ 할증${i+1} 삭제</button>`).join('')}</div>` : ''}
     </div>`;
   }).join('');
+}
+
+function renameHub(oldName){
+  const newName = prompt(`새 허브명을 입력해주세요.`, oldName);
+  if(!newName||newName===oldName)return;
+  if(hubList.find(h=>h.name===newName)){alert('이미 존재하는 허브명이에요!');return;}
+  // hubList 업데이트
+  hubList=hubList.map(h=>h.name===oldName?{...h,name:newName}:h);
+  // savedZones 키 변경
+  if(savedZones[oldName]){
+    savedZones[newName]=savedZones[oldName];
+    delete savedZones[oldName];
+  }
+  if(hubVisible[oldName]!==undefined){
+    hubVisible[newName]=hubVisible[oldName];
+    delete hubVisible[oldName];
+  }
+  renderHubSelect();
+  renderHubMgrList();
+  saveToStorage();
+  saveZonesToSheet();
+}
+
+function redrawHub(name){
+  if(!confirm(`[${name}] 권역을 다시 그릴까요?\n기존 기본권역과 할증구역이 모두 지워집니다.`))return;
+  const z=savedZones[name];
+  if(z){
+    if(z.zonePolygon){z.zonePolygon.setMap(null);z.zonePolygon=null;}
+    (z.surPolygons||[]).forEach(p=>{try{p.setMap(null);}catch(e){}});
+    z.surPolygons=[];z.zonePath=[];z.surPaths=[];
+  }
+  // 해당 허브 선택 후 그리기 모드로
+  document.getElementById('hubSelect').value=name;
+  setLayer('zone');
+  saveToStorage();
+  saveZonesToSheet();
+  renderHubMgrList();
 }
 
 // ══════════════════════════════
