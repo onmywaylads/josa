@@ -588,18 +588,17 @@ function renderHubMgrList(){
     const surBadge = surCount>0 ? `<span style="font-size:10px;color:#ea580c;background:#fff7ed;border:1px solid #fed7aa;border-radius:4px;padding:1px 6px;flex-shrink:0">할증 ${surCount}개</span>` : '';
     return `
     <div class="hub-mgr-item" style="flex-direction:column;align-items:stretch;gap:4px">
-      <div style="display:flex;align-items:center;justify-content:space-between;gap:4px">
-        <label style="display:flex;align-items:center;gap:6px;cursor:pointer;flex:1;min-width:0">
-          <input type="checkbox" ${visible?'checked':''} onchange="toggleHubVisible('${h.name}')"
-            style="width:15px;height:15px;accent-color:#2563eb;cursor:pointer;flex-shrink:0">
-          <div class="hub-mgr-name">${h.name}</div>
-          ${surBadge}
-        </label>
-        <div style="display:flex;gap:4px;flex-shrink:0">
-          <button class="btn btn-sm" style="font-size:11px;padding:3px 8px;border:1px solid var(--border);background:var(--white)" onclick="renameHub('${h.name}')">✏️ 허브명 변경</button>
-          <button class="btn btn-sm" style="font-size:11px;padding:3px 8px;border:1px solid #bfdbfe;background:#eff6ff;color:var(--accent)" onclick="redrawHub('${h.name}')">🔄 권역 다시 그리기</button>
-          <button class="btn btn-sm btn-danger" style="font-size:11px;padding:3px 8px" onclick="deleteHub('${h.name}')">삭제</button>
-        </div>
+    <div class="hub-mgr-item" style="flex-direction:column;align-items:stretch;gap:6px">
+      <label style="display:flex;align-items:center;gap:6px;cursor:pointer">
+        <input type="checkbox" ${visible?'checked':''} onchange="toggleHubVisible('${h.name}')"
+          style="width:15px;height:15px;accent-color:#2563eb;cursor:pointer;flex-shrink:0">
+        <div class="hub-mgr-name">${h.name}</div>
+        ${surBadge}
+      </label>
+      <div style="display:flex;gap:4px;padding-left:21px">
+        <button class="btn btn-sm" style="font-size:11px;padding:3px 8px;border:1px solid var(--border);background:var(--white)" onclick="renameHub('${h.name}')">✏️ 허브명 변경</button>
+        <button class="btn btn-sm" style="font-size:11px;padding:3px 8px;border:1px solid #bfdbfe;background:#eff6ff;color:var(--accent)" onclick="redrawHub('${h.name}')">🔄 권역 다시 그리기</button>
+        <button class="btn btn-sm btn-danger" style="font-size:11px;padding:3px 8px" onclick="deleteHub('${h.name}')">삭제</button>
       </div>
     </div>`;
   }).join('');
