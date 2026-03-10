@@ -587,7 +587,6 @@ function renderHubMgrList(){
     const surCount = (savedZones[h.name]?.surPaths||[]).length;
     const surBadge = surCount>0 ? `<span style="font-size:10px;color:#ea580c;background:#fff7ed;border:1px solid #fed7aa;border-radius:4px;padding:1px 6px;flex-shrink:0">할증 ${surCount}개</span>` : '';
     return `
-    <div class="hub-mgr-item" style="flex-direction:column;align-items:stretch;gap:4px">
     <div class="hub-mgr-item" style="flex-direction:column;align-items:stretch;gap:6px">
       <label style="display:flex;align-items:center;gap:6px;cursor:pointer">
         <input type="checkbox" ${visible?'checked':''} onchange="toggleHubVisible('${h.name}')"
