@@ -1033,7 +1033,7 @@ function deleteSurPath(name, idx){
   saveZonesToSheet();
 }
 
-
+function clearCurrent(){
   if(tempPolyline)tempPolyline.setMap(null);
   if(tempPolygon)tempPolygon.setMap(null);
   currentPath=[];tempPolyline=null;tempPolygon=null;isDrawing=false;
