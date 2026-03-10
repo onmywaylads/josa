@@ -232,10 +232,10 @@
     <p>B2B 실수행 상점 조회 시스템</p>
   </div>
   <div class="stats">
-    <div class="stat"><div class="stat-n" id="statTotal">-</div><div class="stat-l">전체 상점</div></div>
-    <div class="stat"><div class="stat-n" style="color:var(--green)" id="statPossible">-</div><div class="stat-l">수행 가능</div></div>
-    <div class="stat"><div class="stat-n" style="color:var(--red)" id="statImpossible">-</div><div class="stat-l">불가</div></div>
-    <div class="stat"><div class="stat-n" style="color:var(--yellow)" id="statCheck">-</div><div class="stat-l">확인 필요</div></div>
+    <div class="stat"><div class="stat-n" id="statTotal">8</div><div class="stat-l">전체 상점</div></div>
+    <div class="stat"><div class="stat-n" style="color:var(--green)" id="statPossible">6</div><div class="stat-l">수행 가능</div></div>
+    <div class="stat"><div class="stat-n" style="color:var(--red)" id="statImpossible">1</div><div class="stat-l">불가</div></div>
+    <div class="stat"><div class="stat-n" style="color:var(--yellow)" id="statCheck">1</div><div class="stat-l">확인 필요</div></div>
 
   </div>
   <div class="card">
@@ -334,53 +334,18 @@
 </div>
 <script>
 // ══════════════════════════════
-// DB (구글시트에서 로드)
+// DB (샘플)
 // ══════════════════════════════
-let DB = [];
-
-function parseDBRow(row) {
-  const name = String(row['상점명']||'').trim();
-  const brand = name.includes('[') ? name.split('[')[0].trim() : name;
-  const store = name.includes('[') ? name.split('[')[1]?.replace(']','').trim() : '';
-  const addr = String(row['상점주소']||'').trim();
-  const dong = extractDong(addr);
-  return {
-    key: name,
-    brand, store,
-    address: addr,
-    dong,
-    lat: 0, lng: 0, // 좌표는 조회 시 geocoding
-    status: String(row['수행가능여부']||'확인필요').trim(),
-    hub: String(row['메인수행허브']||'').trim(),
-    sharedHub: String(row['공유허브']||'').trim(),
-    preDeduct: String(row['선차감']||'').trim(),
-    memo: String(row['비고']||'').trim(),
-  };
-}
-
-async function loadDBFromSheet(){
-  try{
-    const res = await fetch(SCRIPT_URL+'?action=getDB');
-    const data = await res.json();
-    DB = data.filter(r=>r['상점명']).map(parseDBRow);
-    updateStats();
-  }catch(e){console.log('DB 로드 실패',e);}
-}
-
-function updateStats(){
-  const total = DB.length;
-  const possible = DB.filter(d=>d.status==='가능'||d.status==='수행가능').length;
-  const impossible = DB.filter(d=>d.status==='불가'||d.status==='수행불가').length;
-  const check = DB.filter(d=>!['가능','수행가능','불가','수행불가'].includes(d.status)).length;
-  const tEl=document.getElementById('statTotal');
-  const pEl=document.getElementById('statPossible');
-  const iEl=document.getElementById('statImpossible');
-  const cEl=document.getElementById('statCheck');
-  if(tEl)tEl.textContent=total;
-  if(pEl)pEl.textContent=possible;
-  if(iEl)iEl.textContent=impossible;
-  if(cEl)cEl.textContent=check;
-}
+const DB=[
+  {key:"맥도날드[강남점]",  brand:"맥도날드", store:"강남점",   address:"서울시 강남구 강남대로 396",   dong:"역삼동", lat:37.4979,lng:127.0276, status:"가능",    hub:"강남허브", sharedHub:"서초허브",  zone:"강남-A", preDeduct:"Y", memo:"주차 협소, 픽업 후문"},
+  {key:"맥도날드[역삼점]",  brand:"맥도날드", store:"역삼점",   address:"서울시 강남구 테헤란로 108",   dong:"역삼동", lat:37.5007,lng:127.0368, status:"가능",    hub:"강남허브", sharedHub:"",          zone:"강남-B", preDeduct:"N", memo:""},
+  {key:"맥도날드[신촌점]",  brand:"맥도날드", store:"신촌점",   address:"서울시 서대문구 신촌로 83",    dong:"창천동", lat:37.5556,lng:126.9368, status:"불가",    hub:"",         sharedHub:"",          zone:"",       preDeduct:"",  memo:"협소도로 진입불가"},
+  {key:"BBQ[강남직영점]",   brand:"BBQ",      store:"강남직영점",address:"서울시 강남구 논현로 507",    dong:"역삼동", lat:37.5077,lng:127.0387, status:"가능",    hub:"강남허브", sharedHub:"논현허브",  zone:"강남-A", preDeduct:"Y", memo:""},
+  {key:"롯데리아[잠실점]",  brand:"롯데리아", store:"잠실점",   address:"서울시 송파구 올림픽로 240",   dong:"잠실동", lat:37.5133,lng:127.1002, status:"가능",    hub:"송파허브", sharedHub:"",          zone:"송파-A", preDeduct:"N", memo:"주말 피크타임 주의"},
+  {key:"롯데리아[강변점]",  brand:"롯데리아", store:"강변점",   address:"서울시 광진구 강변역로 50",    dong:"구의동", lat:37.5349,lng:127.0944, status:"확인필요",hub:"광진허브", sharedHub:"",          zone:"광진-B", preDeduct:"",  memo:"권역 경계 상점"},
+  {key:"버거킹[홍대점]",    brand:"버거킹",   store:"홍대점",   address:"서울시 마포구 와우산로 94",    dong:"서교동", lat:37.5563,lng:126.9239, status:"가능",    hub:"마포허브", sharedHub:"",          zone:"마포-A", preDeduct:"Y", memo:""},
+  {key:"교촌치킨[강남본점]",brand:"교촌치킨", store:"강남본점", address:"서울시 강남구 봉은사로 114",   dong:"삼성동", lat:37.5096,lng:127.0613, status:"가능",    hub:"강남허브", sharedHub:"강남2허브", zone:"강남-A", preDeduct:"N", memo:""},
+];
 
 const SCRIPT_URL='https://script.google.com/macros/s/AKfycbwBt4hJMPjXRT2RaKhWyRCVYLg4vO6Bev_8gULP52OhWz6SRPDr3nQLayNulzF8kjsDWA/exec';
 
@@ -462,7 +427,6 @@ function restorePolygonsOnMap(){
 // 페이지 로드 시 - localStorage 먼저, 그다음 시트에서 최신 데이터
 loadFromStorage();
 loadZonesFromSheet();
-loadDBFromSheet();
 
 // ══════════════════════════════
 // 탭
