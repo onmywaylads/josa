@@ -364,11 +364,12 @@ async function loadZonesFromSheet(){
     Object.entries(data.zones||{}).forEach(([k,v])=>{
       if(!savedZones[k]) savedZones[k]={zonePolygon:null,surPolygons:[],zonePath:[],surPaths:[]};
       savedZones[k].zonePath=v.zonePath||[];
-      // 구버전 surPath 호환
       savedZones[k].surPaths = v.surPaths || (v.surPath?.length>=3 ? [v.surPath] : []);
     });
     renderHubSelect();
     renderHubMgrList();
+    // 지도가 이미 열려있으면 폴리곤 재복원
+    if(map) restorePolygonsOnMap();
   }catch(e){console.log('시트 로드 실패',e);}
 }
 
@@ -415,17 +416,19 @@ function restorePolygonsOnMap(){
     if(hubVisible[hub] === undefined) hubVisible[hub] = true;
     const show = hubVisible[hub];
     const hubColor='#2563eb';
+    // 기존 폴리곤 제거
+    if(v.zonePolygon){try{v.zonePolygon.setMap(null);}catch(e){}}
+    (v.surPolygons||[]).forEach(p=>{try{p.setMap(null);}catch(e){}});
+    v.zonePolygon=null; v.surPolygons=[];
+    // 새로 생성
     if(v.zonePath?.length>=3){
       v.zonePolygon=new kakao.maps.Polygon({map,path:v.zonePath.map(p=>new kakao.maps.LatLng(p.lat,p.lng)),strokeWeight:2,strokeColor:hubColor,strokeOpacity:1,fillColor:hubColor,fillOpacity:0.15});
       if(!show) v.zonePolygon.setMap(null);
     }
-    v.surPolygons=[];
-    (v.surPaths||[]).forEach(sp=>{
-      if(sp?.length>=3){
-        const poly=new kakao.maps.Polygon({map,path:sp.map(p=>new kakao.maps.LatLng(p.lat,p.lng)),strokeWeight:2,strokeColor:'#ea580c',strokeOpacity:1,fillColor:'#ea580c',fillOpacity:0.25});
-        if(!show) poly.setMap(null);
-        v.surPolygons.push(poly);
-      }
+    v.surPolygons=(v.surPaths||[]).filter(sp=>sp?.length>=3).map(sp=>{
+      const poly=new kakao.maps.Polygon({map,path:sp.map(p=>new kakao.maps.LatLng(p.lat,p.lng)),strokeWeight:2,strokeColor:'#ea580c',strokeOpacity:1,fillColor:'#ea580c',fillOpacity:0.25});
+      if(!show) poly.setMap(null);
+      return poly;
     });
   });
 }
