@@ -361,6 +361,17 @@ async function loadZonesFromSheet(){
     const res=await fetch(SCRIPT_URL+'?action=getZones');
     const data=await res.json();
     hubList=data.hubList||[];
+    const sheetHubs=new Set(hubList.map(h=>h.name));
+
+    // 시트에 없는 허브 제거
+    Object.keys(savedZones).forEach(k=>{
+      if(!sheetHubs.has(k)){
+        if(savedZones[k].zonePolygon) savedZones[k].zonePolygon.setMap(null);
+        if(savedZones[k].surPolygons) savedZones[k].surPolygons.forEach(p=>p.setMap(null));
+        delete savedZones[k];
+      }
+    });
+
     Object.entries(data.zones||{}).forEach(([k,v])=>{
       if(!savedZones[k]) savedZones[k]={zonePolygon:null,surPolygons:[],zonePath:[],surPaths:[]};
       savedZones[k].zonePath=v.zonePath||[];
@@ -368,7 +379,6 @@ async function loadZonesFromSheet(){
     });
     renderHubSelect();
     renderHubMgrList();
-    // 지도가 이미 열려있으면 폴리곤 재복원
     if(map) restorePolygonsOnMap();
   }catch(e){console.log('시트 로드 실패',e);}
 }
