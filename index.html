@@ -340,12 +340,19 @@ let DB = [];
 
 function parseDBRow(row) {
   const brand = String(row['브랜드명']||'').trim();
-  const store = String(row['상점명']||'').trim();
+  const storeFull = String(row['상점명']||'').trim();
+  // 상점명이 이미 브랜드명[점명] 형식인지 확인
+  const hasFormat = storeFull.includes('[') && storeFull.includes(']');
+  const key = hasFormat ? storeFull : (storeFull ? `${brand}[${storeFull}]` : brand);
+  // store는 [] 안쪽만 추출
+  const storeMatch = storeFull.match(/\[(.+?)\]/);
+  const store = storeMatch ? storeMatch[1] : storeFull;
   const addr = String(row['상점주소']||'').trim();
   const dong = extractDong(addr);
   return {
-    key: store ? `${brand}[${store}]` : brand,
-    brand, store,
+    key,
+    brand,
+    store,
     address: addr,
     dong,
     lat: 0, lng: 0,
@@ -372,8 +379,8 @@ async function loadDBFromSheet(){
 
 function updateStats(){
   const total = DB.length;
-  const possible = DB.filter(d=>['가능','수행가능'].includes(d.status)).length;
-  const impossible = DB.filter(d=>['불가','수행불가'].includes(d.status)).length;
+  const possible = DB.filter(d=>d.status&&d.status!=='X'&&d.status!=='확인필요'&&d.status!=='').length;
+  const impossible = DB.filter(d=>d.status==='X'||d.status==='불가'||d.status==='수행불가').length;
   const check = total - possible - impossible;
   const tEl=document.getElementById('statTotal');
   const pEl=document.getElementById('statPossible');
