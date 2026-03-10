@@ -334,18 +334,56 @@
 </div>
 <script>
 // ══════════════════════════════
-// DB (샘플)
+// DB (구글시트에서 로드)
 // ══════════════════════════════
-const DB=[
-  {key:"맥도날드[강남점]",  brand:"맥도날드", store:"강남점",   address:"서울시 강남구 강남대로 396",   dong:"역삼동", lat:37.4979,lng:127.0276, status:"가능",    hub:"강남허브", sharedHub:"서초허브",  zone:"강남-A", preDeduct:"Y", memo:"주차 협소, 픽업 후문"},
-  {key:"맥도날드[역삼점]",  brand:"맥도날드", store:"역삼점",   address:"서울시 강남구 테헤란로 108",   dong:"역삼동", lat:37.5007,lng:127.0368, status:"가능",    hub:"강남허브", sharedHub:"",          zone:"강남-B", preDeduct:"N", memo:""},
-  {key:"맥도날드[신촌점]",  brand:"맥도날드", store:"신촌점",   address:"서울시 서대문구 신촌로 83",    dong:"창천동", lat:37.5556,lng:126.9368, status:"불가",    hub:"",         sharedHub:"",          zone:"",       preDeduct:"",  memo:"협소도로 진입불가"},
-  {key:"BBQ[강남직영점]",   brand:"BBQ",      store:"강남직영점",address:"서울시 강남구 논현로 507",    dong:"역삼동", lat:37.5077,lng:127.0387, status:"가능",    hub:"강남허브", sharedHub:"논현허브",  zone:"강남-A", preDeduct:"Y", memo:""},
-  {key:"롯데리아[잠실점]",  brand:"롯데리아", store:"잠실점",   address:"서울시 송파구 올림픽로 240",   dong:"잠실동", lat:37.5133,lng:127.1002, status:"가능",    hub:"송파허브", sharedHub:"",          zone:"송파-A", preDeduct:"N", memo:"주말 피크타임 주의"},
-  {key:"롯데리아[강변점]",  brand:"롯데리아", store:"강변점",   address:"서울시 광진구 강변역로 50",    dong:"구의동", lat:37.5349,lng:127.0944, status:"확인필요",hub:"광진허브", sharedHub:"",          zone:"광진-B", preDeduct:"",  memo:"권역 경계 상점"},
-  {key:"버거킹[홍대점]",    brand:"버거킹",   store:"홍대점",   address:"서울시 마포구 와우산로 94",    dong:"서교동", lat:37.5563,lng:126.9239, status:"가능",    hub:"마포허브", sharedHub:"",          zone:"마포-A", preDeduct:"Y", memo:""},
-  {key:"교촌치킨[강남본점]",brand:"교촌치킨", store:"강남본점", address:"서울시 강남구 봉은사로 114",   dong:"삼성동", lat:37.5096,lng:127.0613, status:"가능",    hub:"강남허브", sharedHub:"강남2허브", zone:"강남-A", preDeduct:"N", memo:""},
-];
+let DB = [];
+
+function parseDBRow(row) {
+  const brand = String(row['브랜드명']||'').trim();
+  const store = String(row['상점명']||'').trim();
+  const addr = String(row['상점주소']||'').trim();
+  const dong = extractDong(addr);
+  return {
+    key: store ? `${brand}[${store}]` : brand,
+    brand, store,
+    address: addr,
+    dong,
+    lat: 0, lng: 0,
+    status: String(row['수행가능답변']||'확인필요').trim(),
+    hub: String(row['메인허브명']||'').trim(),
+    sharedHub: String(row['공유허브명']||'').trim(),
+    preDeductTotal: String(row['총판']||'').trim(),
+    preDeductHub: String(row['허브']||'').trim(),
+    hubOpen: String(row['허브오픈시간']||'').trim(),
+    hubClose: String(row['허브마감시간']||'').trim(),
+    memo: String(row['불가/보류사유']||'').trim(),
+  };
+}
+
+async function loadDBFromSheet(){
+  try{
+    const res = await fetch(SCRIPT_URL+'?action=getDB');
+    const data = await res.json();
+    DB = data.filter(r=>r['브랜드명']||r['상점명']).map(parseDBRow);
+    updateStats();
+    console.log('DB 로드 완료:', DB.length, '개');
+  }catch(e){console.log('DB 로드 실패',e);}
+}
+
+function updateStats(){
+  const total = DB.length;
+  const possible = DB.filter(d=>['가능','수행가능'].includes(d.status)).length;
+  const impossible = DB.filter(d=>['불가','수행불가'].includes(d.status)).length;
+  const check = total - possible - impossible;
+  const tEl=document.getElementById('statTotal');
+  const pEl=document.getElementById('statPossible');
+  const iEl=document.getElementById('statImpossible');
+  const cEl=document.getElementById('statCheck');
+  if(tEl)tEl.textContent=total;
+  if(pEl)pEl.textContent=possible;
+  if(iEl)iEl.textContent=impossible;
+  if(cEl)cEl.textContent=check;
+}
 
 const SCRIPT_URL='https://script.google.com/macros/s/AKfycbwBt4hJMPjXRT2RaKhWyRCVYLg4vO6Bev_8gULP52OhWz6SRPDr3nQLayNulzF8kjsDWA/exec';
 
@@ -446,6 +484,7 @@ function restorePolygonsOnMap(){
 // 페이지 로드 시 - localStorage 먼저, 그다음 시트에서 최신 데이터
 loadFromStorage();
 loadZonesFromSheet();
+loadDBFromSheet();
 
 // ══════════════════════════════
 // 탭
@@ -596,14 +635,30 @@ async function doSearch(){
   wrap.innerHTML='<div style="text-align:center;padding:40px;color:var(--text-dim)">🔍 매칭 중...</div>';
   
   const inputCoord=addr?await getCoordFromAddr(addr):null;
+
+  // 좌표 없는 DB 항목 중 상위 후보만 좌표 변환 (성능 최적화)
   const parsed=parseKey(raw);
-  const scored=DB.map(item=>{
+  const preScored=DB.map(item=>{
     const ns=strSim(parsed.brand,item.brand)*0.6+strSim(parsed.store,item.store)*0.4;
     const inDong=extractDong(addr);
     const dong=(inDong&&item.dong&&inDong===item.dong)?1:0;
+    return{...item,_ns:ns,_dong:dong};
+  }).sort((a,b)=>(b._ns+b._dong)-(a._ns+a._dong)).slice(0,30);
+
+  // 상위 30개만 좌표 변환
+  await Promise.all(preScored.map(async item=>{
+    if((!item.lat||!item.lng)&&item.address){
+      const c=await getCoordFromAddr(item.address);
+      if(c){item.lat=c.lat;item.lng=c.lng;}
+    }
+  }));
+
+  const scored=preScored.map(item=>{
+    const ns=item._ns;
+    const dong=item._dong;
     let dSc=0,km=null;
-    if(inputCoord){km=haversine(inputCoord.lat,inputCoord.lng,item.lat,item.lng);dSc=distScore(km);}
-    const total=ns*0.50+dong*0.25+dSc*0.25;
+    if(inputCoord&&item.lat&&item.lng){km=haversine(inputCoord.lat,inputCoord.lng,item.lat,item.lng);dSc=distScore(km);}
+    const total=ns*0.25+dong*0.25+dSc*0.50;
     return{...item,_km:km?km.toFixed(2):null,score:total,sd:{name:Math.round(ns*100),dong:Math.round(dong*100),dist:Math.round(dSc*100),total:Math.round(total*100)}};
   }).sort((a,b)=>b.score-a.score);
   const best=scored[0];
@@ -635,10 +690,11 @@ function resultHTML(item,others,hasSurcharge){
     </div>
     ${hasSurcharge?`<div class="surcharge-badge">⚡ 할증 구역 포함 — 이 상점은 할증 권역에 위치합니다</div>`:''}
     <div class="info-grid">
-      <div class="itile"><div class="itile-l">권역</div><div class="itile-v c-accent">${item.zone||'—'}</div></div>
       <div class="itile"><div class="itile-l">수행허브</div><div class="itile-v">${item.hub||'—'}</div></div>
       <div class="itile"><div class="itile-l">공유허브</div><div class="itile-v c-dim">${item.sharedHub||'없음'}</div></div>
-      <div class="itile"><div class="itile-l">선차감</div><div class="itile-v ${item.preDeduct==='Y'?'c-green':item.preDeduct==='N'?'c-red':'c-yellow'}">${item.preDeduct==='Y'?'적용':item.preDeduct==='N'?'미적용':'확인필요'}</div></div>
+      <div class="itile"><div class="itile-l">총판 선차감</div><div class="itile-v">${item.preDeductTotal||'—'}</div></div>
+      <div class="itile"><div class="itile-l">허브 선차감</div><div class="itile-v">${item.preDeductHub||'—'}</div></div>
+      ${item.hubOpen||item.hubClose?`<div class="itile"><div class="itile-l">허브 운영시간</div><div class="itile-v">${item.hubOpen||''}${item.hubClose?` ~ ${item.hubClose}`:''}</div></div>`:''}
     </div>
     <div class="itile" style="margin-bottom:14px">
       <div class="itile-l">할증 여부</div>
