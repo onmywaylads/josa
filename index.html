@@ -92,10 +92,10 @@
   .res-addr{font-size:12px;color:var(--text-mid);margin-top:4px;display:flex;align-items:center;gap:5px;flex-wrap:wrap;}
 
   .status-pill{display:inline-flex;align-items:center;gap:5px;padding:5px 12px;border-radius:20px;font-size:12px;font-weight:700;white-space:nowrap;flex-shrink:0;}
-  .status-pill.possible{background:var(--green-light);color:var(--green);}
+  .status-pill.possible{background:#eff6ff;color:var(--accent);}
   .status-pill.impossible{background:var(--red-light);color:var(--red);}
   .status-pill.check{background:#fff7ed;color:var(--orange);}
-  .res-card.possible{border-left:4px solid var(--green);}
+  .res-card.possible{border-left:4px solid var(--accent);}
   .res-card.impossible{border-left:4px solid var(--red);}
   .res-card.check{border-left:4px solid var(--orange);}
   .sdot{width:6px;height:6px;border-radius:50%;background:currentColor;}
@@ -729,8 +729,8 @@ async function doSearch(){
 }
 
 function sc(score){return score>=80?'possible':score>=50?'check':'impossible';}
-function bc(p){return p>=80?'var(--green)':p>=70?'var(--yellow)':p>=50?'var(--orange)':'var(--red)';}
-function statusLabel(score){return score>=80?'수행 가능 ⭕':score>=50?'확인 필요 △':'DB 업데이트 필요 ❌';}
+function bc(p){return p>=80?'var(--accent)':p>=70?'var(--yellow)':p>=50?'var(--orange)':'var(--red)';}
+function statusLabel(score){return score>=80?'수행 가능 O':score>=50?'확인 필요 △':'DB 업데이트 필요 X';}
 
 function resultHTML(item,others,hasSurcharge){
   const d=item.sd;
