@@ -362,10 +362,10 @@ async function loadZonesFromSheet(){
     const data=await res.json();
     hubList=data.hubList||[];
     Object.entries(data.zones||{}).forEach(([k,v])=>{
-      if(!savedZones[k]) savedZones[k]={zonePolygon:null,surPolygon:null,zonePath:[],surPath:[]};
-      // 데이터만 업데이트, 폴리곤 객체는 건드리지 않음
+      if(!savedZones[k]) savedZones[k]={zonePolygon:null,surPolygons:[],zonePath:[],surPaths:[]};
       savedZones[k].zonePath=v.zonePath||[];
-      savedZones[k].surPath=v.surPath||[];
+      // 구버전 surPath 호환
+      savedZones[k].surPaths = v.surPaths || (v.surPath?.length>=3 ? [v.surPath] : []);
     });
     renderHubSelect();
     renderHubMgrList();
@@ -376,7 +376,7 @@ async function saveZonesToSheet(){
   try{
     const zonesData={};
     Object.entries(savedZones).forEach(([k,v])=>{
-      zonesData[k]={zonePath:v.zonePath||[],surPath:v.surPath||[]};
+      zonesData[k]={zonePath:v.zonePath||[],surPaths:v.surPaths||[]};
     });
     await fetch(SCRIPT_URL,{
       method:'POST',
@@ -388,7 +388,7 @@ async function saveZonesToSheet(){
 // localStorage 백업도 유지
 function saveToStorage(){
   try{
-    const data={hubList,zones:Object.fromEntries(Object.entries(savedZones).map(([k,v])=>([k,{zonePath:v.zonePath,surPath:v.surPath}])))};
+    const data={hubList,zones:Object.fromEntries(Object.entries(savedZones).map(([k,v])=>([k,{zonePath:v.zonePath,surPaths:v.surPaths}])))};
     localStorage.setItem('barogo_data',JSON.stringify(data));
   }catch(e){}
 }
@@ -400,7 +400,9 @@ function loadFromStorage(){
     const data=JSON.parse(raw);
     hubList=data.hubList||[];
     Object.entries(data.zones||{}).forEach(([k,v])=>{
-      savedZones[k]={zonePolygon:null,surPolygon:null,zonePath:v.zonePath||[],surPath:v.surPath||[]};
+      // 구버전 surPath 호환
+      const surPaths = v.surPaths || (v.surPath?.length>=3 ? [v.surPath] : []);
+      savedZones[k]={zonePolygon:null,surPolygons:[],zonePath:v.zonePath||[],surPaths};
     });
     renderHubSelect();
     renderHubMgrList();
@@ -417,10 +419,14 @@ function restorePolygonsOnMap(){
       v.zonePolygon=new kakao.maps.Polygon({map,path:v.zonePath.map(p=>new kakao.maps.LatLng(p.lat,p.lng)),strokeWeight:2,strokeColor:hubColor,strokeOpacity:1,fillColor:hubColor,fillOpacity:0.15});
       if(!show) v.zonePolygon.setMap(null);
     }
-    if(v.surPath?.length>=3){
-      v.surPolygon=new kakao.maps.Polygon({map,path:v.surPath.map(p=>new kakao.maps.LatLng(p.lat,p.lng)),strokeWeight:2,strokeColor:'#ea580c',strokeOpacity:1,fillColor:'#ea580c',fillOpacity:0.25});
-      if(!show) v.surPolygon.setMap(null);
-    }
+    v.surPolygons=[];
+    (v.surPaths||[]).forEach(sp=>{
+      if(sp?.length>=3){
+        const poly=new kakao.maps.Polygon({map,path:sp.map(p=>new kakao.maps.LatLng(p.lat,p.lng)),strokeWeight:2,strokeColor:'#ea580c',strokeOpacity:1,fillColor:'#ea580c',fillOpacity:0.25});
+        if(!show) poly.setMap(null);
+        v.surPolygons.push(poly);
+      }
+    });
   });
 }
 
@@ -463,7 +469,7 @@ function deleteHub(name){
   hubList=hubList.filter(h=>h.name!==name);
   if(savedZones[name]){
     if(savedZones[name].zonePolygon)savedZones[name].zonePolygon.setMap(null);
-    if(savedZones[name].surPolygon)savedZones[name].surPolygon.setMap(null);
+    (savedZones[name].surPolygons||[]).forEach(p=>p.setMap(null));
     delete savedZones[name];
   }
   renderHubSelect();
@@ -493,18 +499,21 @@ function toggleHubVisible(name) {
   const z = savedZones[name];
   if(!z) return;
   const show = hubVisible[name];
-
-  // 폴리곤 객체 없으면 새로 생성
   if(show) {
     if(!z.zonePolygon && z.zonePath?.length>=3) {
       z.zonePolygon = new kakao.maps.Polygon({map, path:z.zonePath.map(p=>new kakao.maps.LatLng(p.lat,p.lng)), strokeWeight:2,strokeColor:'#2563eb',strokeOpacity:1,fillColor:'#2563eb',fillOpacity:0.15});
     } else if(z.zonePolygon) z.zonePolygon.setMap(map);
-    if(!z.surPolygon && z.surPath?.length>=3) {
-      z.surPolygon = new kakao.maps.Polygon({map, path:z.surPath.map(p=>new kakao.maps.LatLng(p.lat,p.lng)), strokeWeight:2,strokeColor:'#ea580c',strokeOpacity:1,fillColor:'#ea580c',fillOpacity:0.25});
-    } else if(z.surPolygon) z.surPolygon.setMap(map);
+    // 할증 구역 여러 개
+    if(!z.surPolygons) z.surPolygons=[];
+    (z.surPaths||[]).forEach((sp,i)=>{
+      if(z.surPolygons[i]) z.surPolygons[i].setMap(map);
+      else if(sp?.length>=3){
+        z.surPolygons[i]=new kakao.maps.Polygon({map, path:sp.map(p=>new kakao.maps.LatLng(p.lat,p.lng)), strokeWeight:2,strokeColor:'#ea580c',strokeOpacity:1,fillColor:'#ea580c',fillOpacity:0.25});
+      }
+    });
   } else {
     if(z.zonePolygon) z.zonePolygon.setMap(null);
-    if(z.surPolygon) z.surPolygon.setMap(null);
+    (z.surPolygons||[]).forEach(p=>p.setMap(null));
   }
 }
 
@@ -513,16 +522,20 @@ function renderHubMgrList(){
   if(!hubList.length){panel.innerHTML='<div style="font-size:12px;color:var(--text-dim)">추가된 허브 없음</div>';return;}
   panel.innerHTML=hubList.map(h=>{
     const visible = hubVisible[h.name] !== false;
+    const surCount = (savedZones[h.name]?.surPaths||[]).length;
+    const surBadge = surCount>0 ? `<span style="font-size:10px;color:#ea580c;background:#fff7ed;border:1px solid #fed7aa;border-radius:4px;padding:1px 6px;flex-shrink:0">할증 ${surCount}개</span>` : '';
     return `
-    <div class="hub-mgr-item">
-      <div class="hub-mgr-left">
-        <label style="display:flex;align-items:center;gap:6px;cursor:pointer">
+    <div class="hub-mgr-item" style="flex-direction:column;align-items:stretch;gap:4px">
+      <div style="display:flex;align-items:center;justify-content:space-between">
+        <label style="display:flex;align-items:center;gap:6px;cursor:pointer;flex:1;min-width:0">
           <input type="checkbox" ${visible?'checked':''} onchange="toggleHubVisible('${h.name}')"
-            style="width:15px;height:15px;accent-color:#2563eb;cursor:pointer">
+            style="width:15px;height:15px;accent-color:#2563eb;cursor:pointer;flex-shrink:0">
           <div class="hub-mgr-name">${h.name}</div>
+          ${surBadge}
         </label>
+        <button class="btn btn-sm btn-danger" style="font-size:11px;padding:3px 8px;flex-shrink:0" onclick="deleteHub('${h.name}')">삭제</button>
       </div>
-      <button class="btn btn-sm btn-danger" style="font-size:11px;padding:3px 8px;flex-shrink:0" onclick="deleteHub('${h.name}')">삭제</button>
+      ${surCount>0 ? `<div style="padding-left:21px;display:flex;flex-wrap:wrap;gap:4px">${(savedZones[h.name].surPaths||[]).map((_,i)=>`<button onclick="deleteSurPath('${h.name}',${i})" style="font-size:10px;padding:2px 7px;border:1px solid #fca5a5;border-radius:4px;background:#fff;color:#dc2626;cursor:pointer">⚡ 할증${i+1} 삭제</button>`).join('')}</div>` : ''}
     </div>`;
   }).join('');
 }
@@ -580,8 +593,8 @@ async function doSearch(){
   const best=scored[0];
   const others=scored.slice(1,4).filter(x=>x.score>0.05);
   let hasSurcharge=false;
-  if(inputCoord&&best.hub&&savedZones[best.hub]?.surPath?.length>=3){
-    hasSurcharge=pointInPolygon(inputCoord.lat,inputCoord.lng,savedZones[best.hub].surPath);
+  if(inputCoord&&best.hub&&savedZones[best.hub]?.surPaths?.length){
+    hasSurcharge=(savedZones[best.hub].surPaths||[]).some(sp=>sp?.length>=3&&pointInPolygon(inputCoord.lat,inputCoord.lng,sp));
   }
   wrap.innerHTML=best.score<0.12?noMatchHTML(raw):resultHTML(best,others,hasSurcharge);
   requestAnimationFrame(()=>requestAnimationFrame(()=>{
@@ -826,17 +839,21 @@ async function renderInlineMap(item, hasSurcharge) {
     }
   }
 
-  // 3. 할증 구역 ∩ 2km원 교집합 → 빨간색
-  if(item.hub && savedZones[item.hub]?.surPath?.length>=3){
-    const inter = turfIntersect(savedZones[item.hub].surPath, item.lat, item.lng, 2.0);
-    if(inter){
-      const poly = new kakao.maps.Polygon({
-        map:inlineMap, path: inter,
-        strokeWeight:2, strokeColor:'#dc2626', strokeOpacity:1,
-        fillColor:'#dc2626', fillOpacity:0.4
-      });
-      inlineOverlays.push(poly);
-    }
+  // 3. 할증 구역들 ∩ 2km원 교집합 → 빨간색
+  if(item.hub && savedZones[item.hub]?.surPaths?.length){
+    (savedZones[item.hub].surPaths||[]).forEach(sp=>{
+      if(sp?.length>=3){
+        const inter = turfIntersect(sp, item.lat, item.lng, 2.0);
+        if(inter){
+          const poly = new kakao.maps.Polygon({
+            map:inlineMap, path: inter,
+            strokeWeight:2, strokeColor:'#dc2626', strokeOpacity:1,
+            fillColor:'#dc2626', fillOpacity:0.4
+          });
+          inlineOverlays.push(poly);
+        }
+      }
+    });
   }
 
   // 4. 마커
@@ -883,15 +900,19 @@ async function showZoneMap(key, addr, hub, hasSurcharge) {
   });
   zoneMapOverlays.push(circle);
 
-  // 2. 할증 구역 (있을 때만, 2km 원 위에 겹쳐서 표시)
-  if (hub && savedZones[hub]?.surPath?.length) {
-    const surPoly = new kakao.maps.Polygon({
-      map:zoneMap,
-      path: savedZones[hub].surPath.map(p=>new kakao.maps.LatLng(p.lat,p.lng)),
-      strokeWeight:2, strokeColor:'#ea580c', strokeOpacity:1,
-      fillColor:'#ea580c', fillOpacity:0.3
+  // 2. 할증 구역들 (있을 때만)
+  if (hub && savedZones[hub]?.surPaths?.length){
+    (savedZones[hub].surPaths||[]).forEach(sp=>{
+      if(sp?.length>=3){
+        const surPoly = new kakao.maps.Polygon({
+          map:zoneMap,
+          path: sp.map(p=>new kakao.maps.LatLng(p.lat,p.lng)),
+          strokeWeight:2, strokeColor:'#ea580c', strokeOpacity:1,
+          fillColor:'#ea580c', fillOpacity:0.3
+        });
+        zoneMapOverlays.push(surPoly);
+      }
     });
-    zoneMapOverlays.push(surPoly);
   }
 
   // 3. 상점 마커
@@ -978,14 +999,20 @@ function saveZone(){
   const hub=document.getElementById('hubSelect').value;
   if(!hub){alert('허브를 선택해주세요!');return;}
   if(currentPath.length<3){alert('최소 3개 이상 점을 찍어주세요!');return;}
-  if(!savedZones[hub])savedZones[hub]={zonePolygon:null,surPolygon:null,zonePath:[],surPath:[]};
+  if(!savedZones[hub])savedZones[hub]={zonePolygon:null,surPolygons:[],zonePath:[],surPaths:[]};
   const color=currentLayer==='surcharge'?'#ea580c':getHubColor(hub);
-  if(currentLayer==='zone'&&savedZones[hub].zonePolygon)savedZones[hub].zonePolygon.setMap(null);
-  if(currentLayer==='surcharge'&&savedZones[hub].surPolygon)savedZones[hub].surPolygon.setMap(null);
   const polygon=new kakao.maps.Polygon({map,path:currentPath,strokeWeight:2,strokeColor:color,strokeOpacity:1,fillColor:color,fillOpacity:currentLayer==='surcharge'?0.25:0.15});
   const pathData=currentPath.map(p=>({lat:p.getLat(),lng:p.getLng()}));
-  if(currentLayer==='zone'){savedZones[hub].zonePolygon=polygon;savedZones[hub].zonePath=pathData;}
-  else{savedZones[hub].surPolygon=polygon;savedZones[hub].surPath=pathData;}
+  if(currentLayer==='zone'){
+    if(savedZones[hub].zonePolygon)savedZones[hub].zonePolygon.setMap(null);
+    savedZones[hub].zonePolygon=polygon;
+    savedZones[hub].zonePath=pathData;
+  } else {
+    if(!savedZones[hub].surPolygons) savedZones[hub].surPolygons=[];
+    if(!savedZones[hub].surPaths) savedZones[hub].surPaths=[];
+    savedZones[hub].surPolygons.push(polygon);
+    savedZones[hub].surPaths.push(pathData);
+  }
   clearCurrent();isDrawing=false;
   document.getElementById('drawToggle').className='draw-btn';
   document.getElementById('drawToggle').textContent='✏️ 그리기 시작';
@@ -995,7 +1022,18 @@ function saveZone(){
   saveZonesToSheet();
 }
 
-function clearCurrent(){
+function deleteSurPath(name, idx){
+  const z = savedZones[name];
+  if(!z) return;
+  if(z.surPolygons?.[idx]) z.surPolygons[idx].setMap(null);
+  z.surPolygons = (z.surPolygons||[]).filter((_,i)=>i!==idx);
+  z.surPaths = (z.surPaths||[]).filter((_,i)=>i!==idx);
+  renderHubMgrList();
+  saveToStorage();
+  saveZonesToSheet();
+}
+
+
   if(tempPolyline)tempPolyline.setMap(null);
   if(tempPolygon)tempPolygon.setMap(null);
   currentPath=[];tempPolyline=null;tempPolygon=null;isDrawing=false;
