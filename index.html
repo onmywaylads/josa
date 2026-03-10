@@ -500,20 +500,18 @@ function toggleHubVisible(name) {
   if(!z) return;
   const show = hubVisible[name];
   if(show) {
+    // 기본 권역
     if(!z.zonePolygon && z.zonePath?.length>=3) {
       z.zonePolygon = new kakao.maps.Polygon({map, path:z.zonePath.map(p=>new kakao.maps.LatLng(p.lat,p.lng)), strokeWeight:2,strokeColor:'#2563eb',strokeOpacity:1,fillColor:'#2563eb',fillOpacity:0.15});
     } else if(z.zonePolygon) z.zonePolygon.setMap(map);
-    // 할증 구역 여러 개
-    if(!z.surPolygons) z.surPolygons=[];
-    (z.surPaths||[]).forEach((sp,i)=>{
-      if(z.surPolygons[i]) z.surPolygons[i].setMap(map);
-      else if(sp?.length>=3){
-        z.surPolygons[i]=new kakao.maps.Polygon({map, path:sp.map(p=>new kakao.maps.LatLng(p.lat,p.lng)), strokeWeight:2,strokeColor:'#ea580c',strokeOpacity:1,fillColor:'#ea580c',fillOpacity:0.25});
-      }
-    });
+    // 할증 구역 - 항상 새로 생성해서 확실히 표시
+    (z.surPolygons||[]).forEach(p=>{try{p.setMap(null);}catch(e){}});
+    z.surPolygons = (z.surPaths||[]).filter(sp=>sp?.length>=3).map(sp=>
+      new kakao.maps.Polygon({map, path:sp.map(p=>new kakao.maps.LatLng(p.lat,p.lng)), strokeWeight:2,strokeColor:'#ea580c',strokeOpacity:1,fillColor:'#ea580c',fillOpacity:0.25})
+    );
   } else {
     if(z.zonePolygon) z.zonePolygon.setMap(null);
-    (z.surPolygons||[]).forEach(p=>p.setMap(null));
+    (z.surPolygons||[]).forEach(p=>{try{p.setMap(null);}catch(e){}});
   }
 }
 
