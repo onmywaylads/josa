@@ -670,14 +670,28 @@ async function doSearch(){
   }).sort((a,b)=>b.score-a.score);
   const best=scored[0];
   const others=scored.slice(1,4).filter(x=>x.score>0.05);
+
+  // 입력한 상점명/주소/좌표로 덮어쓰기
+  const displayItem = {
+    ...best,
+    key: raw,
+    brand: parsed.brand,
+    store: parsed.store,
+    address: addr || best.address,
+    dong: extractDong(addr) || best.dong,
+    lat: inputCoord?.lat || best.lat,
+    lng: inputCoord?.lng || best.lng,
+    _km: null,
+  };
+
   let hasSurcharge=false;
   if(inputCoord&&best.hub&&savedZones[best.hub]?.surPaths?.length){
     hasSurcharge=(savedZones[best.hub].surPaths||[]).some(sp=>sp?.length>=3&&pointInPolygon(inputCoord.lat,inputCoord.lng,sp));
   }
-  wrap.innerHTML=best.score<0.12?noMatchHTML(raw):resultHTML(best,others,hasSurcharge);
+  wrap.innerHTML=best.score<0.12?noMatchHTML(raw):resultHTML(displayItem,others,hasSurcharge);
   requestAnimationFrame(()=>requestAnimationFrame(()=>{
     document.querySelectorAll('.sfill[data-w]').forEach(el=>{el.style.width=el.dataset.w+'%';});
-    if(best.score>=0.12) renderInlineMap(best, hasSurcharge);
+    if(best.score>=0.12) renderInlineMap(displayItem, hasSurcharge);
   }));
 }
 
