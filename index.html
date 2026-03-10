@@ -644,8 +644,12 @@ function getCoordFromAddr(addr){
       gc.addressSearch(addr,(res,st)=>{
         if(st===kakao.maps.services.Status.OK){
           const r=res[0];
-          // 법정동 추출: road_address의 region_3depth_name 또는 address의 region_3depth_name
-          const dong = (r.road_address?.region_3depth_name||r.address?.region_3depth_name||'');
+          // 카카오 address 객체에서 동 추출 (지번주소 기준)
+          const addrObj = r.address;
+          const roadObj = r.road_address;
+          // region_3depth_name = 읍/면/동, region_3depth_h_name = 행정동
+          const dong = addrObj?.region_3depth_name || roadObj?.region_3depth_name || '';
+          console.log('dong추출:', addr, '->', dong, '|', JSON.stringify(addrObj));
           resolve({lat:parseFloat(r.y),lng:parseFloat(r.x),dong});
         }
         else resolve(guessCoord(addr));
@@ -677,11 +681,10 @@ async function doSearch(){
   const parsed=parseKey(raw);
   const preScored=DB.map(item=>{
     const ns=strSim(parsed.store, item.store);
-    const dong=(inDong&&item.dong&&inDong===item.dong)?1:0;
-    return{...item,_ns:ns,_dong:dong};
-  }).sort((a,b)=>(b._ns+b._dong)-(a._ns+a._dong)).slice(0,30);
+    return{...item,_ns:ns};
+  }).sort((a,b)=>b._ns-a._ns).slice(0,30);
 
-  // 상위 30개만 좌표 변환
+  // 상위 30개 좌표+동 변환
   await Promise.all(preScored.map(async item=>{
     if((!item.lat||!item.lng)&&item.address){
       const c=await getCoordFromAddr(item.address);
@@ -689,13 +692,14 @@ async function doSearch(){
     }
   }));
 
+  // 좌표 변환 후 법정동 비교
   const scored=preScored.map(item=>{
     const ns=item._ns;
-    const dong=item._dong;
+    const dong=(inDong&&item.dong&&inDong===item.dong)?1:0;
     let dSc=0,km=null;
     if(inputCoord&&item.lat&&item.lng){km=haversine(inputCoord.lat,inputCoord.lng,item.lat,item.lng);dSc=distScore(km);}
     const total=ns*0.25+dong*0.25+dSc*0.50;
-    return{...item,_km:km?km.toFixed(2):null,score:total,sd:{name:Math.round(ns*100),dong:Math.round(dong*100),dist:Math.round(dSc*100),total:Math.round(total*100)}};
+    return{...item,_km:km?km.toFixed(2):null,_dong:dong,score:total,sd:{name:Math.round(ns*100),dong:Math.round(dong*100),dist:Math.round(dSc*100),total:Math.round(total*100)}};
   }).sort((a,b)=>b.score-a.score);
   const best=scored[0];
   const others=scored.slice(1,4).filter(x=>x.score>0.05);
