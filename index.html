@@ -682,7 +682,8 @@ function pointInPolygon(lat,lng,path){
 async function doSearch(){
   const raw=document.getElementById('storeInput').value.trim();
   const addr=document.getElementById('addrInput').value.trim();
-  if(!raw){alert('상점명을 입력해주세요.\n형식: 브랜드명[상점명]');return;}
+  if(!raw){alert('상점명을 입력해주세요.');return;}
+  if(!addr){alert('주소를 입력해주세요.');return;}
   const wrap=document.getElementById('resultWrap');
   wrap.innerHTML='<div style="text-align:center;padding:40px;color:var(--text-dim)">🔍 매칭 중...</div>';
   
