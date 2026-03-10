@@ -359,8 +359,8 @@ function parseDBRow(row) {
     status: String(row['수행가능답변']||'확인필요').trim(),
     hub: String(row['메인허브명']||'').trim(),
     sharedHub: String(row['공유허브명']||'').trim(),
-    preDeductTotal: String(row['총판']||'').trim(),
-    preDeductHub: String(row['허브']||'').trim(),
+    preDeductTotal: row['총판']!==undefined&&row['총판']!=='' ? String(row['총판']).trim() : '',
+    preDeductHub: row['허브']!==undefined&&row['허브']!=='' ? String(row['허브']).trim() : '',
     hubOpen: String(row['허브오픈시간']||'').trim(),
     hubClose: String(row['허브마감시간']||'').trim(),
     memo: String(row['불가/보류사유']||'').trim(),
@@ -741,14 +741,10 @@ function resultHTML(item,others,hasSurcharge){
     ${hasSurcharge?`<div class="surcharge-badge">⚡ 할증 구역 포함 — 이 상점은 할증 권역에 위치합니다</div>`:''}
     <div class="info-grid">
       <div class="itile"><div class="itile-l">수행허브</div><div class="itile-v">${item.hub||'—'}</div></div>
-      <div class="itile"><div class="itile-l">공유허브</div><div class="itile-v c-dim">${item.sharedHub||'없음'}</div></div>
-      <div class="itile"><div class="itile-l">총판 선차감</div><div class="itile-v">${item.preDeductTotal||'—'}</div></div>
-      <div class="itile"><div class="itile-l">허브 선차감</div><div class="itile-v">${item.preDeductHub||'—'}</div></div>
+      <div class="itile"><div class="itile-l">공유허브</div><div class="itile-v">${item.sharedHub||'없음'}</div></div>
+      <div class="itile"><div class="itile-l">총판 선차감</div><div class="itile-v">${item.preDeductTotal!==''?item.preDeductTotal:'—'}</div></div>
+      <div class="itile"><div class="itile-l">허브 선차감</div><div class="itile-v">${item.preDeductHub!==''?item.preDeductHub:'—'}</div></div>
       ${item.hubOpen||item.hubClose?`<div class="itile"><div class="itile-l">허브 운영시간</div><div class="itile-v">${item.hubOpen||''}${item.hubClose?` ~ ${item.hubClose}`:''}</div></div>`:''}
-    </div>
-    <div class="itile" style="margin-bottom:14px">
-      <div class="itile-l">할증 여부</div>
-      <div class="itile-v ${hasSurcharge?'c-orange':'c-dim'}">${hasSurcharge?'⚡ 할증 구역':'해당 없음'}</div>
     </div>
     ${item.memo?`<div class="memo">⚠️ <span>${item.memo}</span></div>`:''}
     <div class="score-sec">
