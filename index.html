@@ -685,7 +685,7 @@ async function doSearch(){
   await Promise.all(preScored.map(async item=>{
     if((!item.lat||!item.lng)&&item.address){
       const c=await getCoordFromAddr(item.address);
-      if(c){item.lat=c.lat;item.lng=c.lng;}
+      if(c){item.lat=c.lat;item.lng=c.lng;item.dong=c.dong||item.dong;}
     }
   }));
 
