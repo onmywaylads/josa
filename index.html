@@ -634,7 +634,19 @@ function strSim(a,b){
   return Math.min(0.95, charScore*0.6+commonBonus);
 }
 function haversine(la1,lo1,la2,lo2){const R=6371,d=Math.PI/180,dla=(la2-la1)*d,dlo=(lo2-lo1)*d,av=Math.sin(dla/2)**2+Math.cos(la1*d)*Math.cos(la2*d)*Math.sin(dlo/2)**2;return R*2*Math.atan2(Math.sqrt(av),Math.sqrt(1-av));}
-function distScore(km){if(km<0.3)return 1;if(km<1)return 0.85-(km-0.3)*0.2;if(km<3)return 0.7-(km-1)*0.3;if(km<5)return 0.1;return 0;}
+function distScore(km){
+  if(km<=0.1)return 1;
+  if(km<=0.2)return 0.9;
+  if(km<=0.3)return 0.8;
+  if(km<=0.4)return 0.7;
+  if(km<=0.5)return 0.6;
+  if(km<=0.7)return 0.5;
+  if(km<=1.0)return 0.4;
+  if(km<=1.5)return 0.3;
+  if(km<=2.0)return 0.2;
+  if(km<=3.0)return 0.1;
+  return 0;
+}
 function guessCoord(addr){const t=[["강남구",37.5172,127.0473],["서초구",37.4837,127.0324],["송파구",37.5145,127.1059],["마포구",37.5663,126.9014],["서대문구",37.5791,126.9368],["광진구",37.5384,127.0822],["용산구",37.5311,126.981],["성동구",37.5634,127.0369]];for(const[k,la,lo]of t){if(addr.includes(k))return{lat:la,lng:lo};}return null;}
 
 function getCoordFromAddr(addr){
@@ -698,7 +710,7 @@ async function doSearch(){
     const dong=(inDong&&item.dong&&inDong===item.dong)?1:0;
     let dSc=0,km=null;
     if(inputCoord&&item.lat&&item.lng){km=haversine(inputCoord.lat,inputCoord.lng,item.lat,item.lng);dSc=distScore(km);}
-    const total=ns*0.25+dong*0.25+dSc*0.50;
+    const total=ns*0.10+dong*0.20+dSc*0.70;
     return{...item,_km:km?km.toFixed(2):null,_dong:dong,score:total,sd:{name:Math.round(ns*100),dong:Math.round(dong*100),dist:Math.round(dSc*100),total:Math.round(total*100)}};
   }).sort((a,b)=>b.score-a.score);
   const best=scored[0];
