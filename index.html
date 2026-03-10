@@ -608,7 +608,7 @@ function renderHubMgrList(){
 function parseKey(raw){const m=raw.match(/^(.+?)\[(.+?)\]$/);return m?{brand:m[1].trim(),store:m[2].trim()}:{brand:raw.trim(),store:""};}
 function extractDong(a){const m=(a||"").match(/([가-힣]+동|[가-힣]+가)\b/);return m?m[1]:"";}
 function norm(s){return(s||"").replace(/\s/g,"").toLowerCase();}
-function strSim(a,b){a=norm(a);b=norm(b);if(!a||!b)return 0;if(a===b)return 1;if(a.includes(b)||b.includes(a))return 0.9;let h=0;for(const c of a){if(b.includes(c))h++;}return h/Math.max(a.length,b.length);}
+function strSim(a,b){a=norm(a);b=norm(b);if(!a||!b)return 0;if(a===b)return 1;if(a.includes(b)&&b.length/a.length>0.7)return 0.9;if(b.includes(a)&&a.length/b.length>0.7)return 0.9;let h=0;for(const c of a){if(b.includes(c))h++;}return h/Math.max(a.length,b.length)*0.7;}
 function haversine(la1,lo1,la2,lo2){const R=6371,d=Math.PI/180,dla=(la2-la1)*d,dlo=(lo2-lo1)*d,av=Math.sin(dla/2)**2+Math.cos(la1*d)*Math.cos(la2*d)*Math.sin(dlo/2)**2;return R*2*Math.atan2(Math.sqrt(av),Math.sqrt(1-av));}
 function distScore(km){if(km<0.3)return 1;if(km<1)return 0.85-(km-0.3)*0.2;if(km<3)return 0.7-(km-1)*0.3;if(km<5)return 0.1;return 0;}
 function guessCoord(addr){const t=[["강남구",37.5172,127.0473],["서초구",37.4837,127.0324],["송파구",37.5145,127.1059],["마포구",37.5663,126.9014],["서대문구",37.5791,126.9368],["광진구",37.5384,127.0822],["용산구",37.5311,126.981],["성동구",37.5634,127.0369]];for(const[k,la,lo]of t){if(addr.includes(k))return{lat:la,lng:lo};}return null;}
@@ -618,7 +618,12 @@ function getCoordFromAddr(addr){
     try{
       const gc=new kakao.maps.services.Geocoder();
       gc.addressSearch(addr,(res,st)=>{
-        if(st===kakao.maps.services.Status.OK)resolve({lat:parseFloat(res[0].y),lng:parseFloat(res[0].x)});
+        if(st===kakao.maps.services.Status.OK){
+          const r=res[0];
+          // 법정동 추출: road_address의 region_3depth_name 또는 address의 region_3depth_name
+          const dong = (r.road_address?.region_3depth_name||r.address?.region_3depth_name||'');
+          resolve({lat:parseFloat(r.y),lng:parseFloat(r.x),dong});
+        }
         else resolve(guessCoord(addr));
       });
     }catch(e){resolve(guessCoord(addr));}
@@ -645,9 +650,9 @@ async function doSearch(){
 
   // 좌표 없는 DB 항목 중 상위 후보만 좌표 변환 (성능 최적화)
   const parsed=parseKey(raw);
+  const inDong = extractDong(addr) || inputCoord?.dong || '';
   const preScored=DB.map(item=>{
-    const ns=strSim(parsed.brand,item.brand)*0.6+strSim(parsed.store,item.store)*0.4;
-    const inDong=extractDong(addr);
+    const ns=strSim(parsed.store, item.store);
     const dong=(inDong&&item.dong&&inDong===item.dong)?1:0;
     return{...item,_ns:ns,_dong:dong};
   }).sort((a,b)=>(b._ns+b._dong)-(a._ns+a._dong)).slice(0,30);
@@ -678,7 +683,7 @@ async function doSearch(){
     brand: parsed.brand,
     store: parsed.store,
     address: addr || best.address,
-    dong: extractDong(addr) || best.dong,
+    dong: extractDong(addr) || inputCoord?.dong || '',
     lat: inputCoord?.lat || best.lat,
     lng: inputCoord?.lng || best.lng,
     _km: null,
