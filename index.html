@@ -821,8 +821,8 @@ async function renderInlineMap(item, hasSurcharge) {
   // 1. 2km 원 (연한 회색 배경)
   const circle = new kakao.maps.Circle({
     map:inlineMap, center, radius:2000,
-    strokeWeight:2, strokeColor:'#94a3b8', strokeOpacity:0.6, strokeStyle:'dashed',
-    fillColor:'#f1f5f9', fillOpacity:0.5
+    strokeWeight:3, strokeColor:'#2563eb', strokeOpacity:0.9, strokeStyle:'dashed',
+    fillColor:'#eff6ff', fillOpacity:0.15
   });
   inlineOverlays.push(circle);
 
