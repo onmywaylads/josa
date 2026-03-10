@@ -86,9 +86,6 @@
   @keyframes fadeUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
 
   .res-card{background:var(--white);border:1px solid var(--border);border-radius:14px;padding:20px;margin-bottom:12px;box-shadow:var(--shadow);}
-  .res-card.possible{border-left:4px solid var(--accent);}
-  .res-card.impossible{border-left:4px solid var(--accent);}
-  .res-card.check{border-left:4px solid var(--accent);}
 
   .res-top{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:16px;}
   .res-name{font-size:18px;font-weight:900;}
@@ -97,7 +94,10 @@
   .status-pill{display:inline-flex;align-items:center;gap:5px;padding:5px 12px;border-radius:20px;font-size:12px;font-weight:700;white-space:nowrap;flex-shrink:0;}
   .status-pill.possible{background:var(--green-light);color:var(--green);}
   .status-pill.impossible{background:var(--red-light);color:var(--red);}
-  .status-pill.check{background:var(--yellow-light);color:var(--yellow);}
+  .status-pill.check{background:#fff7ed;color:var(--orange);}
+  .res-card.possible{border-left:4px solid var(--green);}
+  .res-card.impossible{border-left:4px solid var(--red);}
+  .res-card.check{border-left:4px solid var(--orange);}
   .sdot{width:6px;height:6px;border-radius:50%;background:currentColor;}
 
   .info-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:14px;}
@@ -728,19 +728,20 @@ async function doSearch(){
   }));
 }
 
-function sc(s){return s==='가능'?'possible':s==='불가'?'impossible':'check';}
-function bc(p){return p>=70?'var(--green)':p>=40?'var(--accent)':p>0?'var(--yellow)':'var(--text-dim)';}
+function sc(score){return score>=80?'possible':score>=50?'check':'impossible';}
+function bc(p){return p>=80?'var(--green)':p>=70?'var(--yellow)':p>=50?'var(--orange)':'var(--red)';}
+function statusLabel(score){return score>=80?'수행 가능 ⭕':score>=50?'확인 필요 △':'DB 업데이트 필요 ❌';}
 
 function resultHTML(item,others,hasSurcharge){
   const d=item.sd;
   return `
-  <div class="res-card ${sc(item.status)}">
+  <div class="res-card ${sc(d.total)}">
     <div class="res-top">
       <div>
         <div class="res-name"><span style="color:var(--text)">${item.brand}</span><span style="color:var(--text-dim)">[</span><span style="color:var(--accent)">${item.store}</span><span style="color:var(--text-dim)">]</span></div>
         <div class="res-addr">📍 ${item.address}${item.dong?`<span style="background:#d1fae5;color:var(--green);font-size:10px;padding:1px 7px;border-radius:4px">${item.dong}</span>`:''}${item._km?`<span>· ${item._km}km</span>`:''}</div>
       </div>
-      <div class="status-pill ${sc(item.status)}">${item.status==='가능'||item.status==='수행가능'?'매칭 ⭕':item.status==='불가'||item.status==='수행불가'?'매칭 ❌':'확인 필요 🔺'}</div>
+      <div class="status-pill ${sc(d.total)}">${statusLabel(d.total)}</div>
     </div>
     ${hasSurcharge?`<div class="surcharge-badge">⚡ 할증 구역 포함 — 이 상점은 할증 권역에 위치합니다</div>`:''}
     <div class="info-grid">
