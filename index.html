@@ -505,7 +505,23 @@ async function apiMatch(raw, addr) {
   const out = document.getElementById('apiOut');
   out.textContent = '매칭 중...';
 
-  const inputCoord = await getCoordFromAddr(addr);
+  // 카카오 REST API로 좌표 변환 (SDK 대신)
+  async function geocodeREST(address) {
+    try {
+      const res = await fetch("https://dapi.kakao.com/v2/local/search/address.json?query=" + encodeURIComponent(address), {
+        headers: { "Authorization": "KakaoAK 4e2ae5c258e8d075c16cd55ba0472b84" }
+      });
+      const data = await res.json();
+      if (data.documents && data.documents.length > 0) {
+        const d = data.documents[0];
+        const dong = d.address?.region_3depth_name || d.road_address?.region_3depth_name || "";
+        return { lat: parseFloat(d.y), lng: parseFloat(d.x), dong };
+      }
+    } catch(e) {}
+    return null;
+  }
+
+  const inputCoord = await geocodeREST(addr);
   const inDong = inputCoord?.dong || extractDong(addr) || '';
   const parsed = parseKey(raw);
 
@@ -516,7 +532,7 @@ async function apiMatch(raw, addr) {
 
   await Promise.all(preScored.map(async item => {
     if ((!item.lat || !item.lng) && item.address) {
-      const c = await getCoordFromAddr(item.address);
+      const c = await geocodeREST(item.address);
       if (c) { item.lat = c.lat; item.lng = c.lng; item.dong = c.dong || item.dong; }
     }
   }));
