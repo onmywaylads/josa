@@ -491,7 +491,80 @@ function restorePolygonsOnMap(){
 // 페이지 로드 시 - localStorage 먼저, 그다음 시트에서 최신 데이터
 loadFromStorage();
 loadZonesFromSheet();
-loadDBFromSheet();
+loadDBFromSheet().then(() => {
+  const params = new URLSearchParams(window.location.search);
+  if (params.get('api') === '1') {
+    const store = params.get('store') || '';
+    const address = params.get('address') || '';
+    if (store && address) apiMatch(store, address);
+  }
+});
+
+async function apiMatch(raw, addr) {
+  document.body.innerHTML = '<pre id="apiOut" style="font-family:monospace;padding:20px;white-space:pre-wrap;word-break:break-all"></pre>';
+  const out = document.getElementById('apiOut');
+  out.textContent = '매칭 중...';
+
+  const inputCoord = await getCoordFromAddr(addr);
+  const inDong = inputCoord?.dong || extractDong(addr) || '';
+  const parsed = parseKey(raw);
+
+  const preScored = DB.map(item => {
+    const ns = strSim(parsed.store, item.store);
+    return {...item, _ns: ns};
+  }).sort((a,b) => b._ns - a._ns).slice(0, 30);
+
+  await Promise.all(preScored.map(async item => {
+    if ((!item.lat || !item.lng) && item.address) {
+      const c = await getCoordFromAddr(item.address);
+      if (c) { item.lat = c.lat; item.lng = c.lng; item.dong = c.dong || item.dong; }
+    }
+  }));
+
+  const scored = preScored.map(item => {
+    const ns = item._ns;
+    let dSc = 0, km = null;
+    if (inputCoord && item.lat && item.lng) {
+      km = haversine(inputCoord.lat, inputCoord.lng, item.lat, item.lng);
+      dSc = distScore(km);
+    }
+    const dong = dongScore(inDong, item.dong, km, addr, item.address);
+    const total = Math.min(1, ns * 0.10 + dong * 0.20 + dSc * 0.70);
+    return {
+      ...item,
+      _km: km ? km.toFixed(2) : null,
+      score: Math.round(total * 100),
+      sd: {name: Math.round(ns*100), dong: Math.round(dong*100), dist: Math.round(dSc*100), total: Math.round(total*100)}
+    };
+  }).sort((a,b) => b.score - a.score);
+
+  const best = scored[0];
+  const hasSurcharge = inputCoord && best?.hub && savedZones[best.hub]?.surPaths?.length
+    ? (savedZones[best.hub].surPaths||[]).some(sp => sp?.length>=3 && pointInPolygon(inputCoord.lat, inputCoord.lng, sp))
+    : false;
+
+  const result = {
+    input: { store: raw, address: addr, lat: inputCoord?.lat||0, lng: inputCoord?.lng||0 },
+    best: best ? {
+      storeName: best.key,
+      hub: best.hub || '',
+      sharedHub: best.sharedHub || '',
+      preDeductTotal: best.preDeductTotal || '',
+      preDeductHub: best.preDeductHub || '',
+      hubOpen: best.hubOpen || '',
+      hubClose: best.hubClose || '',
+      status: best.status || '',
+      memo: best.memo || '',
+      hasSurcharge,
+      score: best.score,
+      km: best._km,
+      sd: best.sd
+    } : null,
+    candidates: scored.slice(0,3).map(x => ({storeName: x.key, hub: x.hub, score: x.score, km: x._km}))
+  };
+
+  out.textContent = JSON.stringify(result, null, 2);
+}
 
 // ══════════════════════════════
 // 탭
