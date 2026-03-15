@@ -493,10 +493,14 @@ loadFromStorage();
 loadZonesFromSheet();
 loadDBFromSheet().then(() => {
   const params = new URLSearchParams(window.location.search);
+  const store = params.get('store') || '';
+  const address = params.get('address') || '';
   if (params.get('api') === '1') {
-    const store = params.get('store') || '';
-    const address = params.get('address') || '';
     if (store && address) apiMatch(store, address);
+  } else if (store && address) {
+    document.getElementById('storeInput').value = store;
+    document.getElementById('addrInput').value = address;
+    doSearch();
   }
 });
 
