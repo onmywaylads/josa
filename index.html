@@ -739,43 +739,39 @@ function redrawHub(name){
 function parseKey(raw){const m=raw.match(/^(.+?)\[(.+?)\]$/);return m?{brand:m[1].trim(),store:m[2].trim()}:{brand:raw.trim(),store:""};}
 function extractDong(a){const m=(a||"").match(/([가-힣]+동|[가-힣]+가)\b/);return m?m[1]:"";}
 function norm(s){return(s||"").replace(/\s/g,"").toLowerCase();}
-function strSim(a,b){
-  a=norm(a);b=norm(b);
-  if(!a||!b)return 0;
-  if(a===b)return 1;
-  // 한쪽이 다른쪽을 완전 포함하고 길이 비율이 높으면 높은 점수
-  if(a.includes(b))return 0.85*b.length/a.length+0.15;
-  if(b.includes(a))return 0.85*a.length/b.length+0.15;
-  // 공통 글자 비율 (바이그램 방식)
-  let score=0;
-  const minLen=Math.min(a.length,b.length);
-  for(let i=0;i<a.length;i++){
-    if(b.includes(a[i]))score++;
-  }
-  const charScore=score/Math.max(a.length,b.length);
-  // 연속 공통 부분 문자열 보너스
-  let maxCommon=0;
-  for(let i=0;i<a.length;i++){
-    for(let j=i+2;j<=a.length;j++){
-      const sub=a.slice(i,j);
-      if(b.includes(sub)&&sub.length>maxCommon)maxCommon=sub.length;
+function strSim(a, b){
+  // [] 안 단어만 추출해서 비교
+  const extractStore = s => { const m = (s||'').match(/\[(.+?)\]/); return m ? m[1] : s; };
+  a = norm(extractStore(a));
+  b = norm(extractStore(b));
+  if(!a || !b) return 0;
+  if(a === b) return 1;
+  // 연속 공통 부분 문자열 최대 길이
+  let maxCommon = 0;
+  for(let i = 0; i < a.length; i++){
+    for(let j = i + 1; j <= a.length; j++){
+      const sub = a.slice(i, j);
+      if(b.includes(sub) && sub.length > maxCommon) maxCommon = sub.length;
     }
   }
-  const commonBonus=maxCommon>=2?maxCommon/Math.max(a.length,b.length)*0.4:0;
-  return Math.min(0.95, charScore*0.6+commonBonus);
+  if(maxCommon >= 4) return 1.0;
+  if(maxCommon >= 3) return 0.9;
+  if(maxCommon >= 2) return 0.8;
+  return 0;
 }
 function haversine(la1,lo1,la2,lo2){const R=6371,d=Math.PI/180,dla=(la2-la1)*d,dlo=(lo2-lo1)*d,av=Math.sin(dla/2)**2+Math.cos(la1*d)*Math.cos(la2*d)*Math.sin(dlo/2)**2;return R*2*Math.atan2(Math.sqrt(av),Math.sqrt(1-av));}
 function distScore(km){
-  if(km<=0.1)return 1;
-  if(km<=0.2)return 0.9;
-  if(km<=0.3)return 0.8;
-  if(km<=0.4)return 0.7;
-  if(km<=0.5)return 0.6;
-  if(km<=0.7)return 0.5;
-  if(km<=1.0)return 0.4;
-  if(km<=1.5)return 0.3;
-  if(km<=2.0)return 0.2;
-  if(km<=3.0)return 0.1;
+  if(km<=0.10)return 1.00;
+  if(km<=0.15)return 0.95;
+  if(km<=0.20)return 0.90;
+  if(km<=0.30)return 0.85;
+  if(km<=0.40)return 0.80;
+  if(km<=0.50)return 0.75;
+  if(km<=0.70)return 0.65;
+  if(km<=1.00)return 0.55;
+  if(km<=1.50)return 0.40;
+  if(km<=2.00)return 0.25;
+  if(km<=3.00)return 0.10;
   return 0;
 }
 
@@ -785,14 +781,16 @@ function dongScore(inDong, itemDong, km, inAddr, itemAddr){
   if(inDong === itemDong) return 1;
   const inGu = (inAddr||'').match(/([가-힣]+구)/)?.[1] || '';
   const itemGu = (itemAddr||'').match(/([가-힣]+구)/)?.[1] || '';
-  if(inGu && itemGu && inGu === itemGu) return km!==null && km<=0.3 ? 0.7 : 0.5;
-  // 다른 구지만 거리 기반 점수
+  const sameGu = inGu && itemGu && inGu === itemGu;
   if(km !== null){
-    if(km <= 0.1) return 0.5;
-    if(km <= 0.2) return 0.4;
-    if(km <= 0.3) return 0.3;
+    if(km <= 0.10) return sameGu ? 0.95 : 0.95;
+    if(km <= 0.15) return sameGu ? 0.90 : 0.90;
+    if(km <= 0.20) return sameGu ? 0.85 : 0.85;
+    if(km <= 0.30) return sameGu ? 0.80 : 0.75;
+    if(km <= 0.50) return sameGu ? 0.70 : 0.50;
+    if(km <= 1.00) return sameGu ? 0.50 : 0.20;
   }
-  return 0;
+  return sameGu ? 0.30 : 0;
 }
 
 // 입력 좌표가 어느 허브 폴리곤 안에 있는지 반환
@@ -866,7 +864,7 @@ async function doSearch(){
     let dSc=0,km=null;
     if(inputCoord&&item.lat&&item.lng){km=haversine(inputCoord.lat,inputCoord.lng,item.lat,item.lng);dSc=distScore(km);}
     const dong=dongScore(inDong, item.dong, km, addr, item.address);
-    const total=Math.min(1, ns*0.10+dong*0.20+dSc*0.70);
+    const total=Math.min(1, ns*0.10+dong*0.10+dSc*0.80);
     return{...item,_km:km?km.toFixed(2):null,_dong:dong,score:total,sd:{name:Math.round(ns*100),dong:Math.round(dong*100),dist:Math.round(dSc*100),total:Math.round(total*100)}};
   }).sort((a,b)=>b.score-a.score);
   const best=scored[0];
