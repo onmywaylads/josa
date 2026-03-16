@@ -431,6 +431,7 @@ async function loadZonesFromSheet(){
       if(!savedZones[k]) savedZones[k]={zonePolygon:null,surPolygons:[],zonePath:[],surPaths:[]};
       savedZones[k].zonePath=v.zonePath||[];
       savedZones[k].surPaths = v.surPaths || (v.surPath?.length>=3 ? [v.surPath] : []);
+      savedZones[k].brand = v.brand||'';
     });
     renderHubSelect();
     renderHubMgrList();
@@ -442,7 +443,7 @@ async function saveZonesToSheet(){
   try{
     const zonesData={};
     Object.entries(savedZones).forEach(([k,v])=>{
-      zonesData[k]={zonePath:v.zonePath||[],surPaths:v.surPaths||[]};
+      zonesData[k]={zonePath:v.zonePath||[],surPaths:v.surPaths||[],brand:v.brand||''};
     });
     await fetch(SCRIPT_URL,{
       method:'POST',
@@ -468,7 +469,7 @@ function loadFromStorage(){
     Object.entries(data.zones||{}).forEach(([k,v])=>{
       // 구버전 surPath 호환
       const surPaths = v.surPaths || (v.surPath?.length>=3 ? [v.surPath] : []);
-      savedZones[k]={zonePolygon:null,surPolygons:[],zonePath:v.zonePath||[],surPaths};
+      savedZones[k]={zonePolygon:null,surPolygons:[],zonePath:v.zonePath||[],surPaths,brand:v.brand||''};
     });
     renderHubSelect();
     renderHubMgrList();
