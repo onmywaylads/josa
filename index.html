@@ -1,4 +1,5 @@
 <!DOCTYPE html>
+
 <html lang="ko">
 <head>
 <meta charset="UTF-8">
@@ -37,185 +38,186 @@
   *{margin:0;padding:0;box-sizing:border-box;}
   body{font-family:'Pretendard',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;}
 
-  .nav{display:flex;background:var(--white);border-bottom:1px solid var(--border);position:sticky;top:0;z-index:200;box-shadow:var(--shadow);}
-  .nav-tab{flex:1;padding:16px;text-align:center;font-size:13px;font-weight:700;color:var(--text-dim);cursor:pointer;transition:all 0.2s;border-bottom:2px solid transparent;}
-  .nav-tab.active{color:var(--accent);border-bottom-color:var(--accent);}
+.nav{display:flex;background:var(–white);border-bottom:1px solid var(–border);position:sticky;top:0;z-index:200;box-shadow:var(–shadow);}
+.nav-tab{flex:1;padding:16px;text-align:center;font-size:13px;font-weight:700;color:var(–text-dim);cursor:pointer;transition:all 0.2s;border-bottom:2px solid transparent;}
+.nav-tab.active{color:var(–accent);border-bottom-color:var(–accent);}
 
-  .page{display:none;} .page.active{display:block;}
-  #page-map{position:fixed;top:49px;left:0;right:0;bottom:0;}
-  #mapContainer{width:100%;height:100%;position:relative;}
-  #kakaoMap{width:100%;height:100%;}
-  .wrap{max-width:960px;margin:0 auto;padding:24px 16px 80px;}
+.page{display:none;} .page.active{display:block;}
+#page-map{position:fixed;top:49px;left:0;right:0;bottom:0;}
+#mapContainer{width:100%;height:100%;position:relative;}
+#kakaoMap{width:100%;height:100%;}
+.wrap{max-width:960px;margin:0 auto;padding:24px 16px 80px;}
 
-  .page-header{margin-bottom:20px;}
-  .page-header h1{font-size:22px;font-weight:900;}
-  .page-header p{font-size:13px;color:var(--text-mid);margin-top:4px;}
+.page-header{margin-bottom:20px;}
+.page-header h1{font-size:22px;font-weight:900;}
+.page-header p{font-size:13px;color:var(–text-mid);margin-top:4px;}
 
-  .card{background:var(--white);border:1px solid var(--border);border-radius:14px;padding:20px;margin-bottom:14px;box-shadow:var(--shadow);}
-  .card-label{font-size:11px;font-weight:700;color:var(--accent);letter-spacing:0.08em;text-transform:uppercase;margin-bottom:14px;display:flex;align-items:center;gap:7px;}
-  .card-label::before{content:'';width:3px;height:12px;background:var(--accent);border-radius:2px;}
+.card{background:var(–white);border:1px solid var(–border);border-radius:14px;padding:20px;margin-bottom:14px;box-shadow:var(–shadow);}
+.card-label{font-size:11px;font-weight:700;color:var(–accent);letter-spacing:0.08em;text-transform:uppercase;margin-bottom:14px;display:flex;align-items:center;gap:7px;}
+.card-label::before{content:’’;width:3px;height:12px;background:var(–accent);border-radius:2px;}
 
-  .stats{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin-bottom:20px;}
-  .stat{background:var(--white);border:1px solid var(--border);border-radius:12px;padding:14px 12px;box-shadow:var(--shadow);}
-  .stat-n{font-size:22px;font-weight:900;}
-  .stat-l{font-size:10px;color:var(--text-dim);letter-spacing:0.05em;text-transform:uppercase;margin-top:3px;}
+.stats{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin-bottom:20px;}
+.stat{background:var(–white);border:1px solid var(–border);border-radius:12px;padding:14px 12px;box-shadow:var(–shadow);}
+.stat-n{font-size:22px;font-weight:900;}
+.stat-l{font-size:10px;color:var(–text-dim);letter-spacing:0.05em;text-transform:uppercase;margin-top:3px;}
 
-  .input-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px;}
-  .field{display:flex;flex-direction:column;gap:6px;}
-  .field-label{font-size:11px;font-weight:700;color:var(--text-mid);letter-spacing:0.05em;text-transform:uppercase;}
-  .inp{background:var(--bg);border:1.5px solid var(--border);border-radius:9px;padding:11px 14px;color:var(--text);font-family:'Pretendard',sans-serif;font-size:14px;font-weight:500;outline:none;transition:all 0.2s;width:100%;}
-  .inp:focus{border-color:var(--accent);background:var(--white);box-shadow:0 0 0 3px rgba(37,99,235,0.1);}
-  .inp::placeholder{color:var(--text-dim);}
-  .inp.big{font-size:15px;font-weight:700;}
+.input-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px;}
+.field{display:flex;flex-direction:column;gap:6px;}
+.field-label{font-size:11px;font-weight:700;color:var(–text-mid);letter-spacing:0.05em;text-transform:uppercase;}
+.inp{background:var(–bg);border:1.5px solid var(–border);border-radius:9px;padding:11px 14px;color:var(–text);font-family:‘Pretendard’,sans-serif;font-size:14px;font-weight:500;outline:none;transition:all 0.2s;width:100%;}
+.inp:focus{border-color:var(–accent);background:var(–white);box-shadow:0 0 0 3px rgba(37,99,235,0.1);}
+.inp::placeholder{color:var(–text-dim);}
+.inp.big{font-size:15px;font-weight:700;}
 
-  .btn-primary{width:100%;padding:13px;background:var(--accent);border:none;border-radius:9px;color:#fff;font-family:'Pretendard',sans-serif;font-size:14px;font-weight:800;cursor:pointer;transition:all 0.2s;display:flex;align-items:center;justify-content:center;gap:8px;}
-  .btn-primary:hover{background:var(--accent2);transform:translateY(-1px);box-shadow:var(--shadow-md);}
-  .btn{padding:9px 16px;border-radius:8px;font-family:'Pretendard',sans-serif;font-size:13px;font-weight:700;cursor:pointer;transition:all 0.15s;border:none;}
-  .btn-outline{background:var(--white);border:1.5px solid var(--border2);color:var(--text-mid);}
-  .btn-outline:hover{border-color:var(--accent);color:var(--accent);}
-  .btn-ghost{background:var(--bg);border:1px solid var(--border);color:var(--text-mid);}
-  .btn-ghost:hover{border-color:var(--accent);color:var(--accent);}
-  .btn-sm{padding:6px 12px;font-size:12px;}
-  .btn-danger{background:var(--red-light);border:1px solid #fca5a5;color:var(--red);}
-  .btn-danger:hover{background:#fee2e2;}
+.btn-primary{width:100%;padding:13px;background:var(–accent);border:none;border-radius:9px;color:#fff;font-family:‘Pretendard’,sans-serif;font-size:14px;font-weight:800;cursor:pointer;transition:all 0.2s;display:flex;align-items:center;justify-content:center;gap:8px;}
+.btn-primary:hover{background:var(–accent2);transform:translateY(-1px);box-shadow:var(–shadow-md);}
+.btn{padding:9px 16px;border-radius:8px;font-family:‘Pretendard’,sans-serif;font-size:13px;font-weight:700;cursor:pointer;transition:all 0.15s;border:none;}
+.btn-outline{background:var(–white);border:1.5px solid var(–border2);color:var(–text-mid);}
+.btn-outline:hover{border-color:var(–accent);color:var(–accent);}
+.btn-ghost{background:var(–bg);border:1px solid var(–border);color:var(–text-mid);}
+.btn-ghost:hover{border-color:var(–accent);color:var(–accent);}
+.btn-sm{padding:6px 12px;font-size:12px;}
+.btn-danger{background:var(–red-light);border:1px solid #fca5a5;color:var(–red);}
+.btn-danger:hover{background:#fee2e2;}
 
-  .format-tip{background:var(--accent-light);border:1px solid #bfdbfe;border-radius:8px;padding:10px 13px;font-size:12px;color:#1e40af;margin-top:12px;}
-  .format-tip code{background:#dbeafe;color:var(--accent);padding:1px 6px;border-radius:3px;font-family:monospace;}
+.format-tip{background:var(–accent-light);border:1px solid #bfdbfe;border-radius:8px;padding:10px 13px;font-size:12px;color:#1e40af;margin-top:12px;}
+.format-tip code{background:#dbeafe;color:var(–accent);padding:1px 6px;border-radius:3px;font-family:monospace;}
 
-  .result-wrap{animation:fadeUp 0.3s ease;}
-  @keyframes fadeUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+.result-wrap{animation:fadeUp 0.3s ease;}
+@keyframes fadeUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
 
-  .res-card{background:var(--white);border:1px solid var(--border);border-radius:14px;padding:20px;margin-bottom:12px;box-shadow:var(--shadow);}
+.res-card{background:var(–white);border:1px solid var(–border);border-radius:14px;padding:20px;margin-bottom:12px;box-shadow:var(–shadow);}
 
-  .res-top{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:16px;}
-  .res-name{font-size:18px;font-weight:900;}
-  .res-addr{font-size:12px;color:var(--text-mid);margin-top:4px;display:flex;align-items:center;gap:5px;flex-wrap:wrap;}
+.res-top{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:16px;}
+.res-name{font-size:18px;font-weight:900;}
+.res-addr{font-size:12px;color:var(–text-mid);margin-top:4px;display:flex;align-items:center;gap:5px;flex-wrap:wrap;}
 
-  .status-pill{display:inline-flex;align-items:center;gap:5px;padding:5px 12px;border-radius:20px;font-size:12px;font-weight:700;white-space:nowrap;flex-shrink:0;}
-  .status-pill.possible{background:#eff6ff;color:var(--accent);}
-  .status-pill.impossible{background:var(--red-light);color:var(--red);}
-  .status-pill.check{background:#fff7ed;color:var(--orange);}
-  .res-card.possible{border-left:4px solid var(--accent);}
-  .res-card.impossible{border-left:4px solid var(--red);}
-  .res-card.check{border-left:4px solid var(--orange);}
-  .sdot{width:6px;height:6px;border-radius:50%;background:currentColor;}
+.status-pill{display:inline-flex;align-items:center;gap:5px;padding:5px 12px;border-radius:20px;font-size:12px;font-weight:700;white-space:nowrap;flex-shrink:0;}
+.status-pill.possible{background:#eff6ff;color:var(–accent);}
+.status-pill.impossible{background:var(–red-light);color:var(–red);}
+.status-pill.check{background:#fff7ed;color:var(–orange);}
+.res-card.possible{border-left:4px solid var(–accent);}
+.res-card.impossible{border-left:4px solid var(–red);}
+.res-card.check{border-left:4px solid var(–orange);}
+.sdot{width:6px;height:6px;border-radius:50%;background:currentColor;}
 
-  .info-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:14px;}
-  .itile{background:var(--bg);border:1px solid var(--border);border-radius:9px;padding:12px;}
-  .itile-l{font-size:10px;font-weight:700;color:var(--text-dim);letter-spacing:0.07em;text-transform:uppercase;margin-bottom:5px;}
-  .itile-v{font-size:14px;font-weight:700;color:var(--text);}
-  .c-accent{color:var(--accent)}.c-green{color:var(--green)}.c-red{color:var(--red)}.c-yellow{color:var(--yellow)}.c-orange{color:var(--orange)}.c-dim{color:var(--text-dim)}
+.info-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:14px;}
+.itile{background:var(–bg);border:1px solid var(–border);border-radius:9px;padding:12px;}
+.itile-l{font-size:10px;font-weight:700;color:var(–text-dim);letter-spacing:0.07em;text-transform:uppercase;margin-bottom:5px;}
+.itile-v{font-size:14px;font-weight:700;color:var(–text);}
+.c-accent{color:var(–accent)}.c-green{color:var(–green)}.c-red{color:var(–red)}.c-yellow{color:var(–yellow)}.c-orange{color:var(–orange)}.c-dim{color:var(–text-dim)}
 
-  .surcharge-badge{display:inline-flex;align-items:center;gap:6px;background:var(--orange-light);border:1px solid #fed7aa;border-radius:8px;padding:10px 14px;font-size:13px;font-weight:700;color:var(--orange);margin-bottom:14px;width:100%;}
-  .memo{background:var(--yellow-light);border:1px solid #fde68a;border-radius:8px;padding:10px 13px;font-size:12px;color:var(--yellow);margin-bottom:14px;display:flex;gap:7px;line-height:1.5;}
+.surcharge-badge{display:inline-flex;align-items:center;gap:6px;background:var(–orange-light);border:1px solid #fed7aa;border-radius:8px;padding:10px 14px;font-size:13px;font-weight:700;color:var(–orange);margin-bottom:14px;width:100%;}
+.memo{background:var(–yellow-light);border:1px solid #fde68a;border-radius:8px;padding:10px 13px;font-size:12px;color:var(–yellow);margin-bottom:14px;display:flex;gap:7px;line-height:1.5;}
 
-  .score-sec{border-top:1px solid var(--border);padding-top:14px;}
-  .score-title{font-size:10px;font-weight:700;color:var(--text-dim);letter-spacing:0.08em;text-transform:uppercase;margin-bottom:10px;}
-  .srow{display:flex;align-items:center;gap:10px;margin-bottom:7px;}
-  .srow-l{font-size:11px;color:var(--text-mid);width:90px;flex-shrink:0;}
-  .sbar{flex:1;height:5px;background:var(--border);border-radius:3px;overflow:hidden;}
-  .sfill{height:100%;border-radius:3px;width:0%;transition:width 0.8s cubic-bezier(0.16,1,0.3,1);}
-  .spct{font-size:11px;font-weight:700;width:32px;text-align:right;flex-shrink:0;}
-  .stotal{display:flex;justify-content:space-between;align-items:center;margin-top:12px;padding-top:12px;border-top:1px solid var(--border);}
-  .stotal-l{font-size:12px;color:var(--text-mid);}
-  .stotal-v{font-size:18px;font-weight:900;color:var(--accent);}
+.score-sec{border-top:1px solid var(–border);padding-top:14px;}
+.score-title{font-size:10px;font-weight:700;color:var(–text-dim);letter-spacing:0.08em;text-transform:uppercase;margin-bottom:10px;}
+.srow{display:flex;align-items:center;gap:10px;margin-bottom:7px;}
+.srow-l{font-size:11px;color:var(–text-mid);width:90px;flex-shrink:0;}
+.sbar{flex:1;height:5px;background:var(–border);border-radius:3px;overflow:hidden;}
+.sfill{height:100%;border-radius:3px;width:0%;transition:width 0.8s cubic-bezier(0.16,1,0.3,1);}
+.spct{font-size:11px;font-weight:700;width:32px;text-align:right;flex-shrink:0;}
+.stotal{display:flex;justify-content:space-between;align-items:center;margin-top:12px;padding-top:12px;border-top:1px solid var(–border);}
+.stotal-l{font-size:12px;color:var(–text-mid);}
+.stotal-v{font-size:18px;font-weight:900;color:var(–accent);}
 
-  .action-row{display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap;}
+.action-row{display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap;}
 
-  .similar-card{background:var(--white);border:1px solid var(--border);border-radius:12px;padding:18px;box-shadow:var(--shadow);}
-  .sim-list{display:flex;flex-direction:column;gap:7px;margin-top:12px;}
-  .sim-item{display:flex;align-items:center;justify-content:space-between;background:var(--bg);border:1px solid var(--border);border-radius:9px;padding:10px 13px;cursor:pointer;transition:all 0.15s;}
-  .sim-item:hover{border-color:var(--accent);background:var(--accent-light);}
-  .sim-name{font-size:13px;font-weight:700;}
-  .sim-addr{font-size:11px;color:var(--text-dim);margin-top:2px;}
-  .sim-right{display:flex;align-items:center;gap:7px;flex-shrink:0;}
-  .chips{display:flex;gap:3px;}
-  .chip{font-size:10px;font-weight:700;padding:2px 6px;border-radius:4px;}
-  .chip-n{background:#dbeafe;color:var(--accent);}
-  .chip-d{background:#d1fae5;color:var(--green);}
-  .chip-k{background:#fef3c7;color:var(--yellow);}
+.similar-card{background:var(–white);border:1px solid var(–border);border-radius:12px;padding:18px;box-shadow:var(–shadow);}
+.sim-list{display:flex;flex-direction:column;gap:7px;margin-top:12px;}
+.sim-item{display:flex;align-items:center;justify-content:space-between;background:var(–bg);border:1px solid var(–border);border-radius:9px;padding:10px 13px;cursor:pointer;transition:all 0.15s;}
+.sim-item:hover{border-color:var(–accent);background:var(–accent-light);}
+.sim-name{font-size:13px;font-weight:700;}
+.sim-addr{font-size:11px;color:var(–text-dim);margin-top:2px;}
+.sim-right{display:flex;align-items:center;gap:7px;flex-shrink:0;}
+.chips{display:flex;gap:3px;}
+.chip{font-size:10px;font-weight:700;padding:2px 6px;border-radius:4px;}
+.chip-n{background:#dbeafe;color:var(–accent);}
+.chip-d{background:#d1fae5;color:var(–green);}
+.chip-k{background:#fef3c7;color:var(–yellow);}
 
-  .no-match{background:var(--white);border:1px solid var(--border);border-radius:14px;padding:36px;text-align:center;box-shadow:var(--shadow);}
-  .no-match-icon{font-size:40px;margin-bottom:12px;}
-  .no-match-title{font-size:17px;font-weight:800;color:var(--yellow);margin-bottom:8px;}
-  .no-match-desc{font-size:13px;color:var(--text-mid);line-height:1.7;}
+.no-match{background:var(–white);border:1px solid var(–border);border-radius:14px;padding:36px;text-align:center;box-shadow:var(–shadow);}
+.no-match-icon{font-size:40px;margin-bottom:12px;}
+.no-match-title{font-size:17px;font-weight:800;color:var(–yellow);margin-bottom:8px;}
+.no-match-desc{font-size:13px;color:var(–text-mid);line-height:1.7;}
 
-  /* ── 지도 ── */
-  #mapContainer{width:100%;height:calc(100vh - 49px);position:relative;}
-  #kakaoMap{width:100%;height:100%;}
+/* ── 지도 ── */
+#mapContainer{width:100%;height:calc(100vh - 49px);position:relative;}
+#kakaoMap{width:100%;height:100%;}
 
-  .map-toolbar{position:absolute;top:12px;left:12px;z-index:100;display:flex;flex-direction:column;gap:8px;width:300px;}
-  .map-panel{background:rgba(255,255,255,0.97);backdrop-filter:blur(10px);border:1px solid var(--border);border-radius:12px;padding:14px;box-shadow:var(--shadow-md);}
-  .map-panel-title{font-size:11px;font-weight:700;color:var(--accent);letter-spacing:0.08em;text-transform:uppercase;margin-bottom:12px;}
+.map-toolbar{position:absolute;top:12px;left:12px;z-index:100;display:flex;flex-direction:column;gap:8px;width:300px;}
+.map-panel{background:rgba(255,255,255,0.97);backdrop-filter:blur(10px);border:1px solid var(–border);border-radius:12px;padding:14px;box-shadow:var(–shadow-md);}
+.map-panel-title{font-size:11px;font-weight:700;color:var(–accent);letter-spacing:0.08em;text-transform:uppercase;margin-bottom:12px;}
 
-  /* 허브 선택 드롭다운 */
-  .hub-select{background:var(--bg);border:1.5px solid var(--border);border-radius:8px;padding:9px 12px;color:var(--text);font-family:'Pretendard',sans-serif;font-size:13px;font-weight:600;outline:none;width:100%;margin-bottom:8px;cursor:pointer;}
-  .hub-select:focus{border-color:var(--accent);}
+/* 허브 선택 드롭다운 */
+.hub-select{background:var(–bg);border:1.5px solid var(–border);border-radius:8px;padding:9px 12px;color:var(–text);font-family:‘Pretendard’,sans-serif;font-size:13px;font-weight:600;outline:none;width:100%;margin-bottom:8px;cursor:pointer;}
+.hub-select:focus{border-color:var(–accent);}
 
-  /* 허브 추가 인풋 */
-  .hub-add-row{display:flex;gap:0;margin-bottom:12px;border:1.5px solid var(--border);border-radius:10px;overflow:hidden;transition:border-color 0.2s;background:var(--white);}
-  .hub-add-row:focus-within{border-color:var(--accent);}
-  .hub-add-inp{flex:1;background:transparent;border:none;padding:10px 12px;color:var(--text);font-family:'Pretendard',sans-serif;font-size:13px;font-weight:600;outline:none;}
-  .hub-add-inp::placeholder{color:var(--text-dim);}
-  .hub-add-btn{padding:10px 14px;background:var(--accent);border:none;color:#fff;font-family:'Pretendard',sans-serif;font-size:16px;font-weight:700;cursor:pointer;white-space:nowrap;transition:background 0.15s;flex-shrink:0;}
-  .hub-add-btn:hover{background:var(--accent2);}
+/* 허브 추가 인풋 */
+.hub-add-row{display:flex;gap:0;margin-bottom:12px;border:1.5px solid var(–border);border-radius:10px;overflow:hidden;transition:border-color 0.2s;background:var(–white);}
+.hub-add-row:focus-within{border-color:var(–accent);}
+.hub-add-inp{flex:1;background:transparent;border:none;padding:10px 12px;color:var(–text);font-family:‘Pretendard’,sans-serif;font-size:13px;font-weight:600;outline:none;}
+.hub-add-inp::placeholder{color:var(–text-dim);}
+.hub-add-btn{padding:10px 14px;background:var(–accent);border:none;color:#fff;font-family:‘Pretendard’,sans-serif;font-size:16px;font-weight:700;cursor:pointer;white-space:nowrap;transition:background 0.15s;flex-shrink:0;}
+.hub-add-btn:hover{background:var(–accent2);}
 
-  .layer-tabs{display:flex;gap:6px;margin-bottom:10px;}
-  .layer-tab{flex:1;padding:7px;border-radius:7px;font-family:'Pretendard',sans-serif;font-size:11px;font-weight:700;cursor:pointer;border:1.5px solid var(--border);background:var(--bg);color:var(--text-mid);transition:all 0.15s;text-align:center;}
-  .layer-tab.zone.active{background:#dbeafe;border-color:var(--accent);color:var(--accent);}
-  .layer-tab.surcharge.active{background:#fed7aa;border-color:var(--orange);color:var(--orange);}
+.layer-tabs{display:flex;gap:6px;margin-bottom:10px;}
+.layer-tab{flex:1;padding:7px;border-radius:7px;font-family:‘Pretendard’,sans-serif;font-size:11px;font-weight:700;cursor:pointer;border:1.5px solid var(–border);background:var(–bg);color:var(–text-mid);transition:all 0.15s;text-align:center;}
+.layer-tab.zone.active{background:#dbeafe;border-color:var(–accent);color:var(–accent);}
+.layer-tab.surcharge.active{background:#fed7aa;border-color:var(–orange);color:var(–orange);}
 
-  .draw-btns{display:flex;flex-direction:column;gap:6px;}
-  .draw-btn{padding:9px 12px;border-radius:8px;font-family:'Pretendard',sans-serif;font-size:12px;font-weight:700;cursor:pointer;transition:all 0.15s;border:1.5px solid var(--border);background:var(--bg);color:var(--text-mid);display:flex;align-items:center;gap:7px;}
-  .draw-btn:hover{border-color:var(--accent);color:var(--accent);}
-  .draw-btn.drawing{background:#dbeafe;border-color:var(--accent);color:var(--accent);}
-  .draw-btn.drawing-sur{background:#fed7aa;border-color:var(--orange);color:var(--orange);}
-  .draw-btn.save{background:var(--bg);border-color:var(--accent);color:var(--accent);}
-  .draw-btn.save:hover{background:#dbeafe;border-color:var(--accent);}
-  .draw-btn.del{background:var(--bg);border-color:#fca5a5;color:var(--red);}
-  .draw-btn.del:hover{background:#fef2f2;border-color:var(--red);}
+.draw-btns{display:flex;flex-direction:column;gap:6px;}
+.draw-btn{padding:9px 12px;border-radius:8px;font-family:‘Pretendard’,sans-serif;font-size:12px;font-weight:700;cursor:pointer;transition:all 0.15s;border:1.5px solid var(–border);background:var(–bg);color:var(–text-mid);display:flex;align-items:center;gap:7px;}
+.draw-btn:hover{border-color:var(–accent);color:var(–accent);}
+.draw-btn.drawing{background:#dbeafe;border-color:var(–accent);color:var(–accent);}
+.draw-btn.drawing-sur{background:#fed7aa;border-color:var(–orange);color:var(–orange);}
+.draw-btn.save{background:var(–bg);border-color:var(–accent);color:var(–accent);}
+.draw-btn.save:hover{background:#dbeafe;border-color:var(–accent);}
+.draw-btn.del{background:var(–bg);border-color:#fca5a5;color:var(–red);}
+.draw-btn.del:hover{background:#fef2f2;border-color:var(–red);}
 
-  /* 저장된 허브 목록 */
-  .hub-list-panel{max-height:180px;overflow-y:auto;}
-  .hub-row{display:flex;align-items:center;justify-content:space-between;padding:7px 0;border-bottom:1px solid var(--border);}
-  .hub-row:last-child{border-bottom:none;}
-  .hub-dot{width:9px;height:9px;border-radius:50%;margin-right:7px;flex-shrink:0;}
-  .hub-tags{display:flex;gap:4px;align-items:center;}
-  .hub-tag{font-size:10px;font-weight:700;padding:2px 6px;border-radius:4px;cursor:pointer;}
-  .hub-tag.zone-tag{background:#dbeafe;color:var(--accent);}
-  .hub-tag.sur-tag{background:#fed7aa;color:var(--orange);}
+/* 저장된 허브 목록 */
+.hub-list-panel{max-height:180px;overflow-y:auto;}
+.hub-row{display:flex;align-items:center;justify-content:space-between;padding:7px 0;border-bottom:1px solid var(–border);}
+.hub-row:last-child{border-bottom:none;}
+.hub-dot{width:9px;height:9px;border-radius:50%;margin-right:7px;flex-shrink:0;}
+.hub-tags{display:flex;gap:4px;align-items:center;}
+.hub-tag{font-size:10px;font-weight:700;padding:2px 6px;border-radius:4px;cursor:pointer;}
+.hub-tag.zone-tag{background:#dbeafe;color:var(–accent);}
+.hub-tag.sur-tag{background:#fed7aa;color:var(–orange);}
 
-  /* 허브 관리 목록 (설정 패널) */
-  .hub-mgr-list{display:flex;flex-direction:column;gap:6px;margin-top:12px;max-height:420px;overflow-y:auto;}
-  .hub-mgr-item{display:flex;align-items:center;justify-content:space-between;background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:7px 10px;}
-  .hub-mgr-left{display:flex;align-items:center;gap:6px;flex:1;min-width:0;}
-  .hub-mgr-name{font-size:13px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+/* 허브 관리 목록 (설정 패널) */
+.hub-mgr-list{display:flex;flex-direction:column;gap:6px;margin-top:12px;max-height:420px;overflow-y:auto;}
+.hub-mgr-item{display:flex;align-items:center;justify-content:space-between;background:var(–bg);border:1px solid var(–border);border-radius:8px;padding:7px 10px;}
+.hub-mgr-left{display:flex;align-items:center;gap:6px;flex:1;min-width:0;}
+.hub-mgr-name{font-size:13px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
 
-  /* 색상 선택 */
-  .color-dots{display:flex;gap:5px;}
-  .color-dot{width:16px;height:16px;border-radius:50%;cursor:pointer;border:2px solid transparent;transition:all 0.15s;}
-  .color-dot.selected{border-color:var(--text);transform:scale(1.2);}
+/* 색상 선택 */
+.color-dots{display:flex;gap:5px;}
+.color-dot{width:16px;height:16px;border-radius:50%;cursor:pointer;border:2px solid transparent;transition:all 0.15s;}
+.color-dot.selected{border-color:var(–text);transform:scale(1.2);}
 
-  .map-status{position:absolute;bottom:16px;left:50%;transform:translateX(-50%);z-index:100;background:rgba(255,255,255,0.95);border:1px solid var(--border);border-radius:20px;padding:8px 18px;font-size:12px;color:var(--text-mid);white-space:nowrap;box-shadow:var(--shadow);}
-  .map-status.zone{border-color:var(--accent);color:var(--accent);}
-  .map-status.surcharge{border-color:var(--orange);color:var(--orange);}
+.map-status{position:absolute;bottom:16px;left:50%;transform:translateX(-50%);z-index:100;background:rgba(255,255,255,0.95);border:1px solid var(–border);border-radius:20px;padding:8px 18px;font-size:12px;color:var(–text-mid);white-space:nowrap;box-shadow:var(–shadow);}
+.map-status.zone{border-color:var(–accent);color:var(–accent);}
+.map-status.surcharge{border-color:var(–orange);color:var(–orange);}
 
-  /* 모달 */
-  .modal-bg{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.4);z-index:500;align-items:center;justify-content:center;}
-  .modal-bg.show{display:flex;}
-  .modal{background:var(--white);border-radius:16px;padding:24px;width:90%;max-width:360px;box-shadow:0 20px 60px rgba(0,0,0,0.15);}
-  .modal-title{font-size:16px;font-weight:800;margin-bottom:16px;}
-  .modal-field{margin-bottom:14px;}
-  .modal-label{font-size:11px;font-weight:700;color:var(--text-mid);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:6px;}
-  .modal-btns{display:flex;gap:8px;margin-top:20px;}
+/* 모달 */
+.modal-bg{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.4);z-index:500;align-items:center;justify-content:center;}
+.modal-bg.show{display:flex;}
+.modal{background:var(–white);border-radius:16px;padding:24px;width:90%;max-width:360px;box-shadow:0 20px 60px rgba(0,0,0,0.15);}
+.modal-title{font-size:16px;font-weight:800;margin-bottom:16px;}
+.modal-field{margin-bottom:14px;}
+.modal-label{font-size:11px;font-weight:700;color:var(–text-mid);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:6px;}
+.modal-btns{display:flex;gap:8px;margin-top:20px;}
 
-  @media(max-width:640px){
-    .input-row{grid-template-columns:1fr;}
-    .info-grid{grid-template-columns:1fr 1fr;}
-    .stats{grid-template-columns:repeat(3,1fr);}
-    .map-toolbar{width:200px;}
-  }
+@media(max-width:640px){
+.input-row{grid-template-columns:1fr;}
+.info-grid{grid-template-columns:1fr 1fr;}
+.stats{grid-template-columns:repeat(3,1fr);}
+.map-toolbar{width:200px;}
+}
 </style>
+
 </head>
 <body>
 
@@ -225,6 +227,7 @@
 </div>
 
 <!-- 상점 조회 -->
+
 <div class="page active" id="page-search">
 <div class="wrap">
   <div class="page-header">
@@ -236,7 +239,6 @@
     <div class="stat"><div class="stat-n" style="color:var(--green)" id="statPossible">6</div><div class="stat-l">수행 가능</div></div>
     <div class="stat"><div class="stat-n" style="color:var(--red)" id="statImpossible">1</div><div class="stat-l">불가</div></div>
     <div class="stat"><div class="stat-n" style="color:var(--yellow)" id="statCheck">1</div><div class="stat-l">확인 필요</div></div>
-
   </div>
   <div class="card">
     <div class="card-label">신규 실수행 조사 상점 입력</div>
@@ -258,63 +260,68 @@
 </div>
 
 <!-- 권역 관리 -->
+
 <div class="page" id="page-map">
   <div id="mapContainer">
     <div id="kakaoMap"></div>
     <div class="map-toolbar">
 
-      <!-- 그리기 패널 -->
-      <div class="map-panel">
-        <div class="map-panel-title">✏️ 권역 그리기</div>
+```
+  <!-- 그리기 패널 -->
+  <div class="map-panel">
+    <div class="map-panel-title">✏️ 권역 그리기</div>
 
-        <!-- 허브 선택 -->
-        <select class="hub-select" id="hubSelect">
-          <option value="">— 허브 선택 —</option>
-        </select>
+    <!-- 허브 선택 -->
+    <select class="hub-select" id="hubSelect">
+      <option value="">— 허브 선택 —</option>
+    </select>
 
-        <!-- 브랜드 선택 -->
-        <select class="hub-select" id="brandSelect" style="margin-bottom:4px;border-color:#d0d6e2;font-size:12px;">
-          <option value="">— 브랜드 선택 (선택사항) —</option>
-          <option value="바로고">바로고</option>
-          <option value="모아라인">모아라인</option>
-          <option value="딜버">딜버</option>
-        </select>
-        <div style="font-size:10px;color:var(--text-dim);margin-bottom:10px;padding:0 2px">특정 브랜드 권역을 그릴 때 선택하세요</div>
+    <!-- 브랜드 선택 -->
+    <select class="hub-select" id="brandSelect" style="margin-bottom:4px;border-color:#d0d6e2;font-size:12px;">
+      <option value="">— 브랜드 선택 (선택사항) —</option>
+      <option value="바로고">바로고</option>
+      <option value="모아라인">모아라인</option>
+      <option value="딜버">딜버</option>
+    </select>
+    <div style="font-size:10px;color:var(--text-dim);margin-bottom:10px;padding:0 2px">특정 브랜드 권역을 그릴 때 선택하세요</div>
 
-        <!-- 허브 추가 -->
-        <div style="margin-bottom:12px;">
-          <input class="hub-add-inp" id="hubAddInp" placeholder="새 허브명 입력" style="width:100%;border:1.5px solid var(--border);border-radius:8px;padding:9px 12px;font-family:'Pretendard',sans-serif;font-size:13px;font-weight:600;outline:none;color:var(--text);background:var(--white);margin-bottom:6px;" />
-          <button class="hub-add-btn" onclick="addHub()" style="width:100%;padding:9px;background:var(--accent);border:none;border-radius:8px;color:#fff;font-family:'Pretendard',sans-serif;font-size:13px;font-weight:700;cursor:pointer;">+ 허브 추가</button>
-        </div>
-
-        <div class="layer-tabs">
-          <button class="layer-tab zone active" id="tabZone" onclick="setLayer('zone')">🔵 기본 권역</button>
-          <button class="layer-tab surcharge" id="tabSur" onclick="setLayer('surcharge')">🟠 할증 구역</button>
-        </div>
-        <div class="draw-btns">
-          <button class="draw-btn" id="drawToggle" onclick="toggleDraw()">✏️ 그리기 시작</button>
-          <button class="draw-btn" onclick="undoLast()">↩️ 마지막 점 취소</button>
-          <button class="draw-btn save" onclick="saveZone()">💾 저장</button>
-          <button class="draw-btn del" onclick="clearCurrent()">🗑 취소</button>
-        </div>
-      </div>
-
-      <!-- 저장된 권역 목록 -->
-      <div class="map-panel">
-        <div class="map-panel-title" style="display:flex;justify-content:space-between;align-items:center">
-          <span>📋 허브 관리</span>
-        </div>
-        <div class="hub-mgr-list" id="hubMgrList">
-          <div style="font-size:12px;color:var(--text-dim)">추가된 허브 없음</div>
-        </div>
-      </div>
-
+    <!-- 허브 추가 -->
+    <div style="margin-bottom:12px;">
+      <input class="hub-add-inp" id="hubAddInp" placeholder="새 허브명 입력" style="width:100%;border:1.5px solid var(--border);border-radius:8px;padding:9px 12px;font-family:'Pretendard',sans-serif;font-size:13px;font-weight:600;outline:none;color:var(--text);background:var(--white);margin-bottom:6px;" />
+      <button class="hub-add-btn" onclick="addHub()" style="width:100%;padding:9px;background:var(--accent);border:none;border-radius:8px;color:#fff;font-family:'Pretendard',sans-serif;font-size:13px;font-weight:700;cursor:pointer;">+ 허브 추가</button>
     </div>
-    <div class="map-status" id="mapStatus">허브를 추가하고 선택 후 그리기 시작</div>
+
+    <div class="layer-tabs">
+      <button class="layer-tab zone active" id="tabZone" onclick="setLayer('zone')">🔵 기본 권역</button>
+      <button class="layer-tab surcharge" id="tabSur" onclick="setLayer('surcharge')">🟠 할증 구역</button>
+    </div>
+    <div class="draw-btns">
+      <button class="draw-btn" id="drawToggle" onclick="toggleDraw()">✏️ 그리기 시작</button>
+      <button class="draw-btn" onclick="undoLast()">↩️ 마지막 점 취소</button>
+      <button class="draw-btn save" onclick="saveZone()">💾 저장</button>
+      <button class="draw-btn del" onclick="clearCurrent()">🗑 취소</button>
+    </div>
+  </div>
+
+  <!-- 저장된 권역 목록 -->
+  <div class="map-panel">
+    <div class="map-panel-title" style="display:flex;justify-content:space-between;align-items:center">
+      <span>📋 허브 관리</span>
+    </div>
+    <div class="hub-mgr-list" id="hubMgrList">
+      <div style="font-size:12px;color:var(--text-dim)">추가된 허브 없음</div>
+    </div>
+  </div>
+
+</div>
+<div class="map-status" id="mapStatus">허브를 추가하고 선택 후 그리기 시작</div>
+```
+
   </div>
 </div>
 
 <!-- 권역 지도 모달 -->
+
 <div class="modal-bg" id="zoneMapModal" style="z-index:600">
   <div style="background:#fff;border-radius:16px;width:92%;max-width:700px;max-height:90vh;overflow:hidden;box-shadow:0 20px 60px rgba(0,0,0,0.2);display:flex;flex-direction:column;">
     <!-- 헤더 -->
@@ -348,64 +355,58 @@
 let DB = [];
 
 function parseDBRow(row) {
-  const brand = String(row['브랜드명']||'').trim();
-  const storeFull = String(row['상점명']||'').trim();
-  // 상점명이 이미 브랜드명[점명] 형식인지 확인
-  const hasFormat = storeFull.includes('[') && storeFull.includes(']');
-  const key = hasFormat ? storeFull : (storeFull ? `${brand}[${storeFull}]` : brand);
-  // store는 [] 안쪽만 추출
-  const storeMatch = storeFull.match(/\[(.+?)\]/);
-  const store = storeMatch ? storeMatch[1] : storeFull;
-  const addr = String(row['상점주소']||'').trim();
-  const dong = extractDong(addr);
-  return {
-    key,
-    brand,
-    store,
-    address: addr,
-    dong,
-    lat: 0, lng: 0,
-    status: String(row['수행가능답변']||'확인필요').trim(),
-    hub: String(row['메인허브명']||'').trim(),
-    sharedHub: String(row['공유허브명']||'').trim(),
-    preDeductTotal: row['총판']!==undefined&&row['총판']!=='' ? String(row['총판']).trim() : '',
-    preDeductHub: row['허브']!==undefined&&row['허브']!=='' ? String(row['허브']).trim() : '',
-    hubOpen: String(row['허브오픈시간']||'').trim(),
-    hubClose: String(row['허브마감시간']||'').trim(),
-    deliveryCompany: String(row['수행배대사']||'').trim(),
-    hubManager: String(row['담당자2']||'').trim(),
-    memo: String(row['불가/보류사유']||'').trim(),
-  };
+const brand = String(row[‘브랜드명’]||’’).trim();
+const storeFull = String(row[‘상점명’]||’’).trim();
+const hasFormat = storeFull.includes(’[’) && storeFull.includes(’]’);
+const key = hasFormat ? storeFull : (storeFull ? `${brand}[${storeFull}]` : brand);
+const storeMatch = storeFull.match(/[(.+?)]/);
+const store = storeMatch ? storeMatch[1] : storeFull;
+const addr = String(row[‘상점주소’]||’’).trim();
+const dong = extractDong(addr);
+return {
+key, brand, store,
+address: addr, dong,
+lat: 0, lng: 0,
+status: String(row[‘수행가능답변’]||‘확인필요’).trim(),
+hub: String(row[‘메인허브명’]||’’).trim(),
+sharedHub: String(row[‘공유허브명’]||’’).trim(),
+preDeductTotal: row[‘총판’]!==undefined&&row[‘총판’]!==’’ ? String(row[‘총판’]).trim() : ‘’,
+preDeductHub: row[‘허브’]!==undefined&&row[‘허브’]!==’’ ? String(row[‘허브’]).trim() : ‘’,
+hubOpen: String(row[‘허브오픈시간’]||’’).trim(),
+hubClose: String(row[‘허브마감시간’]||’’).trim(),
+deliveryCompany: String(row[‘수행배대사’]||’’).trim(),
+hubManager: String(row[‘담당자2’]||’’).trim(),
+memo: String(row[‘불가/보류사유’]||’’).trim(),
+};
 }
 
 async function loadDBFromSheet(){
-  try{
-    const res = await fetch(SCRIPT_URL+'?action=getDB');
-    const data = await res.json();
-    DB = data.filter(r=>r['브랜드명']||r['상점명']).map(parseDBRow);
-    updateStats();
-    console.log('DB 로드 완료:', DB.length, '개');
-  }catch(e){console.log('DB 로드 실패',e);}
+try{
+const res = await fetch(SCRIPT_URL+’?action=getDB’);
+const data = await res.json();
+DB = data.filter(r=>r[‘브랜드명’]||r[‘상점명’]).map(parseDBRow);
+updateStats();
+console.log(‘DB 로드 완료:’, DB.length, ‘개’);
+}catch(e){console.log(‘DB 로드 실패’,e);}
 }
 
 function updateStats(){
-  const total = DB.length;
-  const possible = DB.filter(d=>d.status&&d.status!=='X'&&d.status!=='확인필요'&&d.status!=='').length;
-  const impossible = DB.filter(d=>d.status==='X'||d.status==='불가'||d.status==='수행불가').length;
-  const check = total - possible - impossible;
-  const tEl=document.getElementById('statTotal');
-  const pEl=document.getElementById('statPossible');
-  const iEl=document.getElementById('statImpossible');
-  const cEl=document.getElementById('statCheck');
-  if(tEl)tEl.textContent=total;
-  if(pEl)pEl.textContent=possible;
-  if(iEl)iEl.textContent=impossible;
-  if(cEl)cEl.textContent=check;
+const total = DB.length;
+const possible = DB.filter(d=>d.status&&d.status!==‘X’&&d.status!==‘확인필요’&&d.status!==’’).length;
+const impossible = DB.filter(d=>d.status===‘X’||d.status===‘불가’||d.status===‘수행불가’).length;
+const check = total - possible - impossible;
+const tEl=document.getElementById(‘statTotal’);
+const pEl=document.getElementById(‘statPossible’);
+const iEl=document.getElementById(‘statImpossible’);
+const cEl=document.getElementById(‘statCheck’);
+if(tEl)tEl.textContent=total;
+if(pEl)pEl.textContent=possible;
+if(iEl)iEl.textContent=impossible;
+if(cEl)cEl.textContent=check;
 }
 
-const SCRIPT_URL='https://script.google.com/macros/s/AKfycbwBt4hJMPjXRT2RaKhWyRCVYLg4vO6Bev_8gULP52OhWz6SRPDr3nQLayNulzF8kjsDWA/exec';
+const SCRIPT_URL=‘https://script.google.com/macros/s/AKfycbwBt4hJMPjXRT2RaKhWyRCVYLg4vO6Bev_8gULP52OhWz6SRPDr3nQLayNulzF8kjsDWA/exec’;
 
-// 허브 목록 (동적 관리)
 let hubList=[];
 let savedZones={};
 
@@ -413,511 +414,509 @@ let savedZones={};
 // 구글시트 연동
 // ══════════════════════════════
 async function loadZonesFromSheet(){
-  try{
-    const res=await fetch(SCRIPT_URL+'?action=getZones');
-    const data=await res.json();
-    hubList=data.hubList||[];
-    const sheetHubs=new Set(hubList.map(h=>h.name));
+try{
+const res=await fetch(SCRIPT_URL+’?action=getZones’);
+const data=await res.json();
+hubList=data.hubList||[];
+const sheetHubs=new Set(hubList.map(h=>h.name));
 
-    // 시트에 없는 허브 제거
-    Object.keys(savedZones).forEach(k=>{
-      if(!sheetHubs.has(k)){
-        if(savedZones[k].zonePolygon) savedZones[k].zonePolygon.setMap(null);
-        if(savedZones[k].surPolygons) savedZones[k].surPolygons.forEach(p=>p.setMap(null));
-        delete savedZones[k];
-      }
-    });
-
-    Object.entries(data.zones||{}).forEach(([k,v])=>{
-      if(!savedZones[k]) savedZones[k]={zonePolygon:null,surPolygons:[],zonePath:[],surPaths:[]};
-      savedZones[k].zonePath=v.zonePath||[];
-      savedZones[k].surPaths = v.surPaths || (v.surPath?.length>=3 ? [v.surPath] : []);
-      savedZones[k].brand = v.brand||'';
-    });
-    renderHubSelect();
-    renderHubMgrList();
-    if(map) restorePolygonsOnMap();
-  }catch(e){console.log('시트 로드 실패',e);}
-}
-
-async function saveZonesToSheet(){
-  try{
-    const zonesData={};
-    Object.entries(savedZones).forEach(([k,v])=>{
-      zonesData[k]={zonePath:v.zonePath||[],surPaths:v.surPaths||[],brand:v.brand||''};
-    });
-    await fetch(SCRIPT_URL,{
-      method:'POST',
-      body:JSON.stringify({action:'saveZones',zones:zonesData,hubList})
-    });
-  }catch(e){console.log('시트 저장 실패',e);}
-}
-
-// localStorage 백업도 유지
-function saveToStorage(){
-  try{
-    const data={hubList,zones:Object.fromEntries(Object.entries(savedZones).map(([k,v])=>([k,{zonePath:v.zonePath,surPaths:v.surPaths}])))};
-    localStorage.setItem('barogo_data',JSON.stringify(data));
-  }catch(e){}
-}
-
-function loadFromStorage(){
-  try{
-    const raw=localStorage.getItem('barogo_data');
-    if(!raw) return false;
-    const data=JSON.parse(raw);
-    hubList=data.hubList||[];
-    Object.entries(data.zones||{}).forEach(([k,v])=>{
-      // 구버전 surPath 호환
-      const surPaths = v.surPaths || (v.surPath?.length>=3 ? [v.surPath] : []);
-      savedZones[k]={zonePolygon:null,surPolygons:[],zonePath:v.zonePath||[],surPaths,brand:v.brand||''};
-    });
-    renderHubSelect();
-    renderHubMgrList();
-    return true;
-  }catch(e){return false;}
-}
-
-function restorePolygonsOnMap(){
-  Object.entries(savedZones).forEach(([hub,v])=>{
-    if(hubVisible[hub] === undefined) hubVisible[hub] = true;
-    const show = hubVisible[hub];
-    const hubColor='#2563eb';
-    // 기존 폴리곤 제거
-    if(v.zonePolygon){try{v.zonePolygon.setMap(null);}catch(e){}}
-    (v.surPolygons||[]).forEach(p=>{try{p.setMap(null);}catch(e){}});
-    v.zonePolygon=null; v.surPolygons=[];
-    // 새로 생성
-    if(v.zonePath?.length>=3){
-      v.zonePolygon=new kakao.maps.Polygon({map,path:v.zonePath.map(p=>new kakao.maps.LatLng(p.lat,p.lng)),strokeWeight:2,strokeColor:hubColor,strokeOpacity:1,fillColor:hubColor,fillOpacity:0.15});
-      if(!show) v.zonePolygon.setMap(null);
-    }
-    v.surPolygons=(v.surPaths||[]).filter(sp=>sp?.length>=3).map(sp=>{
-      const poly=new kakao.maps.Polygon({map,path:sp.map(p=>new kakao.maps.LatLng(p.lat,p.lng)),strokeWeight:2,strokeColor:'#ea580c',strokeOpacity:1,fillColor:'#ea580c',fillOpacity:0.25});
-      if(!show) poly.setMap(null);
-      return poly;
-    });
-  });
-}
-
-// 페이지 로드 시 - localStorage 먼저, 그다음 시트에서 최신 데이터
-loadFromStorage();
-loadZonesFromSheet();
-loadDBFromSheet().then(() => {
-  const params = new URLSearchParams(window.location.search);
-  const store = params.get('store') || '';
-  const address = params.get('address') || '';
-  if (params.get('api') === '1') {
-    if (store && address) apiMatch(store, address);
-  } else if (store && address) {
-    document.getElementById('storeInput').value = store;
-    document.getElementById('addrInput').value = address;
-    doSearch();
+```
+Object.keys(savedZones).forEach(k=>{
+  if(!sheetHubs.has(k)){
+    if(savedZones[k].zonePolygon) savedZones[k].zonePolygon.setMap(null);
+    if(savedZones[k].surPolygons) savedZones[k].surPolygons.forEach(p=>p.setMap(null));
+    delete savedZones[k];
   }
 });
 
+Object.entries(data.zones||{}).forEach(([k,v])=>{
+  if(!savedZones[k]) savedZones[k]={zonePolygon:null,surPolygons:[],zonePath:[],surPaths:[]};
+  savedZones[k].zonePath=v.zonePath||[];
+  savedZones[k].surPaths = v.surPaths || (v.surPath?.length>=3 ? [v.surPath] : []);
+  savedZones[k].brand = v.brand||'';
+});
+renderHubSelect();
+renderHubMgrList();
+if(map) restorePolygonsOnMap();
+```
+
+}catch(e){console.log(‘시트 로드 실패’,e);}
+}
+
+async function saveZonesToSheet(){
+try{
+const zonesData={};
+Object.entries(savedZones).forEach(([k,v])=>{
+zonesData[k]={zonePath:v.zonePath||[],surPaths:v.surPaths||[],brand:v.brand||’’};
+});
+await fetch(SCRIPT_URL,{
+method:‘POST’,
+body:JSON.stringify({action:‘saveZones’,zones:zonesData,hubList})
+});
+}catch(e){console.log(‘시트 저장 실패’,e);}
+}
+
+function saveToStorage(){
+try{
+const data={hubList,zones:Object.fromEntries(Object.entries(savedZones).map(([k,v])=>([k,{zonePath:v.zonePath,surPaths:v.surPaths,brand:v.brand||’’}])))};
+localStorage.setItem(‘barogo_data’,JSON.stringify(data));
+}catch(e){}
+}
+
+function loadFromStorage(){
+try{
+const raw=localStorage.getItem(‘barogo_data’);
+if(!raw) return false;
+const data=JSON.parse(raw);
+hubList=data.hubList||[];
+Object.entries(data.zones||{}).forEach(([k,v])=>{
+const surPaths = v.surPaths || (v.surPath?.length>=3 ? [v.surPath] : []);
+savedZones[k]={zonePolygon:null,surPolygons:[],zonePath:v.zonePath||[],surPaths,brand:v.brand||’’};
+});
+renderHubSelect();
+renderHubMgrList();
+return true;
+}catch(e){return false;}
+}
+
+function restorePolygonsOnMap(){
+Object.entries(savedZones).forEach(([hub,v])=>{
+if(hubVisible[hub] === undefined) hubVisible[hub] = true;
+const show = hubVisible[hub];
+const hubColor=’#2563eb’;
+if(v.zonePolygon){try{v.zonePolygon.setMap(null);}catch(e){}}
+(v.surPolygons||[]).forEach(p=>{try{p.setMap(null);}catch(e){}});
+v.zonePolygon=null; v.surPolygons=[];
+if(v.zonePath?.length>=3){
+v.zonePolygon=new kakao.maps.Polygon({map,path:v.zonePath.map(p=>new kakao.maps.LatLng(p.lat,p.lng)),strokeWeight:2,strokeColor:hubColor,strokeOpacity:1,fillColor:hubColor,fillOpacity:0.15});
+if(!show) v.zonePolygon.setMap(null);
+}
+v.surPolygons=(v.surPaths||[]).filter(sp=>sp?.length>=3).map(sp=>{
+const poly=new kakao.maps.Polygon({map,path:sp.map(p=>new kakao.maps.LatLng(p.lat,p.lng)),strokeWeight:2,strokeColor:’#ea580c’,strokeOpacity:1,fillColor:’#ea580c’,fillOpacity:0.25});
+if(!show) poly.setMap(null);
+return poly;
+});
+});
+}
+
+loadFromStorage();
+loadZonesFromSheet();
+loadDBFromSheet().then(() => {
+const params = new URLSearchParams(window.location.search);
+const store = params.get(‘store’) || ‘’;
+const address = params.get(‘address’) || ‘’;
+if (params.get(‘api’) === ‘1’) {
+if (store && address) apiMatch(store, address);
+} else if (store && address) {
+document.getElementById(‘storeInput’).value = store;
+document.getElementById(‘addrInput’).value = address;
+doSearch();
+}
+});
+
 async function apiMatch(raw, addr) {
-  document.body.innerHTML = '<pre id="apiOut" style="font-family:monospace;padding:20px;white-space:pre-wrap;word-break:break-all"></pre>';
-  const out = document.getElementById('apiOut');
-  out.textContent = '매칭 중...';
+document.body.innerHTML = ‘<pre id="apiOut" style="font-family:monospace;padding:20px;white-space:pre-wrap;word-break:break-all"></pre>’;
+const out = document.getElementById(‘apiOut’);
+out.textContent = ‘매칭 중…’;
 
-  // 카카오 REST API로 좌표 변환 (SDK 대신)
-  async function geocodeREST(address) {
-    try {
-      const res = await fetch("https://dapi.kakao.com/v2/local/search/address.json?query=" + encodeURIComponent(address), {
-        headers: { "Authorization": "KakaoAK 4e2ae5c258e8d075c16cd55ba0472b84" }
-      });
-      const data = await res.json();
-      if (data.documents && data.documents.length > 0) {
-        const d = data.documents[0];
-        const dong = d.address?.region_3depth_name || d.road_address?.region_3depth_name || "";
-        return { lat: parseFloat(d.y), lng: parseFloat(d.x), dong };
-      }
-    } catch(e) {}
-    return null;
-  }
+async function geocodeREST(address) {
+try {
+const res = await fetch(“https://dapi.kakao.com/v2/local/search/address.json?query=” + encodeURIComponent(address), {
+headers: { “Authorization”: “KakaoAK 4e2ae5c258e8d075c16cd55ba0472b84” }
+});
+const data = await res.json();
+if (data.documents && data.documents.length > 0) {
+const d = data.documents[0];
+const dong = d.address?.region_3depth_name || d.road_address?.region_3depth_name || “”;
+return { lat: parseFloat(d.y), lng: parseFloat(d.x), dong };
+}
+} catch(e) {}
+return null;
+}
 
-  const inputCoord = await geocodeREST(addr);
-  const inDong = inputCoord?.dong || extractDong(addr) || '';
-  const parsed = parseKey(raw);
+const inputCoord = await geocodeREST(addr);
+const inDong = inputCoord?.dong || extractDong(addr) || ‘’;
+const parsed = parseKey(raw);
 
-  const preScored = DB.map(item => {
-    const ns = strSim(parsed.store, item.store);
-    return {...item, _ns: ns};
-  }).sort((a,b) => b._ns - a._ns).slice(0, 30);
+const preScored = DB.map(item => {
+const ns = strSim(parsed.store, item.store);
+return {…item, _ns: ns};
+}).sort((a,b) => b._ns - a._ns).slice(0, 30);
 
-  await Promise.all(preScored.map(async item => {
-    if ((!item.lat || !item.lng) && item.address) {
-      const c = await geocodeREST(item.address);
-      if (c) { item.lat = c.lat; item.lng = c.lng; item.dong = c.dong || item.dong; }
-    }
-  }));
+await Promise.all(preScored.map(async item => {
+if ((!item.lat || !item.lng) && item.address) {
+const c = await geocodeREST(item.address);
+if (c) { item.lat = c.lat; item.lng = c.lng; item.dong = c.dong || item.dong; }
+}
+}));
 
-  const scored = preScored.map(item => {
-    const ns = item._ns;
-    let dSc = 0, km = null;
-    if (inputCoord && item.lat && item.lng) {
-      km = haversine(inputCoord.lat, inputCoord.lng, item.lat, item.lng);
-      dSc = distScore(km);
-    }
-    const dong = dongScore(inDong, item.dong, km, addr, item.address);
-    const total = Math.min(1, ns * 0.10 + dong * 0.20 + dSc * 0.70);
-    return {
-      ...item,
-      _km: km ? km.toFixed(2) : null,
-      score: Math.round(total * 100),
-      sd: {name: Math.round(ns*100), dong: Math.round(dong*100), dist: Math.round(dSc*100), total: Math.round(total*100)}
-    };
-  }).sort((a,b) => b.score - a.score);
+const scored = preScored.map(item => {
+const ns = item._ns;
+let dSc = 0, km = null;
+if (inputCoord && item.lat && item.lng) {
+km = haversine(inputCoord.lat, inputCoord.lng, item.lat, item.lng);
+dSc = distScore(km);
+}
+const dong = dongScore(inDong, item.dong, km, addr, item.address);
+const total = Math.min(1, ns * 0.10 + dong * 0.20 + dSc * 0.70);
+return {
+…item,
+_km: km ? km.toFixed(2) : null,
+score: Math.round(total * 100),
+sd: {name: Math.round(ns*100), dong: Math.round(dong*100), dist: Math.round(dSc*100), total: Math.round(total*100)}
+};
+}).sort((a,b) => b.score - a.score);
 
-  const best = scored[0];
-  const hasSurcharge = inputCoord && best?.hub && savedZones[best.hub]?.surPaths?.length
-    ? (savedZones[best.hub].surPaths||[]).some(sp => sp?.length>=3 && pointInPolygon(inputCoord.lat, inputCoord.lng, sp))
-    : false;
+const best = scored[0];
+const hasSurcharge = inputCoord && best?.hub && savedZones[best.hub]?.surPaths?.length
+? (savedZones[best.hub].surPaths||[]).some(sp => sp?.length>=3 && pointInPolygon(inputCoord.lat, inputCoord.lng, sp))
+: false;
 
-  const result = {
-    input: { store: raw, address: addr, lat: inputCoord?.lat||0, lng: inputCoord?.lng||0 },
-    best: best ? {
-      storeName: best.key,
-      hub: best.hub || '',
-      sharedHub: best.sharedHub || '',
-      preDeductTotal: best.preDeductTotal || '',
-      preDeductHub: best.preDeductHub || '',
-      hubOpen: best.hubOpen || '',
-      hubClose: best.hubClose || '',
-      deliveryCompany: best.deliveryCompany || '',
-      hubManager: best.hubManager || '',
-      status: best.status || '',
-      memo: best.memo || '',
-      hasSurcharge,
-      score: best.score,
-      km: best._km,
-      sd: best.sd
-    } : null,
-    candidates: scored.slice(0,3).map(x => ({storeName: x.key, hub: x.hub, score: x.score, km: x._km}))
-  };
+const result = {
+input: { store: raw, address: addr, lat: inputCoord?.lat||0, lng: inputCoord?.lng||0 },
+best: best ? {
+storeName: best.key,
+hub: best.hub || ‘’,
+sharedHub: best.sharedHub || ‘’,
+preDeductTotal: best.preDeductTotal || ‘’,
+preDeductHub: best.preDeductHub || ‘’,
+hubOpen: best.hubOpen || ‘’,
+hubClose: best.hubClose || ‘’,
+deliveryCompany: best.deliveryCompany || ‘’,
+hubManager: best.hubManager || ‘’,
+status: best.status || ‘’,
+memo: best.memo || ‘’,
+hasSurcharge,
+score: best.score,
+km: best._km,
+sd: best.sd
+} : null,
+candidates: scored.slice(0,3).map(x => ({storeName: x.key, hub: x.hub, score: x.score, km: x._km}))
+};
 
-  out.textContent = JSON.stringify(result, null, 2);
+out.textContent = JSON.stringify(result, null, 2);
 }
 
 // ══════════════════════════════
 // 탭
 // ══════════════════════════════
 function showPage(name,el){
-  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
-  document.querySelectorAll('.nav-tab').forEach(t=>t.classList.remove('active'));
-  document.getElementById('page-'+name).classList.add('active');
-  el.classList.add('active');
-  if(name==='map'){
-    if(!mapInitialized){
-      if(window.kakaoMapReady)initMap();
-      else window.pendingMapInit=true;
-    } else {
-      // 탭 전환 시 폴리곤 재복원
-      restorePolygonsOnMap();
-    }
-  }
+document.querySelectorAll(’.page’).forEach(p=>p.classList.remove(‘active’));
+document.querySelectorAll(’.nav-tab’).forEach(t=>t.classList.remove(‘active’));
+document.getElementById(‘page-’+name).classList.add(‘active’);
+el.classList.add(‘active’);
+if(name===‘map’){
+if(!mapInitialized){
+if(window.kakaoMapReady)initMap();
+else window.pendingMapInit=true;
+} else {
+restorePolygonsOnMap();
+}
+}
 }
 
 // ══════════════════════════════
 // 허브 추가/삭제
 // ══════════════════════════════
 function addHub(){
-  const name=document.getElementById('hubAddInp').value.trim();
-  if(!name){alert('허브명을 입력해주세요!');return;}
-  if(hubList.find(h=>h.name===name)){alert('이미 존재하는 허브입니다!');return;}
-  hubList.push({name});
-  document.getElementById('hubAddInp').value='';
-  renderHubSelect();
-  renderHubMgrList();
-  saveToStorage();
-  saveZonesToSheet();
-  document.getElementById('hubSelect').value=name;
+const name=document.getElementById(‘hubAddInp’).value.trim();
+if(!name){alert(‘허브명을 입력해주세요!’);return;}
+if(hubList.find(h=>h.name===name)){alert(‘이미 존재하는 허브입니다!’);return;}
+hubList.push({name});
+document.getElementById(‘hubAddInp’).value=’’;
+renderHubSelect();
+renderHubMgrList();
+saveToStorage();
+saveZonesToSheet();
+document.getElementById(‘hubSelect’).value=name;
 }
 
 function deleteHub(name){
-  if(!confirm(`[${name}] 허브를 삭제할까요?\n그려진 권역도 함께 삭제됩니다.`))return;
-  hubList=hubList.filter(h=>h.name!==name);
-  if(savedZones[name]){
-    if(savedZones[name].zonePolygon)savedZones[name].zonePolygon.setMap(null);
-    (savedZones[name].surPolygons||[]).forEach(p=>p.setMap(null));
-    delete savedZones[name];
-  }
-  renderHubSelect();
-  renderHubMgrList();
-  saveToStorage();
-  saveZonesToSheet();
+if(!confirm(`[${name}] 허브를 삭제할까요?\n그려진 권역도 함께 삭제됩니다.`))return;
+hubList=hubList.filter(h=>h.name!==name);
+if(savedZones[name]){
+if(savedZones[name].zonePolygon)savedZones[name].zonePolygon.setMap(null);
+(savedZones[name].surPolygons||[]).forEach(p=>p.setMap(null));
+delete savedZones[name];
+}
+renderHubSelect();
+renderHubMgrList();
+saveToStorage();
+saveZonesToSheet();
 }
 
 function renderHubSelect(){
-  const sel=document.getElementById('hubSelect');
-  const cur=sel.value;
-  sel.innerHTML='<option value="">— 허브 선택 —</option>';
-  hubList.forEach(h=>{
-    const opt=document.createElement('option');
-    opt.value=h.name; opt.textContent=h.name;
-    sel.appendChild(opt);
-  });
-  if(hubList.find(h=>h.name===cur))sel.value=cur;
+const sel=document.getElementById(‘hubSelect’);
+const cur=sel.value;
+sel.innerHTML=’<option value="">— 허브 선택 —</option>’;
+hubList.forEach(h=>{
+const opt=document.createElement(‘option’);
+opt.value=h.name; opt.textContent=h.name;
+sel.appendChild(opt);
+});
+if(hubList.find(h=>h.name===cur))sel.value=cur;
 }
 
-// 허브 표시 여부 (기본 모두 표시)
 let hubVisible = {};
 
 function toggleHubVisible(name) {
-  hubVisible[name] = hubVisible[name] === false ? true : false;
-  if(!map) return;
-  const z = savedZones[name];
-  if(!z) return;
-  const show = hubVisible[name];
-  if(show) {
-    // 기본 권역
-    if(!z.zonePolygon && z.zonePath?.length>=3) {
-      z.zonePolygon = new kakao.maps.Polygon({map, path:z.zonePath.map(p=>new kakao.maps.LatLng(p.lat,p.lng)), strokeWeight:2,strokeColor:'#2563eb',strokeOpacity:1,fillColor:'#2563eb',fillOpacity:0.15});
-    } else if(z.zonePolygon) z.zonePolygon.setMap(map);
-    // 할증 구역 - 항상 새로 생성해서 확실히 표시
-    (z.surPolygons||[]).forEach(p=>{try{p.setMap(null);}catch(e){}});
-    z.surPolygons = (z.surPaths||[]).filter(sp=>sp?.length>=3).map(sp=>
-      new kakao.maps.Polygon({map, path:sp.map(p=>new kakao.maps.LatLng(p.lat,p.lng)), strokeWeight:2,strokeColor:'#ea580c',strokeOpacity:1,fillColor:'#ea580c',fillOpacity:0.25})
-    );
-  } else {
-    if(z.zonePolygon) z.zonePolygon.setMap(null);
-    (z.surPolygons||[]).forEach(p=>{try{p.setMap(null);}catch(e){}});
-  }
+hubVisible[name] = hubVisible[name] === false ? true : false;
+if(!map) return;
+const z = savedZones[name];
+if(!z) return;
+const show = hubVisible[name];
+if(show) {
+if(!z.zonePolygon && z.zonePath?.length>=3) {
+z.zonePolygon = new kakao.maps.Polygon({map, path:z.zonePath.map(p=>new kakao.maps.LatLng(p.lat,p.lng)), strokeWeight:2,strokeColor:’#2563eb’,strokeOpacity:1,fillColor:’#2563eb’,fillOpacity:0.15});
+} else if(z.zonePolygon) z.zonePolygon.setMap(map);
+(z.surPolygons||[]).forEach(p=>{try{p.setMap(null);}catch(e){}});
+z.surPolygons = (z.surPaths||[]).filter(sp=>sp?.length>=3).map(sp=>
+new kakao.maps.Polygon({map, path:sp.map(p=>new kakao.maps.LatLng(p.lat,p.lng)), strokeWeight:2,strokeColor:’#ea580c’,strokeOpacity:1,fillColor:’#ea580c’,fillOpacity:0.25})
+);
+} else {
+if(z.zonePolygon) z.zonePolygon.setMap(null);
+(z.surPolygons||[]).forEach(p=>{try{p.setMap(null);}catch(e){}});
+}
 }
 
+// ══════════════════════════════
+// [수정] 허브 관리 목록 렌더링 — 브랜드명 노출 + 브랜드 변경 버튼 추가
+// ══════════════════════════════
 function renderHubMgrList(){
-  const panel=document.getElementById('hubMgrList');
-  if(!hubList.length){panel.innerHTML='<div style="font-size:12px;color:var(--text-dim)">추가된 허브 없음</div>';return;}
-  panel.innerHTML=hubList.map(h=>{
-    const visible = hubVisible[h.name] !== false;
-    const surCount = (savedZones[h.name]?.surPaths||[]).length;
-    const surBadge = surCount>0 ? `<span style="font-size:10px;color:#ea580c;background:#fff7ed;border:1px solid #fed7aa;border-radius:4px;padding:1px 6px;flex-shrink:0">할증 ${surCount}개</span>` : '';
-    const brandName = savedZones[h.name]?.brand;
-    const brandBadge = brandName ? `<span style="font-size:10px;color:#059669;background:#ecfdf5;border:1px solid #6ee7b7;border-radius:4px;padding:1px 6px;flex-shrink:0">${brandName}</span>` : '';
-    return `
-    <div class="hub-mgr-item" style="flex-direction:column;align-items:stretch;gap:6px">
-      <label style="display:flex;align-items:center;gap:6px;cursor:pointer">
-        <input type="checkbox" ${visible?'checked':''} onchange="toggleHubVisible('${h.name}')"
-          style="width:15px;height:15px;accent-color:#2563eb;cursor:pointer;flex-shrink:0">
-        <div class="hub-mgr-name">${h.name}</div>
-        ${brandBadge}
-        ${surBadge}
-      </label>
-      <div style="display:flex;gap:4px;flex-wrap:nowrap">
-        <button class="btn btn-sm" style="font-size:10px;padding:3px 7px;border:1px solid var(--border);background:var(--white);white-space:nowrap" onclick="renameHub('${h.name}')">✏️ 허브명 변경</button>
-        <button class="btn btn-sm" style="font-size:10px;padding:3px 7px;border:1px solid #bfdbfe;background:#eff6ff;color:var(--accent);white-space:nowrap" onclick="redrawHub('${h.name}')">🔄 권역 다시 그리기</button>
-        <button class="btn btn-sm btn-danger" style="font-size:10px;padding:3px 7px;white-space:nowrap" onclick="deleteHub('${h.name}')">삭제</button>
-      </div>
-    </div>`;
-  }).join('');
+const panel=document.getElementById(‘hubMgrList’);
+if(!hubList.length){panel.innerHTML=’<div style="font-size:12px;color:var(--text-dim)">추가된 허브 없음</div>’;return;}
+panel.innerHTML=hubList.map(h=>{
+const visible = hubVisible[h.name] !== false;
+const surCount = (savedZones[h.name]?.surPaths||[]).length;
+const surBadge = surCount>0 ? `<span style="font-size:10px;color:#ea580c;background:#fff7ed;border:1px solid #fed7aa;border-radius:4px;padding:1px 6px;flex-shrink:0">할증 ${surCount}개</span>` : ‘’;
+const brandName = savedZones[h.name]?.brand || ‘’;
+const brandBadge = brandName
+? `<span style="font-size:10px;color:#059669;background:#ecfdf5;border:1px solid #6ee7b7;border-radius:4px;padding:1px 6px;flex-shrink:0">${brandName}</span>`
+: `<span style="font-size:10px;color:#9ca3af;background:#f3f4f6;border:1px solid #e4e8f0;border-radius:4px;padding:1px 6px;flex-shrink:0">브랜드없음</span>`;
+return ` <div class="hub-mgr-item" style="flex-direction:column;align-items:stretch;gap:6px"> <label style="display:flex;align-items:center;gap:6px;cursor:pointer"> <input type="checkbox" ${visible?'checked':''} onchange="toggleHubVisible('${h.name}')" style="width:15px;height:15px;accent-color:#2563eb;cursor:pointer;flex-shrink:0"> <div class="hub-mgr-name">${h.name}</div> ${brandBadge} ${surBadge} </label> <div style="display:flex;gap:4px;flex-wrap:nowrap"> <button class="btn btn-sm" style="font-size:10px;padding:3px 7px;border:1px solid var(--border);background:var(--white);white-space:nowrap" onclick="renameHub('${h.name}')">✏️ 허브명 변경</button> <button class="btn btn-sm" style="font-size:10px;padding:3px 7px;border:1px solid #6ee7b7;background:#ecfdf5;color:#059669;white-space:nowrap" onclick="changeBrand('${h.name}')">🏷 브랜드 변경</button> <button class="btn btn-sm" style="font-size:10px;padding:3px 7px;border:1px solid #bfdbfe;background:#eff6ff;color:var(--accent);white-space:nowrap" onclick="redrawHub('${h.name}')">🔄 권역 다시 그리기</button> <button class="btn btn-sm btn-danger" style="font-size:10px;padding:3px 7px;white-space:nowrap" onclick="deleteHub('${h.name}')">삭제</button> </div> </div>`;
+}).join(’’);
 }
 
 function renameHub(oldName){
-  const newName = prompt(`새 허브명을 입력해주세요.`, oldName);
-  if(!newName||newName===oldName)return;
-  if(hubList.find(h=>h.name===newName)){alert('이미 존재하는 허브명이에요!');return;}
-  // hubList 업데이트
-  hubList=hubList.map(h=>h.name===oldName?{...h,name:newName}:h);
-  // savedZones 키 변경
-  if(savedZones[oldName]){
-    savedZones[newName]=savedZones[oldName];
-    delete savedZones[oldName];
-  }
-  if(hubVisible[oldName]!==undefined){
-    hubVisible[newName]=hubVisible[oldName];
-    delete hubVisible[oldName];
-  }
-  renderHubSelect();
-  renderHubMgrList();
-  saveToStorage();
-  saveZonesToSheet();
+const newName = prompt(`새 허브명을 입력해주세요.`, oldName);
+if(!newName||newName===oldName)return;
+if(hubList.find(h=>h.name===newName)){alert(‘이미 존재하는 허브명이에요!’);return;}
+hubList=hubList.map(h=>h.name===oldName?{…h,name:newName}:h);
+if(savedZones[oldName]){
+savedZones[newName]=savedZones[oldName];
+delete savedZones[oldName];
+}
+if(hubVisible[oldName]!==undefined){
+hubVisible[newName]=hubVisible[oldName];
+delete hubVisible[oldName];
+}
+renderHubSelect();
+renderHubMgrList();
+saveToStorage();
+saveZonesToSheet();
+}
+
+// ══════════════════════════════
+// [신규] 브랜드 변경 함수
+// ══════════════════════════════
+function changeBrand(name) {
+const brands = [’’, ‘바로고’, ‘모아라인’, ‘딜버’];
+const current = savedZones[name]?.brand || ‘’;
+const optionsList = brands.map((b, i) => `${i}: ${b || '(없음)'}`).join(’\n’);
+const input = prompt(
+`[${name}] 브랜드를 선택해주세요.\n\n${optionsList}\n\n번호 입력 또는 직접 브랜드명 입력:`,
+current
+);
+if (input === null) return;
+
+let newBrand = input.trim();
+if (/^\d$/.test(newBrand) && brands[parseInt(newBrand)] !== undefined) {
+newBrand = brands[parseInt(newBrand)];
+}
+
+if (!savedZones[name]) {
+savedZones[name] = { zonePolygon: null, surPolygons: [], zonePath: [], surPaths: [], brand: ‘’ };
+}
+savedZones[name].brand = newBrand;
+renderHubMgrList();
+saveToStorage();
+saveZonesToSheet();
 }
 
 function redrawHub(name){
-  if(!confirm(`[${name}] 권역을 다시 그릴까요?\n기존 기본권역과 할증구역이 모두 지워집니다.`))return;
-  const z=savedZones[name];
-  if(z){
-    if(z.zonePolygon){z.zonePolygon.setMap(null);z.zonePolygon=null;}
-    (z.surPolygons||[]).forEach(p=>{try{p.setMap(null);}catch(e){}});
-    z.surPolygons=[];z.zonePath=[];z.surPaths=[];
-  }
-  // 해당 허브 선택 후 그리기 모드로
-  document.getElementById('hubSelect').value=name;
-  setLayer('zone');
-  saveToStorage();
-  saveZonesToSheet();
-  renderHubMgrList();
+if(!confirm(`[${name}] 권역을 다시 그릴까요?\n기존 기본권역과 할증구역이 모두 지워집니다.`))return;
+const z=savedZones[name];
+if(z){
+if(z.zonePolygon){z.zonePolygon.setMap(null);z.zonePolygon=null;}
+(z.surPolygons||[]).forEach(p=>{try{p.setMap(null);}catch(e){}});
+z.surPolygons=[];z.zonePath=[];z.surPaths=[];
+}
+document.getElementById(‘hubSelect’).value=name;
+setLayer(‘zone’);
+saveToStorage();
+saveZonesToSheet();
+renderHubMgrList();
 }
 
 // ══════════════════════════════
 // 매칭 로직
 // ══════════════════════════════
-function parseKey(raw){const m=raw.match(/^(.+?)\[(.+?)\]$/);return m?{brand:m[1].trim(),store:m[2].trim()}:{brand:raw.trim(),store:""};}
-function extractDong(a){const m=(a||"").match(/([가-힣]+동|[가-힣]+가)\b/);return m?m[1]:"";}
-function norm(s){return(s||"").replace(/\s/g,"").toLowerCase();}
+function parseKey(raw){const m=raw.match(/^(.+?)[(.+?)]$/);return m?{brand:m[1].trim(),store:m[2].trim()}:{brand:raw.trim(),store:””};}
+function extractDong(a){const m=(a||””).match(/([가-힣]+동|[가-힣]+가)\b/);return m?m[1]:””;}
+function norm(s){return(s||””).replace(/\s/g,””).toLowerCase();}
 function strSim(a, b){
-  // [] 안 단어만 추출해서 비교
-  const extractStore = s => { const m = (s||'').match(/\[(.+?)\]/); return m ? m[1] : s; };
-  a = norm(extractStore(a));
-  b = norm(extractStore(b));
-  if(!a || !b) return 0;
-  if(a === b) return 1;
-  // 연속 공통 부분 문자열 최대 길이
-  let maxCommon = 0;
-  for(let i = 0; i < a.length; i++){
-    for(let j = i + 1; j <= a.length; j++){
-      const sub = a.slice(i, j);
-      if(b.includes(sub) && sub.length > maxCommon) maxCommon = sub.length;
-    }
-  }
-  if(maxCommon >= 4) return 1.0;
-  if(maxCommon >= 3) return 0.9;
-  if(maxCommon >= 2) return 0.8;
-  return 0;
+const extractStore = s => { const m = (s||’’).match(/[(.+?)]/); return m ? m[1] : s; };
+a = norm(extractStore(a));
+b = norm(extractStore(b));
+if(!a || !b) return 0;
+if(a === b) return 1;
+let maxCommon = 0;
+for(let i = 0; i < a.length; i++){
+for(let j = i + 1; j <= a.length; j++){
+const sub = a.slice(i, j);
+if(b.includes(sub) && sub.length > maxCommon) maxCommon = sub.length;
+}
+}
+if(maxCommon >= 4) return 1.0;
+if(maxCommon >= 3) return 0.9;
+if(maxCommon >= 2) return 0.8;
+return 0;
 }
 function haversine(la1,lo1,la2,lo2){const R=6371,d=Math.PI/180,dla=(la2-la1)*d,dlo=(lo2-lo1)*d,av=Math.sin(dla/2)**2+Math.cos(la1*d)*Math.cos(la2*d)*Math.sin(dlo/2)**2;return R*2*Math.atan2(Math.sqrt(av),Math.sqrt(1-av));}
 function distScore(km){
-  if(km<=0.10)return 1.00;
-  if(km<=0.15)return 0.95;
-  if(km<=0.20)return 0.90;
-  if(km<=0.30)return 0.85;
-  if(km<=0.40)return 0.80;
-  if(km<=0.50)return 0.75;
-  if(km<=0.70)return 0.65;
-  if(km<=1.00)return 0.55;
-  if(km<=1.50)return 0.40;
-  if(km<=2.00)return 0.25;
-  if(km<=3.00)return 0.10;
-  return 0;
+if(km<=0.10)return 1.00;
+if(km<=0.15)return 0.95;
+if(km<=0.20)return 0.90;
+if(km<=0.30)return 0.85;
+if(km<=0.40)return 0.80;
+if(km<=0.50)return 0.75;
+if(km<=0.70)return 0.65;
+if(km<=1.00)return 0.55;
+if(km<=1.50)return 0.40;
+if(km<=2.00)return 0.25;
+if(km<=3.00)return 0.10;
+return 0;
 }
 
-// 법정동 점수 세분화
 function dongScore(inDong, itemDong, km, inAddr, itemAddr){
-  if(!inDong || !itemDong) return 0;
-  if(inDong === itemDong) return 1;
-  const inGu = (inAddr||'').match(/([가-힣]+구)/)?.[1] || '';
-  const itemGu = (itemAddr||'').match(/([가-힣]+구)/)?.[1] || '';
-  const sameGu = inGu && itemGu && inGu === itemGu;
-  if(km !== null){
-    if(km <= 0.10) return sameGu ? 0.95 : 0.95;
-    if(km <= 0.15) return sameGu ? 0.90 : 0.90;
-    if(km <= 0.20) return sameGu ? 0.85 : 0.85;
-    if(km <= 0.30) return sameGu ? 0.80 : 0.75;
-    if(km <= 0.50) return sameGu ? 0.70 : 0.50;
-    if(km <= 1.00) return sameGu ? 0.50 : 0.20;
-  }
-  return sameGu ? 0.30 : 0;
+if(!inDong || !itemDong) return 0;
+if(inDong === itemDong) return 1;
+const inGu = (inAddr||’’).match(/([가-힣]+구)/)?.[1] || ‘’;
+const itemGu = (itemAddr||’’).match(/([가-힣]+구)/)?.[1] || ‘’;
+const sameGu = inGu && itemGu && inGu === itemGu;
+if(km !== null){
+if(km <= 0.10) return sameGu ? 0.95 : 0.95;
+if(km <= 0.15) return sameGu ? 0.90 : 0.90;
+if(km <= 0.20) return sameGu ? 0.85 : 0.85;
+if(km <= 0.30) return sameGu ? 0.80 : 0.75;
+if(km <= 0.50) return sameGu ? 0.70 : 0.50;
+if(km <= 1.00) return sameGu ? 0.50 : 0.20;
+}
+return sameGu ? 0.30 : 0;
 }
 
-// 입력 좌표가 어느 허브 폴리곤 안에 있는지 반환
 function getHubForCoord(lat, lng){
-  for(const [hubName, zone] of Object.entries(savedZones)){
-    if(zone.zonePath?.length>=3 && pointInPolygon(lat, lng, zone.zonePath)) return hubName;
-  }
-  return null;
+for(const [hubName, zone] of Object.entries(savedZones)){
+if(zone.zonePath?.length>=3 && pointInPolygon(lat, lng, zone.zonePath)) return hubName;
 }
-function guessCoord(addr){const t=[["강남구",37.5172,127.0473],["서초구",37.4837,127.0324],["송파구",37.5145,127.1059],["마포구",37.5663,126.9014],["서대문구",37.5791,126.9368],["광진구",37.5384,127.0822],["용산구",37.5311,126.981],["성동구",37.5634,127.0369]];for(const[k,la,lo]of t){if(addr.includes(k))return{lat:la,lng:lo};}return null;}
+return null;
+}
+function guessCoord(addr){const t=[[“강남구”,37.5172,127.0473],[“서초구”,37.4837,127.0324],[“송파구”,37.5145,127.1059],[“마포구”,37.5663,126.9014],[“서대문구”,37.5791,126.9368],[“광진구”,37.5384,127.0822],[“용산구”,37.5311,126.981],[“성동구”,37.5634,127.0369]];for(const[k,la,lo]of t){if(addr.includes(k))return{lat:la,lng:lo};}return null;}
 
 function getCoordFromAddr(addr){
-  return new Promise(resolve=>{
-    try{
-      const gc=new kakao.maps.services.Geocoder();
-      gc.addressSearch(addr,(res,st)=>{
-        if(st===kakao.maps.services.Status.OK){
-          const r=res[0];
-          // 카카오 address 객체에서 동 추출 (지번주소 기준)
-          const addrObj = r.address;
-          const roadObj = r.road_address;
-          // region_3depth_name = 읍/면/동, region_3depth_h_name = 행정동
-          const dong = addrObj?.region_3depth_name || roadObj?.region_3depth_name || '';
-          console.log('dong추출:', addr, '->', dong, '|', JSON.stringify(addrObj));
-          resolve({lat:parseFloat(r.y),lng:parseFloat(r.x),dong});
-        }
-        else resolve(guessCoord(addr));
-      });
-    }catch(e){resolve(guessCoord(addr));}
-  });
+return new Promise(resolve=>{
+try{
+const gc=new kakao.maps.services.Geocoder();
+gc.addressSearch(addr,(res,st)=>{
+if(st===kakao.maps.services.Status.OK){
+const r=res[0];
+const addrObj = r.address;
+const roadObj = r.road_address;
+const dong = addrObj?.region_3depth_name || roadObj?.region_3depth_name || ‘’;
+console.log(‘dong추출:’, addr, ‘->’, dong, ‘|’, JSON.stringify(addrObj));
+resolve({lat:parseFloat(r.y),lng:parseFloat(r.x),dong});
+}
+else resolve(guessCoord(addr));
+});
+}catch(e){resolve(guessCoord(addr));}
+});
 }
 
 function pointInPolygon(lat,lng,path){
-  let inside=false;
-  for(let i=0,j=path.length-1;i<path.length;j=i++){
-    const xi=path[i].lat,yi=path[i].lng,xj=path[j].lat,yj=path[j].lng;
-    if(((yi>lng)!==(yj>lng))&&(lat<(xj-xi)*(lng-yi)/(yj-yi)+xi))inside=!inside;
-  }
-  return inside;
+let inside=false;
+for(let i=0,j=path.length-1;i<path.length;j=i++){
+const xi=path[i].lat,yi=path[i].lng,xj=path[j].lat,yj=path[j].lng;
+if(((yi>lng)!==(yj>lng))&&(lat<(xj-xi)*(lng-yi)/(yj-yi)+xi))inside=!inside;
+}
+return inside;
 }
 
 async function doSearch(){
-  const raw=document.getElementById('storeInput').value.trim();
-  const addr=document.getElementById('addrInput').value.trim();
-  if(!raw){alert('상점명을 입력해주세요.');return;}
-  if(!addr){alert('주소를 입력해주세요.');return;}
-  const wrap=document.getElementById('resultWrap');
-  wrap.innerHTML='<div style="text-align:center;padding:40px;color:var(--text-dim)">🔍 매칭 중...</div>';
-  
-  const inputCoord=addr?await getCoordFromAddr(addr):null;
-  const inDong = inputCoord?.dong || extractDong(addr) || '';
+const raw=document.getElementById(‘storeInput’).value.trim();
+const addr=document.getElementById(‘addrInput’).value.trim();
+if(!raw){alert(‘상점명을 입력해주세요.’);return;}
+if(!addr){alert(‘주소를 입력해주세요.’);return;}
+const wrap=document.getElementById(‘resultWrap’);
+wrap.innerHTML=’<div style="text-align:center;padding:40px;color:var(--text-dim)">🔍 매칭 중…</div>’;
 
-  // 좌표 없는 DB 항목 중 상위 후보만 좌표 변환 (성능 최적화)
-  const parsed=parseKey(raw);
-  const preScored=DB.map(item=>{
-    const ns=strSim(parsed.store, item.store);
-    return{...item,_ns:ns};
-  }).sort((a,b)=>b._ns-a._ns).slice(0,30);
+const inputCoord=addr?await getCoordFromAddr(addr):null;
+const inDong = inputCoord?.dong || extractDong(addr) || ‘’;
 
-  // 상위 30개 좌표+동 변환
-  await Promise.all(preScored.map(async item=>{
-    if((!item.lat||!item.lng)&&item.address){
-      const c=await getCoordFromAddr(item.address);
-      if(c){item.lat=c.lat;item.lng=c.lng;item.dong=c.dong||item.dong;}
-    }
-  }));
+const parsed=parseKey(raw);
+const preScored=DB.map(item=>{
+const ns=strSim(parsed.store, item.store);
+return{…item,_ns:ns};
+}).sort((a,b)=>b._ns-a._ns).slice(0,30);
 
-  // 좌표 변환 후 법정동 비교
-  const scored=preScored.map(item=>{
-    const ns=item._ns;
-    let dSc=0,km=null;
-    if(inputCoord&&item.lat&&item.lng){km=haversine(inputCoord.lat,inputCoord.lng,item.lat,item.lng);dSc=distScore(km);}
-    const dong=dongScore(inDong, item.dong, km, addr, item.address);
-    const total=Math.min(1, ns*0.10+dong*0.10+dSc*0.80);
-    return{...item,_km:km?km.toFixed(2):null,_dong:dong,score:total,sd:{name:Math.round(ns*100),dong:Math.round(dong*100),dist:Math.round(dSc*100),total:Math.round(total*100)}};
-  }).sort((a,b)=>b.score-a.score);
-  const best=scored[0];
-  const others=scored.slice(1,4).filter(x=>x.score>0.05);
+await Promise.all(preScored.map(async item=>{
+if((!item.lat||!item.lng)&&item.address){
+const c=await getCoordFromAddr(item.address);
+if(c){item.lat=c.lat;item.lng=c.lng;item.dong=c.dong||item.dong;}
+}
+}));
 
-  // 입력한 상점명/주소/좌표로 덮어쓰기
-  const displayItem = {
-    ...best,
-    key: raw,
-    brand: parsed.brand,
-    store: parsed.store,
-    address: addr || best.address,
-    dong: extractDong(addr) || inputCoord?.dong || '',
-    lat: inputCoord?.lat || best.lat,
-    lng: inputCoord?.lng || best.lng,
-    _km: null,
-  };
+const scored=preScored.map(item=>{
+const ns=item._ns;
+let dSc=0,km=null;
+if(inputCoord&&item.lat&&item.lng){km=haversine(inputCoord.lat,inputCoord.lng,item.lat,item.lng);dSc=distScore(km);}
+const dong=dongScore(inDong, item.dong, km, addr, item.address);
+const total=Math.min(1, ns*0.10+dong*0.10+dSc*0.80);
+return{…item,_km:km?km.toFixed(2):null,_dong:dong,score:total,sd:{name:Math.round(ns*100),dong:Math.round(dong*100),dist:Math.round(dSc*100),total:Math.round(total*100)}};
+}).sort((a,b)=>b.score-a.score);
+const best=scored[0];
+const others=scored.slice(1,4).filter(x=>x.score>0.05);
 
-  let hasSurcharge=false;
-  if(inputCoord&&best.hub&&savedZones[best.hub]?.surPaths?.length){
-    hasSurcharge=(savedZones[best.hub].surPaths||[]).some(sp=>sp?.length>=3&&pointInPolygon(inputCoord.lat,inputCoord.lng,sp));
-  }
-  wrap.innerHTML=best.score<0.12?noMatchHTML(raw):resultHTML(displayItem,others,hasSurcharge);
-  requestAnimationFrame(()=>requestAnimationFrame(()=>{
-    document.querySelectorAll('.sfill[data-w]').forEach(el=>{el.style.width=el.dataset.w+'%';});
-    if(best.score>=0.12) renderInlineMap(displayItem, hasSurcharge);
-  }));
+const displayItem = {
+…best,
+key: raw,
+brand: parsed.brand,
+store: parsed.store,
+address: addr || best.address,
+dong: extractDong(addr) || inputCoord?.dong || ‘’,
+lat: inputCoord?.lat || best.lat,
+lng: inputCoord?.lng || best.lng,
+_km: null,
+};
+
+let hasSurcharge=false;
+if(inputCoord&&best.hub&&savedZones[best.hub]?.surPaths?.length){
+hasSurcharge=(savedZones[best.hub].surPaths||[]).some(sp=>sp?.length>=3&&pointInPolygon(inputCoord.lat,inputCoord.lng,sp));
+}
+wrap.innerHTML=best.score<0.12?noMatchHTML(raw):resultHTML(displayItem,others,hasSurcharge);
+requestAnimationFrame(()=>requestAnimationFrame(()=>{
+document.querySelectorAll(’.sfill[data-w]’).forEach(el=>{el.style.width=el.dataset.w+’%’;});
+if(best.score>=0.12) renderInlineMap(displayItem, hasSurcharge);
+}));
 }
 
-function sc(score){return score>=80?'possible':score>=50?'check':'impossible';}
-function bc(p){return p>=80?'var(--accent)':p>=70?'var(--yellow)':p>=50?'var(--orange)':'var(--red)';}
-function statusLabel(score){return score>=80?'수행 가능 O':score>=50?'확인 필요 △':'DB 업데이트 필요 X';}
+function sc(score){return score>=80?‘possible’:score>=50?‘check’:‘impossible’;}
+function bc(p){return p>=80?‘var(–accent)’:p>=70?‘var(–yellow)’:p>=50?‘var(–orange)’:‘var(–red)’;}
+function statusLabel(score){return score>=80?‘수행 가능 O’:score>=50?‘확인 필요 △’:‘DB 업데이트 필요 X’;}
 
 function resultHTML(item,others,hasSurcharge){
-  const d=item.sd;
-  return `
+const d=item.sd;
+return `
+
   <div class="res-card ${sc(d.total)}">
     <div class="res-top">
       <div>
@@ -981,381 +980,346 @@ function resultHTML(item,others,hasSurcharge){
 }
 
 function noMatchHTML(raw){return`<div class="no-match"><div class="no-match-icon">🔍</div><div class="no-match-title">일치 데이터 없음</div><div class="no-match-desc"><strong>${raw}</strong>에 대한 기존 데이터가 없습니다.</div><div style="display:flex;gap:8px;justify-content:center;margin-top:16px"><button class="btn btn-outline" onclick="alert('신규 등록!')">➕ 신규 등록</button><button class="btn btn-ghost" onclick="clearResult()">↩ 다시</button></div></div>`;}
-function clearResult(){document.getElementById('resultWrap').innerHTML='';document.getElementById('storeInput').value='';document.getElementById('addrInput').value='';}
-function fillAndSearch(key,addr){document.getElementById('storeInput').value=key;document.getElementById('addrInput').value=addr;doSearch();}
+function clearResult(){document.getElementById(‘resultWrap’).innerHTML=’’;document.getElementById(‘storeInput’).value=’’;document.getElementById(‘addrInput’).value=’’;}
+function fillAndSearch(key,addr){document.getElementById(‘storeInput’).value=key;document.getElementById(‘addrInput’).value=addr;doSearch();}
 function copyMsg(key,addr,conf,sur){
-  const msg=`안녕하세요! 북부광역사업부입니다 🙂\n\nB2B 상점 수행 가능 여부 확인 요청드립니다.\n\n📍 상점명: ${key}\n📍 주소: ${addr}\n${sur?'⚡ 할증 구역 포함\n':''}\n확인 부탁드립니다!\n✅ 수행 가능 여부\n✅ 권역 정보\n✅ 수행허브\n✅ 선차감 여부${sur?'\n✅ 할증 적용 여부':''}\n\n감사합니다 🙏`;
-  navigator.clipboard.writeText(msg).then(()=>alert('복사됐어요! 카톡에 붙여넣기 하세요 😊'));
+const msg=`안녕하세요! 북부광역사업부입니다 🙂\n\nB2B 상점 수행 가능 여부 확인 요청드립니다.\n\n📍 상점명: ${key}\n📍 주소: ${addr}\n${sur?'⚡ 할증 구역 포함\n':''}\n확인 부탁드립니다!\n✅ 수행 가능 여부\n✅ 권역 정보\n✅ 수행허브\n✅ 선차감 여부${sur?'\n✅ 할증 적용 여부':''}\n\n감사합니다 🙏`;
+navigator.clipboard.writeText(msg).then(()=>alert(‘복사됐어요! 카톡에 붙여넣기 하세요 😊’));
 }
-document.addEventListener('keydown',e=>{if(e.key==='Enter')doSearch();});
+document.addEventListener(‘keydown’,e=>{if(e.key===‘Enter’)doSearch();});
 
 // ══════════════════════════════
-// 인라인 지도 (상점 조회 결과 아래)
+// 인라인 지도
 // ══════════════════════════════
 let inlineMap=null, inlineOverlays=[];
 
-// 원과 폴리곤 교집합 - 각 엣지를 원으로 클리핑
 function clipByCircle(poly, cLat, cLng, radiusKm) {
-  const R = radiusKm;
-  function dist(p) {
-    const dlat = (p.lat - cLat) * 111;
-    const dlng = (p.lng - cLng) * 111 * Math.cos(cLat * Math.PI / 180);
-    return Math.sqrt(dlat*dlat + dlng*dlng);
-  }
-  function inCircle(p) { return dist(p) <= R; }
-  function circleIntersect(p, q) {
-    // p→q 선분과 원의 교점
-    const dlat = (q.lat - p.lat) * 111;
-    const dlng = (q.lng - p.lng) * 111 * Math.cos(cLat * Math.PI / 180);
-    const plat = (p.lat - cLat) * 111;
-    const plng = (p.lng - cLng) * 111 * Math.cos(cLat * Math.PI / 180);
-    const a = dlat*dlat + dlng*dlng;
-    const b = 2*(plat*dlat + plng*dlng);
-    const c = plat*plat + plng*plng - R*R;
-    const disc = b*b - 4*a*c;
-    if(disc < 0 || a < 1e-12) return null;
-    const results = [];
-    const sq = Math.sqrt(disc);
-    [(-b-sq)/(2*a), (-b+sq)/(2*a)].forEach(t => {
-      if(t >= 0 && t <= 1) {
-        results.push({lat: p.lat + t*(q.lat-p.lat), lng: p.lng + t*(q.lng-p.lng)});
-      }
-    });
-    return results;
-  }
-
-  let result = [];
-  for(let i = 0; i < poly.length; i++) {
-    const P = poly[i];
-    const Q = poly[(i+1) % poly.length];
-    const pIn = inCircle(P);
-    const qIn = inCircle(Q);
-    if(pIn) {
-      result.push(P);
-      if(!qIn) {
-        const pts = circleIntersect(P, Q);
-        if(pts) pts.forEach(pt => result.push(pt));
-      }
-    } else {
-      const pts = circleIntersect(P, Q);
-      if(pts && pts.length > 0) {
-        pts.forEach(pt => result.push(pt));
-        if(qIn) {} // Q는 다음 iteration에서 추가됨
-      }
-    }
-  }
-  return result;
+const R = radiusKm;
+function dist(p) {
+const dlat = (p.lat - cLat) * 111;
+const dlng = (p.lng - cLng) * 111 * Math.cos(cLat * Math.PI / 180);
+return Math.sqrt(dlat*dlat + dlng*dlng);
+}
+function inCircle(p) { return dist(p) <= R; }
+function circleIntersect(p, q) {
+const dlat = (q.lat - p.lat) * 111;
+const dlng = (q.lng - p.lng) * 111 * Math.cos(cLat * Math.PI / 180);
+const plat = (p.lat - cLat) * 111;
+const plng = (p.lng - cLng) * 111 * Math.cos(cLat * Math.PI / 180);
+const a = dlat*dlat + dlng*dlng;
+const b = 2*(plat*dlat + plng*dlng);
+const c = plat*plat + plng*plng - R*R;
+const disc = b*b - 4*a*c;
+if(disc < 0 || a < 1e-12) return null;
+const results = [];
+const sq = Math.sqrt(disc);
+[(-b-sq)/(2*a), (-b+sq)/(2*a)].forEach(t => {
+if(t >= 0 && t <= 1) {
+results.push({lat: p.lat + t*(q.lat-p.lat), lng: p.lng + t*(q.lng-p.lng)});
+}
+});
+return results;
+}
+let result = [];
+for(let i = 0; i < poly.length; i++) {
+const P = poly[i];
+const Q = poly[(i+1) % poly.length];
+const pIn = inCircle(P);
+const qIn = inCircle(Q);
+if(pIn) {
+result.push(P);
+if(!qIn) {
+const pts = circleIntersect(P, Q);
+if(pts) pts.forEach(pt => result.push(pt));
+}
+} else {
+const pts = circleIntersect(P, Q);
+if(pts && pts.length > 0) {
+pts.forEach(pt => result.push(pt));
+if(qIn) {}
+}
+}
+}
+return result;
 }
 
-// turf.js로 폴리곤과 원의 교집합 계산
 function turfIntersect(pathData, cLat, cLng, radiusKm) {
-  try {
-    const circle = turf.circle([cLng, cLat], radiusKm, {steps:64, units:'kilometers'});
-    const coords = pathData.map(p=>[p.lng, p.lat]);
-    coords.push(coords[0]); // 닫기
-    const polygon = turf.polygon([coords]);
-    const inter = turf.intersect(polygon, circle);
-    if(!inter) return null;
-    const result = inter.geometry.coordinates[0];
-    return result.map(c=>new kakao.maps.LatLng(c[1], c[0]));
-  } catch(e) {
-    console.log('turf 교집합 오류:', e);
-    return null;
-  }
+try {
+const circle = turf.circle([cLng, cLat], radiusKm, {steps:64, units:‘kilometers’});
+const coords = pathData.map(p=>[p.lng, p.lat]);
+coords.push(coords[0]);
+const polygon = turf.polygon([coords]);
+const inter = turf.intersect(polygon, circle);
+if(!inter) return null;
+const result = inter.geometry.coordinates[0];
+return result.map(c=>new kakao.maps.LatLng(c[1], c[0]));
+} catch(e) {
+console.log(‘turf 교집합 오류:’, e);
+return null;
+}
 }
 
-// 원을 폴리곤 근사값으로 변환
 function circleToPolygon(lat, lng, radiusKm, numPoints=64) {
-  const points=[];
-  for(let i=0;i<numPoints;i++){
-    const angle=(i/numPoints)*2*Math.PI;
-    const dlat=(radiusKm/111)*Math.cos(angle);
-    const dlng=(radiusKm/(111*Math.cos(lat*Math.PI/180)))*Math.sin(angle);
-    points.push({lat:lat+dlat, lng:lng+dlng});
-  }
-  return points;
+const points=[];
+for(let i=0;i<numPoints;i++){
+const angle=(i/numPoints)*2*Math.PI;
+const dlat=(radiusKm/111)*Math.cos(angle);
+const dlng=(radiusKm/(111*Math.cos(lat*Math.PI/180)))*Math.sin(angle);
+points.push({lat:lat+dlat, lng:lng+dlng});
+}
+return points;
 }
 
-// 두 폴리곤의 교차 영역 계산 (Sutherland-Hodgman)
-// subject = 자를 대상, clip = 자르는 기준
 function clipPolygon(subject, clip) {
-  let output = subject.map(p=>({lat:p.lat, lng:p.lng}));
-  if(!output.length) return [];
-  for(let i=0; i<clip.length; i++){
-    if(!output.length) return [];
-    const input = [...output];
-    output = [];
-    const A = clip[i];
-    const B = clip[(i+1) % clip.length];
-    for(let j=0; j<input.length; j++){
-      const P = input[j];
-      const Q = input[(j+1) % input.length];
-      const pIn = side(P,A,B);
-      const qIn = side(Q,A,B);
-      if(pIn){
-        output.push(P);
-        if(!qIn) output.push(lineIntersect(P,Q,A,B));
-      } else if(qIn){
-        output.push(lineIntersect(P,Q,A,B));
-      }
-    }
-  }
-  return output;
+let output = subject.map(p=>({lat:p.lat, lng:p.lng}));
+if(!output.length) return [];
+for(let i=0; i<clip.length; i++){
+if(!output.length) return [];
+const input = […output];
+output = [];
+const A = clip[i];
+const B = clip[(i+1) % clip.length];
+for(let j=0; j<input.length; j++){
+const P = input[j];
+const Q = input[(j+1) % input.length];
+const pIn = side(P,A,B);
+const qIn = side(Q,A,B);
+if(pIn){
+output.push(P);
+if(!qIn) output.push(lineIntersect(P,Q,A,B));
+} else if(qIn){
+output.push(lineIntersect(P,Q,A,B));
+}
+}
+}
+return output;
 }
 function side(p,a,b){
-  return ((b.lat-a.lat)*(p.lng-a.lng) - (b.lng-a.lng)*(p.lat-a.lat)) >= 0;
+return ((b.lat-a.lat)*(p.lng-a.lng) - (b.lng-a.lng)*(p.lat-a.lat)) >= 0;
 }
 function lineIntersect(p,q,a,b){
-  const d1lat=q.lat-p.lat, d1lng=q.lng-p.lng;
-  const d2lat=b.lat-a.lat, d2lng=b.lng-a.lng;
-  const denom = d1lat*d2lng - d1lng*d2lat;
-  if(Math.abs(denom)<1e-12) return {...p};
-  const t = ((a.lat-p.lat)*d2lng - (a.lng-p.lng)*d2lat) / denom;
-  return {lat: p.lat + t*d1lat, lng: p.lng + t*d1lng};
+const d1lat=q.lat-p.lat, d1lng=q.lng-p.lng;
+const d2lat=b.lat-a.lat, d2lng=b.lng-a.lng;
+const denom = d1lat*d2lng - d1lng*d2lat;
+if(Math.abs(denom)<1e-12) return {…p};
+const t = ((a.lat-p.lat)*d2lng - (a.lng-p.lng)*d2lat) / denom;
+return {lat: p.lat + t*d1lat, lng: p.lng + t*d1lng};
 }
 
 async function renderInlineMap(item, hasSurcharge) {
-  if(!window.kakaoMapReady) return;
-
-  const container = document.getElementById('inlineMap');
-  if(!container) return;
-
-  const center = new kakao.maps.LatLng(item.lat, item.lng);
-  inlineMap = new kakao.maps.Map(container, {center, level:6});
-
-  inlineOverlays.forEach(o=>{try{o.setMap(null);}catch(e){}});
-  inlineOverlays=[];
-
-  // 1. 2km 원 (연한 회색 배경)
-  const circle = new kakao.maps.Circle({
-    map:inlineMap, center, radius:2000,
-    strokeWeight:3, strokeColor:'#2563eb', strokeOpacity:0.9, strokeStyle:'dashed',
-    fillColor:'#eff6ff', fillOpacity:0.15
-  });
-  inlineOverlays.push(circle);
-
-  // 2. 허브 기본 권역 ∩ 2km원 교집합 → 파란색
-  if(item.hub && savedZones[item.hub]?.zonePath?.length>=3){
-    const inter = turfIntersect(savedZones[item.hub].zonePath, item.lat, item.lng, 2.0);
-    if(inter){
-      const poly = new kakao.maps.Polygon({
-        map:inlineMap, path: inter,
-        strokeWeight:2, strokeColor:'#2563eb', strokeOpacity:0.9,
-        fillColor:'#2563eb', fillOpacity:0.35
-      });
-      inlineOverlays.push(poly);
-    }
-  }
-
-  // 3. 할증 구역들 ∩ 2km원 교집합 → 빨간색
-  if(item.hub && savedZones[item.hub]?.surPaths?.length){
-    (savedZones[item.hub].surPaths||[]).forEach(sp=>{
-      if(sp?.length>=3){
-        const inter = turfIntersect(sp, item.lat, item.lng, 2.0);
-        if(inter){
-          const poly = new kakao.maps.Polygon({
-            map:inlineMap, path: inter,
-            strokeWeight:2, strokeColor:'#dc2626', strokeOpacity:1,
-            fillColor:'#dc2626', fillOpacity:0.4
-          });
-          inlineOverlays.push(poly);
-        }
-      }
-    });
-  }
-
-  // 4. 마커
-  const marker = new kakao.maps.Marker({map:inlineMap, position:center});
-  inlineOverlays.push(marker);
-
-  // 5. 상점명
-  const info = new kakao.maps.InfoWindow({
-    content:`<div style="padding:6px 10px;font-size:12px;font-weight:700;white-space:nowrap">${item.key}${hasSurcharge?' ⚡':''}</div>`,
-    removable:false
-  });
-  info.open(inlineMap, marker);
-  inlineOverlays.push(info);
-
-  setTimeout(()=>inlineMap.relayout(), 150);
+if(!window.kakaoMapReady) return;
+const container = document.getElementById(‘inlineMap’);
+if(!container) return;
+const center = new kakao.maps.LatLng(item.lat, item.lng);
+inlineMap = new kakao.maps.Map(container, {center, level:6});
+inlineOverlays.forEach(o=>{try{o.setMap(null);}catch(e){}});
+inlineOverlays=[];
+const circle = new kakao.maps.Circle({
+map:inlineMap, center, radius:2000,
+strokeWeight:3, strokeColor:’#2563eb’, strokeOpacity:0.9, strokeStyle:‘dashed’,
+fillColor:’#eff6ff’, fillOpacity:0.15
+});
+inlineOverlays.push(circle);
+if(item.hub && savedZones[item.hub]?.zonePath?.length>=3){
+const inter = turfIntersect(savedZones[item.hub].zonePath, item.lat, item.lng, 2.0);
+if(inter){
+const poly = new kakao.maps.Polygon({
+map:inlineMap, path: inter,
+strokeWeight:2, strokeColor:’#2563eb’, strokeOpacity:0.9,
+fillColor:’#2563eb’, fillOpacity:0.35
+});
+inlineOverlays.push(poly);
+}
+}
+if(item.hub && savedZones[item.hub]?.surPaths?.length){
+(savedZones[item.hub].surPaths||[]).forEach(sp=>{
+if(sp?.length>=3){
+const inter = turfIntersect(sp, item.lat, item.lng, 2.0);
+if(inter){
+const poly = new kakao.maps.Polygon({
+map:inlineMap, path: inter,
+strokeWeight:2, strokeColor:’#dc2626’, strokeOpacity:1,
+fillColor:’#dc2626’, fillOpacity:0.4
+});
+inlineOverlays.push(poly);
+}
+}
+});
+}
+const marker = new kakao.maps.Marker({map:inlineMap, position:center});
+inlineOverlays.push(marker);
+const info = new kakao.maps.InfoWindow({
+content:`<div style="padding:6px 10px;font-size:12px;font-weight:700;white-space:nowrap">${item.key}${hasSurcharge?' ⚡':''}</div>`,
+removable:false
+});
+info.open(inlineMap, marker);
+inlineOverlays.push(info);
+setTimeout(()=>inlineMap.relayout(), 150);
 }
 
 async function showZoneMap(key, addr, hub, hasSurcharge) {
-  document.getElementById('zoneMapModal').classList.add('show');
-  document.getElementById('zoneMapTitle').textContent = key;
-  document.getElementById('zoneMapSub').textContent = addr + (hasSurcharge ? '  ⚡ 할증 구역 포함' : '');
-
-  const coord = await getCoordFromAddr(addr);
-  if (!coord) { alert('주소 좌표를 찾을 수 없어요!'); return; }
-
-  const container = document.getElementById('zoneMap');
-  const center = new kakao.maps.LatLng(coord.lat, coord.lng);
-  if (!zoneMap) {
-    zoneMap = new kakao.maps.Map(container, {center, level:6});
-  } else {
-    zoneMap.setCenter(center);
-    zoneMap.setLevel(6);
-  }
-
-  // 기존 오버레이 제거
-  zoneMapOverlays.forEach(o=>{try{o.setMap(null);}catch(e){}});
-  zoneMapOverlays=[];
-
-  // 1. 상점 반경 2km 원
-  const circle = new kakao.maps.Circle({
-    map:zoneMap, center, radius:2000,
-    strokeWeight:2, strokeColor:'#2563eb', strokeOpacity:0.9,
-    fillColor:'#2563eb', fillOpacity:0.12
-  });
-  zoneMapOverlays.push(circle);
-
-  // 2. 할증 구역들 (있을 때만)
-  if (hub && savedZones[hub]?.surPaths?.length){
-    (savedZones[hub].surPaths||[]).forEach(sp=>{
-      if(sp?.length>=3){
-        const surPoly = new kakao.maps.Polygon({
-          map:zoneMap,
-          path: sp.map(p=>new kakao.maps.LatLng(p.lat,p.lng)),
-          strokeWeight:2, strokeColor:'#ea580c', strokeOpacity:1,
-          fillColor:'#ea580c', fillOpacity:0.3
-        });
-        zoneMapOverlays.push(surPoly);
-      }
-    });
-  }
-
-  // 3. 상점 마커
-  const marker = new kakao.maps.Marker({map:zoneMap, position:center});
-  zoneMapOverlays.push(marker);
-
-  // 4. 상점명 인포윈도우
-  const info = new kakao.maps.InfoWindow({
-    content:`<div style="padding:8px 12px;font-size:12px;font-weight:700;white-space:nowrap">${key}${hasSurcharge?' ⚡':''}</div>`,
-    removable:false
-  });
-  info.open(zoneMap, marker);
-  zoneMapOverlays.push(info);
-
-  setTimeout(()=>zoneMap.relayout(), 100);
+document.getElementById(‘zoneMapModal’).classList.add(‘show’);
+document.getElementById(‘zoneMapTitle’).textContent = key;
+document.getElementById(‘zoneMapSub’).textContent = addr + (hasSurcharge ? ’  ⚡ 할증 구역 포함’ : ‘’);
+const coord = await getCoordFromAddr(addr);
+if (!coord) { alert(‘주소 좌표를 찾을 수 없어요!’); return; }
+const container = document.getElementById(‘zoneMap’);
+const center = new kakao.maps.LatLng(coord.lat, coord.lng);
+if (!zoneMap) {
+zoneMap = new kakao.maps.Map(container, {center, level:6});
+} else {
+zoneMap.setCenter(center);
+zoneMap.setLevel(6);
+}
+zoneMapOverlays.forEach(o=>{try{o.setMap(null);}catch(e){}});
+zoneMapOverlays=[];
+const circle = new kakao.maps.Circle({
+map:zoneMap, center, radius:2000,
+strokeWeight:2, strokeColor:’#2563eb’, strokeOpacity:0.9,
+fillColor:’#2563eb’, fillOpacity:0.12
+});
+zoneMapOverlays.push(circle);
+if (hub && savedZones[hub]?.surPaths?.length){
+(savedZones[hub].surPaths||[]).forEach(sp=>{
+if(sp?.length>=3){
+const surPoly = new kakao.maps.Polygon({
+map:zoneMap,
+path: sp.map(p=>new kakao.maps.LatLng(p.lat,p.lng)),
+strokeWeight:2, strokeColor:’#ea580c’, strokeOpacity:1,
+fillColor:’#ea580c’, fillOpacity:0.3
+});
+zoneMapOverlays.push(surPoly);
+}
+});
+}
+const marker = new kakao.maps.Marker({map:zoneMap, position:center});
+zoneMapOverlays.push(marker);
+const info = new kakao.maps.InfoWindow({
+content:`<div style="padding:8px 12px;font-size:12px;font-weight:700;white-space:nowrap">${key}${hasSurcharge?' ⚡':''}</div>`,
+removable:false
+});
+info.open(zoneMap, marker);
+zoneMapOverlays.push(info);
+setTimeout(()=>zoneMap.relayout(), 100);
 }
 
 function closeZoneMap() {
-  document.getElementById('zoneMapModal').classList.remove('show');
+document.getElementById(‘zoneMapModal’).classList.remove(‘show’);
 }
 
 function saveZoneMapImage() {
-  // 카카오맵은 직접 캔버스 캡쳐가 안되므로 Static Map API 활용
-  const title = document.getElementById('zoneMapTitle').textContent;
-  const sub = document.getElementById('zoneMapSub').textContent;
-  alert(`"${title}" 권역 지도\n\n카카오맵 보안 정책상 직접 캡쳐는 제한돼요.\n브라우저에서 직접 스크린샷(Print Screen 또는 캡쳐 도구)을 사용해주세요!\n\nWindows: Win+Shift+S\nMac: Cmd+Shift+4`);
+const title = document.getElementById(‘zoneMapTitle’).textContent;
+alert(`"${title}" 권역 지도\n\n카카오맵 보안 정책상 직접 캡쳐는 제한돼요.\n브라우저에서 직접 스크린샷(Print Screen 또는 캡쳐 도구)을 사용해주세요!\n\nWindows: Win+Shift+S\nMac: Cmd+Shift+4`);
 }
 
 // ══════════════════════════════
 // 카카오맵 + 그리기
 // ══════════════════════════════
-let map,mapInitialized=false,currentLayer='zone',isDrawing=false,currentPath=[],tempPolyline=null,tempPolygon=null;
+let map,mapInitialized=false,currentLayer=‘zone’,isDrawing=false,currentPath=[],tempPolyline=null,tempPolygon=null;
 
 function initMap(){
-  mapInitialized=true;
-  map=new kakao.maps.Map(document.getElementById('kakaoMap'),{center:new kakao.maps.LatLng(37.5172,127.0473),level:8});
-  kakao.maps.event.addListener(map,'click',onMapClick);
-  restorePolygonsOnMap();
+mapInitialized=true;
+map=new kakao.maps.Map(document.getElementById(‘kakaoMap’),{center:new kakao.maps.LatLng(37.5172,127.0473),level:8});
+kakao.maps.event.addListener(map,‘click’,onMapClick);
+restorePolygonsOnMap();
 }
 
-function getHubColor(name){return '#2563eb';}
+function getHubColor(name){return ‘#2563eb’;}
 
 function setLayer(layer){
-  currentLayer=layer;
-  document.getElementById('tabZone').classList.toggle('active',layer==='zone');
-  document.getElementById('tabSur').classList.toggle('active',layer==='surcharge');
-  if(isDrawing){isDrawing=false;clearCurrent();}
+currentLayer=layer;
+document.getElementById(‘tabZone’).classList.toggle(‘active’,layer===‘zone’);
+document.getElementById(‘tabSur’).classList.toggle(‘active’,layer===‘surcharge’);
+if(isDrawing){isDrawing=false;clearCurrent();}
 }
 
 function onMapClick(e){
-  if(!isDrawing)return;
-  currentPath.push(new kakao.maps.LatLng(e.latLng.getLat(),e.latLng.getLng()));
-  updateTempDraw();
-  const hub=document.getElementById('hubSelect').value;
-  setStatus(`[${hub}] ${currentLayer==='zone'?'기본권역':'할증구역'} — 점 ${currentPath.length}개 · 💾 저장`,currentLayer==='zone'?'zone':'surcharge');
+if(!isDrawing)return;
+currentPath.push(new kakao.maps.LatLng(e.latLng.getLat(),e.latLng.getLng()));
+updateTempDraw();
+const hub=document.getElementById(‘hubSelect’).value;
+setStatus(`[${hub}] ${currentLayer==='zone'?'기본권역':'할증구역'} — 점 ${currentPath.length}개 · 💾 저장`,currentLayer===‘zone’?‘zone’:‘surcharge’);
 }
 
 function updateTempDraw(){
-  if(tempPolyline)tempPolyline.setMap(null);
-  if(tempPolygon)tempPolygon.setMap(null);
-  const hub=document.getElementById('hubSelect').value;
-  const color=currentLayer==='surcharge'?'#ea580c':getHubColor(hub);
-  if(currentPath.length>=2)tempPolygon=new kakao.maps.Polygon({map,path:currentPath,strokeWeight:2,strokeColor:color,strokeOpacity:0.9,fillColor:color,fillOpacity:0.15});
-  tempPolyline=new kakao.maps.Polyline({map,path:currentPath,strokeWeight:2,strokeColor:color,strokeOpacity:1});
+if(tempPolyline)tempPolyline.setMap(null);
+if(tempPolygon)tempPolygon.setMap(null);
+const hub=document.getElementById(‘hubSelect’).value;
+const color=currentLayer===‘surcharge’?’#ea580c’:getHubColor(hub);
+if(currentPath.length>=2)tempPolygon=new kakao.maps.Polygon({map,path:currentPath,strokeWeight:2,strokeColor:color,strokeOpacity:0.9,fillColor:color,fillOpacity:0.15});
+tempPolyline=new kakao.maps.Polyline({map,path:currentPath,strokeWeight:2,strokeColor:color,strokeOpacity:1});
 }
 
 function toggleDraw(){
-  const hub=document.getElementById('hubSelect').value;
-  if(!hub){alert('허브를 먼저 선택해주세요!');return;}
-  isDrawing=!isDrawing;
-  const btn=document.getElementById('drawToggle');
-  if(isDrawing){
-    btn.className=`draw-btn ${currentLayer==='surcharge'?'drawing-sur':'drawing'}`;
-    btn.textContent='⏹️ 그리기 중단';
-    setStatus(`[${hub}] ${currentLayer==='zone'?'🔵 기본 권역':'🟠 할증 구역'} 그리는 중 — 지도 클릭`,currentLayer==='zone'?'zone':'surcharge');
-  }else{
-    btn.className='draw-btn';btn.textContent='✏️ 그리기 시작';setStatus('그리기 중단');
-  }
+const hub=document.getElementById(‘hubSelect’).value;
+if(!hub){alert(‘허브를 먼저 선택해주세요!’);return;}
+isDrawing=!isDrawing;
+const btn=document.getElementById(‘drawToggle’);
+if(isDrawing){
+btn.className=`draw-btn ${currentLayer==='surcharge'?'drawing-sur':'drawing'}`;
+btn.textContent=‘⏹️ 그리기 중단’;
+setStatus(`[${hub}] ${currentLayer==='zone'?'🔵 기본 권역':'🟠 할증 구역'} 그리는 중 — 지도 클릭`,currentLayer===‘zone’?‘zone’:‘surcharge’);
+}else{
+btn.className=‘draw-btn’;btn.textContent=‘✏️ 그리기 시작’;setStatus(‘그리기 중단’);
+}
 }
 
 function undoLast(){if(currentPath.length>0){currentPath.pop();updateTempDraw();}}
 
 function saveZone(){
-  const hub=document.getElementById('hubSelect').value;
-  const brand=document.getElementById('brandSelect')?.value||'';
-  if(!hub){alert('허브를 선택해주세요!');return;}
-  if(currentPath.length<3){alert('최소 3개 이상 점을 찍어주세요!');return;}
-  if(!savedZones[hub])savedZones[hub]={zonePolygon:null,surPolygons:[],zonePath:[],surPaths:[],brand:''};
-  const color=currentLayer==='surcharge'?'#ea580c':getHubColor(hub);
-  const polygon=new kakao.maps.Polygon({map,path:currentPath,strokeWeight:2,strokeColor:color,strokeOpacity:1,fillColor:color,fillOpacity:currentLayer==='surcharge'?0.25:0.15});
-  const pathData=currentPath.map(p=>({lat:p.getLat(),lng:p.getLng()}));
-  if(currentLayer==='zone'){
-    if(savedZones[hub].zonePolygon)savedZones[hub].zonePolygon.setMap(null);
-    savedZones[hub].zonePolygon=polygon;
-    savedZones[hub].zonePath=pathData;
-    if(brand) savedZones[hub].brand=brand;
-  } else {
-    if(!savedZones[hub].surPolygons) savedZones[hub].surPolygons=[];
-    if(!savedZones[hub].surPaths) savedZones[hub].surPaths=[];
-    savedZones[hub].surPolygons.push(polygon);
-    savedZones[hub].surPaths.push(pathData);
-  }
-  clearCurrent();isDrawing=false;
-  document.getElementById('drawToggle').className='draw-btn';
-  document.getElementById('drawToggle').textContent='✏️ 그리기 시작';
-  const brandMsg = brand ? ` (${brand})` : '';
-  setStatus(`[${hub}]${brandMsg} ${currentLayer==='zone'?'기본 권역':'할증 구역'} 저장 완료! ✅`);
-  renderHubMgrList();
-  saveToStorage();
-  saveZonesToSheet();
+const hub=document.getElementById(‘hubSelect’).value;
+const brand=document.getElementById(‘brandSelect’)?.value||’’;
+if(!hub){alert(‘허브를 선택해주세요!’);return;}
+if(currentPath.length<3){alert(‘최소 3개 이상 점을 찍어주세요!’);return;}
+if(!savedZones[hub])savedZones[hub]={zonePolygon:null,surPolygons:[],zonePath:[],surPaths:[],brand:’’};
+const color=currentLayer===‘surcharge’?’#ea580c’:getHubColor(hub);
+const polygon=new kakao.maps.Polygon({map,path:currentPath,strokeWeight:2,strokeColor:color,strokeOpacity:1,fillColor:color,fillOpacity:currentLayer===‘surcharge’?0.25:0.15});
+const pathData=currentPath.map(p=>({lat:p.getLat(),lng:p.getLng()}));
+if(currentLayer===‘zone’){
+if(savedZones[hub].zonePolygon)savedZones[hub].zonePolygon.setMap(null);
+savedZones[hub].zonePolygon=polygon;
+savedZones[hub].zonePath=pathData;
+if(brand) savedZones[hub].brand=brand;
+} else {
+if(!savedZones[hub].surPolygons) savedZones[hub].surPolygons=[];
+if(!savedZones[hub].surPaths) savedZones[hub].surPaths=[];
+savedZones[hub].surPolygons.push(polygon);
+savedZones[hub].surPaths.push(pathData);
+}
+clearCurrent();isDrawing=false;
+document.getElementById(‘drawToggle’).className=‘draw-btn’;
+document.getElementById(‘drawToggle’).textContent=‘✏️ 그리기 시작’;
+const brandMsg = brand ? ` (${brand})` : ‘’;
+setStatus(`[${hub}]${brandMsg} ${currentLayer==='zone'?'기본 권역':'할증 구역'} 저장 완료! ✅`);
+renderHubMgrList();
+saveToStorage();
+saveZonesToSheet();
 }
 
 function deleteSurPath(name, idx){
-  const z = savedZones[name];
-  if(!z) return;
-  if(z.surPolygons?.[idx]) z.surPolygons[idx].setMap(null);
-  z.surPolygons = (z.surPolygons||[]).filter((_,i)=>i!==idx);
-  z.surPaths = (z.surPaths||[]).filter((_,i)=>i!==idx);
-  renderHubMgrList();
-  saveToStorage();
-  saveZonesToSheet();
+const z = savedZones[name];
+if(!z) return;
+if(z.surPolygons?.[idx]) z.surPolygons[idx].setMap(null);
+z.surPolygons = (z.surPolygons||[]).filter((*,i)=>i!==idx);
+z.surPaths = (z.surPaths||[]).filter((*,i)=>i!==idx);
+renderHubMgrList();
+saveToStorage();
+saveZonesToSheet();
 }
 
 function clearCurrent(){
-  if(tempPolyline)tempPolyline.setMap(null);
-  if(tempPolygon)tempPolygon.setMap(null);
-  currentPath=[];tempPolyline=null;tempPolygon=null;isDrawing=false;
-  document.getElementById('drawToggle').className='draw-btn';
-  document.getElementById('drawToggle').textContent='✏️ 그리기 시작';
+if(tempPolyline)tempPolyline.setMap(null);
+if(tempPolygon)tempPolygon.setMap(null);
+currentPath=[];tempPolyline=null;tempPolygon=null;isDrawing=false;
+document.getElementById(‘drawToggle’).className=‘draw-btn’;
+document.getElementById(‘drawToggle’).textContent=‘✏️ 그리기 시작’;
 }
 
-function setStatus(msg,type=''){
-  const el=document.getElementById('mapStatus');
-  el.textContent=msg;el.className='map-status'+(type?' '+type:'');
+function setStatus(msg,type=’’){
+const el=document.getElementById(‘mapStatus’);
+el.textContent=msg;el.className=‘map-status’+(type?’ ‘+type:’’);
 }
 </script>
+
 </body>
 </html>
