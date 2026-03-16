@@ -100,7 +100,7 @@
   .res-card.check{border-left:4px solid var(--orange);}
   .sdot{width:6px;height:6px;border-radius:50%;background:currentColor;}
 
-  .info-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:14px;}
+  .info-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:14px;}
   .itile{background:var(--bg);border:1px solid var(--border);border-radius:9px;padding:12px;}
   .itile-l{font-size:10px;font-weight:700;color:var(--text-dim);letter-spacing:0.07em;text-transform:uppercase;margin-bottom:5px;}
   .itile-v{font-size:14px;font-weight:700;color:var(--text);}
@@ -272,6 +272,15 @@
           <option value="">— 허브 선택 —</option>
         </select>
 
+        <!-- 브랜드 선택 -->
+        <select class="hub-select" id="brandSelect" style="margin-bottom:4px;border-color:#d0d6e2;font-size:12px;">
+          <option value="">— 브랜드 선택 (선택사항) —</option>
+          <option value="바로고">바로고</option>
+          <option value="모아라인">모아라인</option>
+          <option value="딜버">딜버</option>
+        </select>
+        <div style="font-size:10px;color:var(--text-dim);margin-bottom:10px;padding:0 2px">특정 브랜드 권역을 그릴 때 선택하세요</div>
+
         <!-- 허브 추가 -->
         <div style="margin-bottom:12px;">
           <input class="hub-add-inp" id="hubAddInp" placeholder="새 허브명 입력" style="width:100%;border:1.5px solid var(--border);border-radius:8px;padding:9px 12px;font-family:'Pretendard',sans-serif;font-size:13px;font-weight:600;outline:none;color:var(--text);background:var(--white);margin-bottom:6px;" />
@@ -363,6 +372,7 @@ function parseDBRow(row) {
     preDeductHub: row['허브']!==undefined&&row['허브']!=='' ? String(row['허브']).trim() : '',
     hubOpen: String(row['허브오픈시간']||'').trim(),
     hubClose: String(row['허브마감시간']||'').trim(),
+    deliveryCompany: String(row['수행배대사']||'').trim(),
     memo: String(row['불가/보류사유']||'').trim(),
   };
 }
@@ -573,6 +583,7 @@ async function apiMatch(raw, addr) {
       preDeductHub: best.preDeductHub || '',
       hubOpen: best.hubOpen || '',
       hubClose: best.hubClose || '',
+      deliveryCompany: best.deliveryCompany || '',
       status: best.status || '',
       memo: best.memo || '',
       hasSurcharge,
@@ -679,12 +690,15 @@ function renderHubMgrList(){
     const visible = hubVisible[h.name] !== false;
     const surCount = (savedZones[h.name]?.surPaths||[]).length;
     const surBadge = surCount>0 ? `<span style="font-size:10px;color:#ea580c;background:#fff7ed;border:1px solid #fed7aa;border-radius:4px;padding:1px 6px;flex-shrink:0">할증 ${surCount}개</span>` : '';
+    const brandName = savedZones[h.name]?.brand;
+    const brandBadge = brandName ? `<span style="font-size:10px;color:#059669;background:#ecfdf5;border:1px solid #6ee7b7;border-radius:4px;padding:1px 6px;flex-shrink:0">${brandName}</span>` : '';
     return `
     <div class="hub-mgr-item" style="flex-direction:column;align-items:stretch;gap:6px">
       <label style="display:flex;align-items:center;gap:6px;cursor:pointer">
         <input type="checkbox" ${visible?'checked':''} onchange="toggleHubVisible('${h.name}')"
           style="width:15px;height:15px;accent-color:#2563eb;cursor:pointer;flex-shrink:0">
         <div class="hub-mgr-name">${h.name}</div>
+        ${brandBadge}
         ${surBadge}
       </label>
       <div style="display:flex;gap:4px;flex-wrap:nowrap">
@@ -915,7 +929,8 @@ function resultHTML(item,others,hasSurcharge){
       <div class="itile"><div class="itile-l">공유허브</div><div class="itile-v">${item.sharedHub||'없음'}</div></div>
       <div class="itile"><div class="itile-l">총판 선차감</div><div class="itile-v">${item.preDeductTotal!==''?item.preDeductTotal:'—'}</div></div>
       <div class="itile"><div class="itile-l">허브 선차감</div><div class="itile-v">${item.preDeductHub!==''?item.preDeductHub:'—'}</div></div>
-      ${item.hubOpen||item.hubClose?`<div class="itile"><div class="itile-l">허브 운영시간</div><div class="itile-v">${item.hubOpen||''}${item.hubClose?` ~ ${item.hubClose}`:''}</div></div>`:''}
+      <div class="itile"><div class="itile-l">수행배대사</div><div class="itile-v c-accent">${item.deliveryCompany||'—'}</div></div>
+      <div class="itile"><div class="itile-l">허브 운영시간</div><div class="itile-v">${(item.hubOpen||item.hubClose)?(item.hubOpen||'?')+' ~ '+(item.hubClose||'?'):'—'}</div></div>
     </div>
     ${item.memo?`<div class="memo">⚠️ <span>${item.memo}</span></div>`:''}
     <div class="score-sec">
@@ -1286,9 +1301,10 @@ function undoLast(){if(currentPath.length>0){currentPath.pop();updateTempDraw();
 
 function saveZone(){
   const hub=document.getElementById('hubSelect').value;
+  const brand=document.getElementById('brandSelect')?.value||'';
   if(!hub){alert('허브를 선택해주세요!');return;}
   if(currentPath.length<3){alert('최소 3개 이상 점을 찍어주세요!');return;}
-  if(!savedZones[hub])savedZones[hub]={zonePolygon:null,surPolygons:[],zonePath:[],surPaths:[]};
+  if(!savedZones[hub])savedZones[hub]={zonePolygon:null,surPolygons:[],zonePath:[],surPaths:[],brand:''};
   const color=currentLayer==='surcharge'?'#ea580c':getHubColor(hub);
   const polygon=new kakao.maps.Polygon({map,path:currentPath,strokeWeight:2,strokeColor:color,strokeOpacity:1,fillColor:color,fillOpacity:currentLayer==='surcharge'?0.25:0.15});
   const pathData=currentPath.map(p=>({lat:p.getLat(),lng:p.getLng()}));
@@ -1296,6 +1312,7 @@ function saveZone(){
     if(savedZones[hub].zonePolygon)savedZones[hub].zonePolygon.setMap(null);
     savedZones[hub].zonePolygon=polygon;
     savedZones[hub].zonePath=pathData;
+    if(brand) savedZones[hub].brand=brand;
   } else {
     if(!savedZones[hub].surPolygons) savedZones[hub].surPolygons=[];
     if(!savedZones[hub].surPaths) savedZones[hub].surPaths=[];
@@ -1305,7 +1322,8 @@ function saveZone(){
   clearCurrent();isDrawing=false;
   document.getElementById('drawToggle').className='draw-btn';
   document.getElementById('drawToggle').textContent='✏️ 그리기 시작';
-  setStatus(`[${hub}] ${currentLayer==='zone'?'기본 권역':'할증 구역'} 저장 완료! ✅`);
+  const brandMsg = brand ? ` (${brand})` : '';
+  setStatus(`[${hub}]${brandMsg} ${currentLayer==='zone'?'기본 권역':'할증 구역'} 저장 완료! ✅`);
   renderHubMgrList();
   saveToStorage();
   saveZonesToSheet();
