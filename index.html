@@ -928,11 +928,11 @@ function resultHTML(item,others,hasSurcharge){
     </div>
     ${hasSurcharge?`<div class="surcharge-badge">⚡ 할증 구역 포함 — 이 상점은 할증 권역에 위치합니다</div>`:''}
     <div class="info-grid">
+      <div class="itile"><div class="itile-l">수행배대사</div><div class="itile-v c-accent">${item.deliveryCompany||'—'}</div></div>
       <div class="itile"><div class="itile-l">수행허브</div><div class="itile-v">${item.hub||'—'}</div></div>
       <div class="itile"><div class="itile-l">공유허브</div><div class="itile-v">${item.sharedHub||'없음'}</div></div>
       <div class="itile"><div class="itile-l">총판 선차감</div><div class="itile-v">${item.preDeductTotal!==''?item.preDeductTotal:'—'}</div></div>
       <div class="itile"><div class="itile-l">허브 선차감</div><div class="itile-v">${item.preDeductHub!==''?item.preDeductHub:'—'}</div></div>
-      <div class="itile"><div class="itile-l">수행배대사</div><div class="itile-v c-accent">${item.deliveryCompany||'—'}</div></div>
       <div class="itile"><div class="itile-l">허브 운영시간</div><div class="itile-v">${(item.hubOpen||item.hubClose)?(item.hubOpen||'?')+' ~ '+(item.hubClose||'?'):'—'}</div></div>
       <div class="itile"><div class="itile-l">허브 담당자</div><div class="itile-v">${item.hubManager||'—'}</div></div>
     </div>
