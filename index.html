@@ -373,6 +373,7 @@ function parseDBRow(row) {
     hubOpen: String(row['허브오픈시간']||'').trim(),
     hubClose: String(row['허브마감시간']||'').trim(),
     deliveryCompany: String(row['수행배대사']||'').trim(),
+    hubManager: String(row['담당자2']||'').trim(),
     memo: String(row['불가/보류사유']||'').trim(),
   };
 }
@@ -585,6 +586,7 @@ async function apiMatch(raw, addr) {
       hubOpen: best.hubOpen || '',
       hubClose: best.hubClose || '',
       deliveryCompany: best.deliveryCompany || '',
+      hubManager: best.hubManager || '',
       status: best.status || '',
       memo: best.memo || '',
       hasSurcharge,
@@ -932,6 +934,7 @@ function resultHTML(item,others,hasSurcharge){
       <div class="itile"><div class="itile-l">허브 선차감</div><div class="itile-v">${item.preDeductHub!==''?item.preDeductHub:'—'}</div></div>
       <div class="itile"><div class="itile-l">수행배대사</div><div class="itile-v c-accent">${item.deliveryCompany||'—'}</div></div>
       <div class="itile"><div class="itile-l">허브 운영시간</div><div class="itile-v">${(item.hubOpen||item.hubClose)?(item.hubOpen||'?')+' ~ '+(item.hubClose||'?'):'—'}</div></div>
+      <div class="itile"><div class="itile-l">허브 담당자</div><div class="itile-v">${item.hubManager||'—'}</div></div>
     </div>
     ${item.memo?`<div class="memo">⚠️ <span>${item.memo}</span></div>`:''}
     <div class="score-sec">
