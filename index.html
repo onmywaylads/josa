@@ -149,11 +149,9 @@
 .map-panel{background:rgba(255,255,255,0.97);backdrop-filter:blur(10px);border:1px solid var(–border);border-radius:12px;padding:14px;box-shadow:var(–shadow-md);}
 .map-panel-title{font-size:11px;font-weight:700;color:var(–accent);letter-spacing:0.08em;text-transform:uppercase;margin-bottom:12px;}
 
-/* 허브 선택 드롭다운 */
 .hub-select{background:var(–bg);border:1.5px solid var(–border);border-radius:8px;padding:9px 12px;color:var(–text);font-family:‘Pretendard’,sans-serif;font-size:13px;font-weight:600;outline:none;width:100%;margin-bottom:8px;cursor:pointer;}
 .hub-select:focus{border-color:var(–accent);}
 
-/* 허브 추가 인풋 */
 .hub-add-row{display:flex;gap:0;margin-bottom:12px;border:1.5px solid var(–border);border-radius:10px;overflow:hidden;transition:border-color 0.2s;background:var(–white);}
 .hub-add-row:focus-within{border-color:var(–accent);}
 .hub-add-inp{flex:1;background:transparent;border:none;padding:10px 12px;color:var(–text);font-family:‘Pretendard’,sans-serif;font-size:13px;font-weight:600;outline:none;}
@@ -176,7 +174,6 @@
 .draw-btn.del{background:var(–bg);border-color:#fca5a5;color:var(–red);}
 .draw-btn.del:hover{background:#fef2f2;border-color:var(–red);}
 
-/* 저장된 허브 목록 */
 .hub-list-panel{max-height:180px;overflow-y:auto;}
 .hub-row{display:flex;align-items:center;justify-content:space-between;padding:7px 0;border-bottom:1px solid var(–border);}
 .hub-row:last-child{border-bottom:none;}
@@ -186,13 +183,11 @@
 .hub-tag.zone-tag{background:#dbeafe;color:var(–accent);}
 .hub-tag.sur-tag{background:#fed7aa;color:var(–orange);}
 
-/* 허브 관리 목록 (설정 패널) */
 .hub-mgr-list{display:flex;flex-direction:column;gap:6px;margin-top:12px;max-height:420px;overflow-y:auto;}
 .hub-mgr-item{display:flex;align-items:center;justify-content:space-between;background:var(–bg);border:1px solid var(–border);border-radius:8px;padding:7px 10px;}
 .hub-mgr-left{display:flex;align-items:center;gap:6px;flex:1;min-width:0;}
 .hub-mgr-name{font-size:13px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
 
-/* 색상 선택 */
 .color-dots{display:flex;gap:5px;}
 .color-dot{width:16px;height:16px;border-radius:50%;cursor:pointer;border:2px solid transparent;transition:all 0.15s;}
 .color-dot.selected{border-color:var(–text);transform:scale(1.2);}
@@ -201,7 +196,6 @@
 .map-status.zone{border-color:var(–accent);color:var(–accent);}
 .map-status.surcharge{border-color:var(–orange);color:var(–orange);}
 
-/* 모달 */
 .modal-bg{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.4);z-index:500;align-items:center;justify-content:center;}
 .modal-bg.show{display:flex;}
 .modal{background:var(–white);border-radius:16px;padding:24px;width:90%;max-width:360px;box-shadow:0 20px 60px rgba(0,0,0,0.15);}
@@ -239,6 +233,7 @@
     <div class="stat"><div class="stat-n" style="color:var(--green)" id="statPossible">6</div><div class="stat-l">수행 가능</div></div>
     <div class="stat"><div class="stat-n" style="color:var(--red)" id="statImpossible">1</div><div class="stat-l">불가</div></div>
     <div class="stat"><div class="stat-n" style="color:var(--yellow)" id="statCheck">1</div><div class="stat-l">확인 필요</div></div>
+
   </div>
   <div class="card">
     <div class="card-label">신규 실수행 조사 상점 입력</div>
@@ -324,7 +319,6 @@
 
 <div class="modal-bg" id="zoneMapModal" style="z-index:600">
   <div style="background:#fff;border-radius:16px;width:92%;max-width:700px;max-height:90vh;overflow:hidden;box-shadow:0 20px 60px rgba(0,0,0,0.2);display:flex;flex-direction:column;">
-    <!-- 헤더 -->
     <div style="padding:16px 20px;border-bottom:1px solid #e4e8f0;display:flex;justify-content:space-between;align-items:center;flex-shrink:0">
       <div>
         <div id="zoneMapTitle" style="font-size:16px;font-weight:800;color:#111827"></div>
@@ -335,10 +329,8 @@
         <button onclick="closeZoneMap()" style="padding:8px 12px;background:#f3f4f6;border:none;border-radius:8px;font-size:13px;cursor:pointer">✕</button>
       </div>
     </div>
-    <!-- 지도 -->
     <div id="zoneMapContainer" style="flex:1;min-height:400px;position:relative">
       <div id="zoneMap" style="width:100%;height:100%;min-height:400px"></div>
-      <!-- 범례 -->
       <div style="position:absolute;bottom:12px;left:12px;background:rgba(255,255,255,0.95);border:1px solid #e4e8f0;border-radius:10px;padding:10px 14px;font-size:11px;font-weight:600;z-index:10">
         <div style="display:flex;align-items:center;gap:6px;margin-bottom:5px"><div style="width:12px;height:12px;border-radius:50%;background:#2563eb;opacity:0.3;border:2px solid #2563eb"></div> 허브 기본 권역</div>
         <div style="display:flex;align-items:center;gap:6px;margin-bottom:5px"><div style="width:12px;height:12px;border-radius:50%;background:#ea580c;opacity:0.3;border:2px solid #ea580c"></div> 할증 구역</div>
@@ -357,15 +349,20 @@ let DB = [];
 function parseDBRow(row) {
 const brand = String(row[‘브랜드명’]||’’).trim();
 const storeFull = String(row[‘상점명’]||’’).trim();
+// 상점명이 이미 브랜드명[점명] 형식인지 확인
 const hasFormat = storeFull.includes(’[’) && storeFull.includes(’]’);
 const key = hasFormat ? storeFull : (storeFull ? `${brand}[${storeFull}]` : brand);
+// store는 [] 안쪽만 추출
 const storeMatch = storeFull.match(/[(.+?)]/);
 const store = storeMatch ? storeMatch[1] : storeFull;
 const addr = String(row[‘상점주소’]||’’).trim();
 const dong = extractDong(addr);
 return {
-key, brand, store,
-address: addr, dong,
+key,
+brand,
+store,
+address: addr,
+dong,
 lat: 0, lng: 0,
 status: String(row[‘수행가능답변’]||‘확인필요’).trim(),
 hub: String(row[‘메인허브명’]||’’).trim(),
@@ -407,6 +404,7 @@ if(cEl)cEl.textContent=check;
 
 const SCRIPT_URL=‘https://script.google.com/macros/s/AKfycbwBt4hJMPjXRT2RaKhWyRCVYLg4vO6Bev_8gULP52OhWz6SRPDr3nQLayNulzF8kjsDWA/exec’;
 
+// 허브 목록 (동적 관리)
 let hubList=[];
 let savedZones={};
 
@@ -421,6 +419,7 @@ hubList=data.hubList||[];
 const sheetHubs=new Set(hubList.map(h=>h.name));
 
 ```
+// 시트에 없는 허브 제거
 Object.keys(savedZones).forEach(k=>{
   if(!sheetHubs.has(k)){
     if(savedZones[k].zonePolygon) savedZones[k].zonePolygon.setMap(null);
@@ -456,9 +455,10 @@ body:JSON.stringify({action:‘saveZones’,zones:zonesData,hubList})
 }catch(e){console.log(‘시트 저장 실패’,e);}
 }
 
+// localStorage 백업도 유지
 function saveToStorage(){
 try{
-const data={hubList,zones:Object.fromEntries(Object.entries(savedZones).map(([k,v])=>([k,{zonePath:v.zonePath,surPaths:v.surPaths,brand:v.brand||’’}])))};
+const data={hubList,zones:Object.fromEntries(Object.entries(savedZones).map(([k,v])=>([k,{zonePath:v.zonePath,surPaths:v.surPaths}])))};
 localStorage.setItem(‘barogo_data’,JSON.stringify(data));
 }catch(e){}
 }
@@ -470,6 +470,7 @@ if(!raw) return false;
 const data=JSON.parse(raw);
 hubList=data.hubList||[];
 Object.entries(data.zones||{}).forEach(([k,v])=>{
+// 구버전 surPath 호환
 const surPaths = v.surPaths || (v.surPath?.length>=3 ? [v.surPath] : []);
 savedZones[k]={zonePolygon:null,surPolygons:[],zonePath:v.zonePath||[],surPaths,brand:v.brand||’’};
 });
@@ -484,9 +485,11 @@ Object.entries(savedZones).forEach(([hub,v])=>{
 if(hubVisible[hub] === undefined) hubVisible[hub] = true;
 const show = hubVisible[hub];
 const hubColor=’#2563eb’;
+// 기존 폴리곤 제거
 if(v.zonePolygon){try{v.zonePolygon.setMap(null);}catch(e){}}
 (v.surPolygons||[]).forEach(p=>{try{p.setMap(null);}catch(e){}});
 v.zonePolygon=null; v.surPolygons=[];
+// 새로 생성
 if(v.zonePath?.length>=3){
 v.zonePolygon=new kakao.maps.Polygon({map,path:v.zonePath.map(p=>new kakao.maps.LatLng(p.lat,p.lng)),strokeWeight:2,strokeColor:hubColor,strokeOpacity:1,fillColor:hubColor,fillOpacity:0.15});
 if(!show) v.zonePolygon.setMap(null);
@@ -499,6 +502,7 @@ return poly;
 });
 }
 
+// 페이지 로드 시 - localStorage 먼저, 그다음 시트에서 최신 데이터
 loadFromStorage();
 loadZonesFromSheet();
 loadDBFromSheet().then(() => {
@@ -657,6 +661,7 @@ sel.appendChild(opt);
 if(hubList.find(h=>h.name===cur))sel.value=cur;
 }
 
+// 허브 표시 여부 (기본 모두 표시)
 let hubVisible = {};
 
 function toggleHubVisible(name) {
@@ -679,9 +684,6 @@ if(z.zonePolygon) z.zonePolygon.setMap(null);
 }
 }
 
-// ══════════════════════════════
-// [수정] 허브 관리 목록 렌더링 — 브랜드명 노출 + 브랜드 변경 버튼 추가
-// ══════════════════════════════
 function renderHubMgrList(){
 const panel=document.getElementById(‘hubMgrList’);
 if(!hubList.length){panel.innerHTML=’<div style="font-size:12px;color:var(--text-dim)">추가된 허브 없음</div>’;return;}
@@ -689,11 +691,9 @@ panel.innerHTML=hubList.map(h=>{
 const visible = hubVisible[h.name] !== false;
 const surCount = (savedZones[h.name]?.surPaths||[]).length;
 const surBadge = surCount>0 ? `<span style="font-size:10px;color:#ea580c;background:#fff7ed;border:1px solid #fed7aa;border-radius:4px;padding:1px 6px;flex-shrink:0">할증 ${surCount}개</span>` : ‘’;
-const brandName = savedZones[h.name]?.brand || ‘’;
-const brandBadge = brandName
-? `<span style="font-size:10px;color:#059669;background:#ecfdf5;border:1px solid #6ee7b7;border-radius:4px;padding:1px 6px;flex-shrink:0">${brandName}</span>`
-: `<span style="font-size:10px;color:#9ca3af;background:#f3f4f6;border:1px solid #e4e8f0;border-radius:4px;padding:1px 6px;flex-shrink:0">브랜드없음</span>`;
-return ` <div class="hub-mgr-item" style="flex-direction:column;align-items:stretch;gap:6px"> <label style="display:flex;align-items:center;gap:6px;cursor:pointer"> <input type="checkbox" ${visible?'checked':''} onchange="toggleHubVisible('${h.name}')" style="width:15px;height:15px;accent-color:#2563eb;cursor:pointer;flex-shrink:0"> <div class="hub-mgr-name">${h.name}</div> ${brandBadge} ${surBadge} </label> <div style="display:flex;gap:4px;flex-wrap:nowrap"> <button class="btn btn-sm" style="font-size:10px;padding:3px 7px;border:1px solid var(--border);background:var(--white);white-space:nowrap" onclick="renameHub('${h.name}')">✏️ 허브명 변경</button> <button class="btn btn-sm" style="font-size:10px;padding:3px 7px;border:1px solid #6ee7b7;background:#ecfdf5;color:#059669;white-space:nowrap" onclick="changeBrand('${h.name}')">🏷 브랜드 변경</button> <button class="btn btn-sm" style="font-size:10px;padding:3px 7px;border:1px solid #bfdbfe;background:#eff6ff;color:var(--accent);white-space:nowrap" onclick="redrawHub('${h.name}')">🔄 권역 다시 그리기</button> <button class="btn btn-sm btn-danger" style="font-size:10px;padding:3px 7px;white-space:nowrap" onclick="deleteHub('${h.name}')">삭제</button> </div> </div>`;
+const brandName = savedZones[h.name]?.brand;
+const brandBadge = brandName ? `<span style="font-size:10px;color:#059669;background:#ecfdf5;border:1px solid #6ee7b7;border-radius:4px;padding:1px 6px;flex-shrink:0">${brandName}</span>` : ‘’;
+return ` <div class="hub-mgr-item" style="flex-direction:column;align-items:stretch;gap:6px"> <label style="display:flex;align-items:center;gap:6px;cursor:pointer"> <input type="checkbox" ${visible?'checked':''} onchange="toggleHubVisible('${h.name}')" style="width:15px;height:15px;accent-color:#2563eb;cursor:pointer;flex-shrink:0"> <div class="hub-mgr-name">${h.name}</div> ${brandBadge} ${surBadge} </label> <div style="display:flex;gap:4px;flex-wrap:nowrap"> <button class="btn btn-sm" style="font-size:10px;padding:3px 7px;border:1px solid var(--border);background:var(--white);white-space:nowrap" onclick="renameHub('${h.name}')">✏️ 허브명 변경</button> <button class="btn btn-sm" style="font-size:10px;padding:3px 7px;border:1px solid #bfdbfe;background:#eff6ff;color:var(--accent);white-space:nowrap" onclick="redrawHub('${h.name}')">🔄 권역 다시 그리기</button> <button class="btn btn-sm btn-danger" style="font-size:10px;padding:3px 7px;white-space:nowrap" onclick="deleteHub('${h.name}')">삭제</button> </div> </div>`;
 }).join(’’);
 }
 
@@ -711,33 +711,6 @@ hubVisible[newName]=hubVisible[oldName];
 delete hubVisible[oldName];
 }
 renderHubSelect();
-renderHubMgrList();
-saveToStorage();
-saveZonesToSheet();
-}
-
-// ══════════════════════════════
-// [신규] 브랜드 변경 함수
-// ══════════════════════════════
-function changeBrand(name) {
-const brands = [’’, ‘바로고’, ‘모아라인’, ‘딜버’];
-const current = savedZones[name]?.brand || ‘’;
-const optionsList = brands.map((b, i) => `${i}: ${b || '(없음)'}`).join(’\n’);
-const input = prompt(
-`[${name}] 브랜드를 선택해주세요.\n\n${optionsList}\n\n번호 입력 또는 직접 브랜드명 입력:`,
-current
-);
-if (input === null) return;
-
-let newBrand = input.trim();
-if (/^\d$/.test(newBrand) && brands[parseInt(newBrand)] !== undefined) {
-newBrand = brands[parseInt(newBrand)];
-}
-
-if (!savedZones[name]) {
-savedZones[name] = { zonePolygon: null, surPolygons: [], zonePath: [], surPaths: [], brand: ‘’ };
-}
-savedZones[name].brand = newBrand;
 renderHubMgrList();
 saveToStorage();
 saveZonesToSheet();
@@ -989,59 +962,9 @@ navigator.clipboard.writeText(msg).then(()=>alert(‘복사됐어요! 카톡에 
 document.addEventListener(‘keydown’,e=>{if(e.key===‘Enter’)doSearch();});
 
 // ══════════════════════════════
-// 인라인 지도
+// 인라인 지도 (상점 조회 결과 아래)
 // ══════════════════════════════
 let inlineMap=null, inlineOverlays=[];
-
-function clipByCircle(poly, cLat, cLng, radiusKm) {
-const R = radiusKm;
-function dist(p) {
-const dlat = (p.lat - cLat) * 111;
-const dlng = (p.lng - cLng) * 111 * Math.cos(cLat * Math.PI / 180);
-return Math.sqrt(dlat*dlat + dlng*dlng);
-}
-function inCircle(p) { return dist(p) <= R; }
-function circleIntersect(p, q) {
-const dlat = (q.lat - p.lat) * 111;
-const dlng = (q.lng - p.lng) * 111 * Math.cos(cLat * Math.PI / 180);
-const plat = (p.lat - cLat) * 111;
-const plng = (p.lng - cLng) * 111 * Math.cos(cLat * Math.PI / 180);
-const a = dlat*dlat + dlng*dlng;
-const b = 2*(plat*dlat + plng*dlng);
-const c = plat*plat + plng*plng - R*R;
-const disc = b*b - 4*a*c;
-if(disc < 0 || a < 1e-12) return null;
-const results = [];
-const sq = Math.sqrt(disc);
-[(-b-sq)/(2*a), (-b+sq)/(2*a)].forEach(t => {
-if(t >= 0 && t <= 1) {
-results.push({lat: p.lat + t*(q.lat-p.lat), lng: p.lng + t*(q.lng-p.lng)});
-}
-});
-return results;
-}
-let result = [];
-for(let i = 0; i < poly.length; i++) {
-const P = poly[i];
-const Q = poly[(i+1) % poly.length];
-const pIn = inCircle(P);
-const qIn = inCircle(Q);
-if(pIn) {
-result.push(P);
-if(!qIn) {
-const pts = circleIntersect(P, Q);
-if(pts) pts.forEach(pt => result.push(pt));
-}
-} else {
-const pts = circleIntersect(P, Q);
-if(pts && pts.length > 0) {
-pts.forEach(pt => result.push(pt));
-if(qIn) {}
-}
-}
-}
-return result;
-}
 
 function turfIntersect(pathData, cLat, cLng, radiusKm) {
 try {
@@ -1057,53 +980,6 @@ return result.map(c=>new kakao.maps.LatLng(c[1], c[0]));
 console.log(‘turf 교집합 오류:’, e);
 return null;
 }
-}
-
-function circleToPolygon(lat, lng, radiusKm, numPoints=64) {
-const points=[];
-for(let i=0;i<numPoints;i++){
-const angle=(i/numPoints)*2*Math.PI;
-const dlat=(radiusKm/111)*Math.cos(angle);
-const dlng=(radiusKm/(111*Math.cos(lat*Math.PI/180)))*Math.sin(angle);
-points.push({lat:lat+dlat, lng:lng+dlng});
-}
-return points;
-}
-
-function clipPolygon(subject, clip) {
-let output = subject.map(p=>({lat:p.lat, lng:p.lng}));
-if(!output.length) return [];
-for(let i=0; i<clip.length; i++){
-if(!output.length) return [];
-const input = […output];
-output = [];
-const A = clip[i];
-const B = clip[(i+1) % clip.length];
-for(let j=0; j<input.length; j++){
-const P = input[j];
-const Q = input[(j+1) % input.length];
-const pIn = side(P,A,B);
-const qIn = side(Q,A,B);
-if(pIn){
-output.push(P);
-if(!qIn) output.push(lineIntersect(P,Q,A,B));
-} else if(qIn){
-output.push(lineIntersect(P,Q,A,B));
-}
-}
-}
-return output;
-}
-function side(p,a,b){
-return ((b.lat-a.lat)*(p.lng-a.lng) - (b.lng-a.lng)*(p.lat-a.lat)) >= 0;
-}
-function lineIntersect(p,q,a,b){
-const d1lat=q.lat-p.lat, d1lng=q.lng-p.lng;
-const d2lat=b.lat-a.lat, d2lng=b.lng-a.lng;
-const denom = d1lat*d2lng - d1lng*d2lat;
-if(Math.abs(denom)<1e-12) return {…p};
-const t = ((a.lat-p.lat)*d2lng - (a.lng-p.lng)*d2lat) / denom;
-return {lat: p.lat + t*d1lat, lng: p.lng + t*d1lng};
 }
 
 async function renderInlineMap(item, hasSurcharge) {
@@ -1156,6 +1032,8 @@ info.open(inlineMap, marker);
 inlineOverlays.push(info);
 setTimeout(()=>inlineMap.relayout(), 150);
 }
+
+let zoneMap=null, zoneMapOverlays=[];
 
 async function showZoneMap(key, addr, hub, hasSurcharge) {
 document.getElementById(‘zoneMapModal’).classList.add(‘show’);
@@ -1216,7 +1094,6 @@ alert(`"${title}" 권역 지도\n\n카카오맵 보안 정책상 직접 캡쳐�
 // 카카오맵 + 그리기
 // ══════════════════════════════
 let map,mapInitialized=false,currentLayer=‘zone’,isDrawing=false,currentPath=[],tempPolyline=null,tempPolygon=null;
-let zoneMap=null,zoneMapOverlays=[];
 
 function initMap(){
 mapInitialized=true;
