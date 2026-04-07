@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 
 const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwBt4hJMPjXRT2RaKhWyRCVYLg4vO6Bev_8gULP52OhWz6SRPDr3nQLayNulzF8kjsDWA/exec';
+const BRANDS = ['바로고', '모아라인', '딜버'];
 
 export default function Main({ user }) {
   const [tab, setTab] = useState('search');
@@ -16,12 +17,10 @@ export default function Main({ user }) {
         </button>
       </nav>
 
-      {/* 상점 조회 */}
       <div style={{display: tab==='search' ? 'block' : 'none'}}>
         <SearchPage />
       </div>
 
-      {/* 권역 관리 - 항상 DOM에 존재, visibility로만 제어 */}
       <div style={{
         position: 'fixed', top: 49, left: 0, right: 0, bottom: 0,
         visibility: tab==='map' ? 'visible' : 'hidden',
@@ -311,8 +310,9 @@ function MapPage({ active }) {
   const [isDrawing, setIsDrawing] = useState(false);
   const [status, setStatus] = useState('허브를 추가하고 선택 후 그리기 시작');
   const [hubAddName, setHubAddName] = useState('');
+  const [hubAddBrand, setHubAddBrand] = useState('');
   const [selectedHub, setSelectedHub] = useState('');
-  const [selectedBrand, setSelectedBrand] = useState('');
+  const [hubSearch, setHubSearch] = useState('');
 
   const currentPathRef = useRef([]);
   const tempPolylineRef = useRef(null);
@@ -327,14 +327,12 @@ function MapPage({ active }) {
   useEffect(() => { isDrawingRef.current = isDrawing; }, [isDrawing]);
   useEffect(() => { currentLayerRef.current = currentLayer; }, [currentLayer]);
 
-  // 컴포넌트 마운트 시 바로 지도 초기화 시작
   useEffect(() => {
     loadFromStorage();
     loadZonesFromSheet();
     initMapWhenReady();
   }, []);
 
-  // 탭 전환 시 relayout
   useEffect(() => {
     if (active && mapInstanceRef.current) {
       setTimeout(() => mapInstanceRef.current.relayout(), 50);
@@ -444,7 +442,6 @@ function MapPage({ active }) {
         if (next[selectedHub].zonePolygon) next[selectedHub].zonePolygon.setMap(null);
         next[selectedHub].zonePolygon = polygon;
         next[selectedHub].zonePath = pathData;
-        if (selectedBrand) next[selectedHub].brand = selectedBrand;
       } else {
         next[selectedHub].surPolygons = [...(next[selectedHub].surPolygons||[]), polygon];
         next[selectedHub].surPaths = [...(next[selectedHub].surPaths||[]), pathData];
@@ -469,11 +466,18 @@ function MapPage({ active }) {
 
   function addHub() {
     if (!hubAddName.trim()) { alert('허브명을 입력해주세요!'); return; }
+    if (!hubAddBrand) { alert('브랜드를 선택해주세요!'); return; }
     if (hubList.find(h => h.name === hubAddName.trim())) { alert('이미 존재하는 허브입니다!'); return; }
-    const next = [...hubList, {name: hubAddName.trim()}];
+    const next = [...hubList, {name: hubAddName.trim(), brand: hubAddBrand}];
     setHubList(next);
     setSelectedHub(hubAddName.trim());
+    setSavedZones(prev => {
+      const z = {...prev};
+      if (!z[hubAddName.trim()]) z[hubAddName.trim()] = {zonePolygon:null, surPolygons:[], zonePath:[], surPaths:[], brand: hubAddBrand};
+      return z;
+    });
     setHubAddName('');
+    setHubAddBrand('');
     saveToStorageData(next, savedZonesRef.current);
     saveZonesToSheetData(next, savedZonesRef.current);
   }
@@ -541,7 +545,7 @@ function MapPage({ active }) {
 
   function saveToStorageData(hList, zones) {
     try {
-      const data = {hubList: hList, zones: Object.fromEntries(Object.entries(zones).map(([k,v])=>[k,{zonePath:v.zonePath, surPaths:v.surPaths}]))};
+      const data = {hubList: hList, zones: Object.fromEntries(Object.entries(zones).map(([k,v])=>[k,{zonePath:v.zonePath, surPaths:v.surPaths, brand:v.brand}]))};
       localStorage.setItem('barogo_data', JSON.stringify(data));
     } catch(e) {}
   }
@@ -556,33 +560,37 @@ function MapPage({ active }) {
     } catch(e) {}
   }
 
+  // 브랜드별 색상
+  const brandColor = {
+    '바로고': {bg:'#eff6ff', color:'#2563eb', border:'#bfdbfe'},
+    '모아라인': {bg:'#f0fdf4', color:'#16a34a', border:'#bbf7d0'},
+    '딜버': {bg:'#fdf4ff', color:'#9333ea', border:'#e9d5ff'},
+  };
+
+  const filteredHubs = hubList.filter(h => h.name.includes(hubSearch));
+
   return (
     <div style={{width:'100%',height:'100%',position:'relative'}}>
       <div ref={mapRef} style={{width:'100%',height:'100%'}} />
       <div className="map-toolbar">
+
+        {/* 그리기 패널 */}
         <div className="map-panel">
           <div className="map-panel-title">✏️ 권역 그리기</div>
+
+          {/* 허브 선택 */}
           <select className="hub-select" value={selectedHub} onChange={e=>setSelectedHub(e.target.value)}>
             <option value="">— 허브 선택 —</option>
             {hubList.map(h=><option key={h.name} value={h.name}>{h.name}</option>)}
           </select>
-          <select className="hub-select" value={selectedBrand} onChange={e=>setSelectedBrand(e.target.value)} style={{marginBottom:4,fontSize:12}}>
-            <option value="">— 브랜드 선택 (선택사항) —</option>
-            <option value="바로고">바로고</option>
-            <option value="모아라인">모아라인</option>
-            <option value="딜버">딜버</option>
-          </select>
-          <div style={{fontSize:10,color:'var(--text-dim)',marginBottom:10}}>특정 브랜드 권역을 그릴 때 선택하세요</div>
-          <div style={{marginBottom:12}}>
-            <input value={hubAddName} onChange={e=>setHubAddName(e.target.value)}
-              placeholder="새 허브명 입력"
-              style={{width:'100%',border:'1.5px solid var(--border)',borderRadius:8,padding:'9px 12px',fontFamily:'Pretendard',fontSize:13,fontWeight:600,outline:'none',marginBottom:6}} />
-            <button onClick={addHub} style={{width:'100%',padding:9,background:'var(--accent)',border:'none',borderRadius:8,color:'#fff',fontFamily:'Pretendard',fontSize:13,fontWeight:700,cursor:'pointer'}}>+ 허브 추가</button>
-          </div>
+
+          {/* 레이어 탭 */}
           <div className="layer-tabs">
             <button className={`layer-tab zone ${currentLayer==='zone'?'active':''}`} onClick={()=>setCurrentLayer('zone')}>🔵 기본 권역</button>
             <button className={`layer-tab surcharge ${currentLayer==='surcharge'?'active':''}`} onClick={()=>setCurrentLayer('surcharge')}>🟠 할증 구역</button>
           </div>
+
+          {/* 그리기 버튼 */}
           <div className="draw-btns">
             <button className={`draw-btn ${isDrawing?(currentLayer==='surcharge'?'drawing-sur':'drawing'):''}`} onClick={toggleDraw}>
               {isDrawing?'⏹️ 그리기 중단':'✏️ 그리기 시작'}
@@ -592,25 +600,110 @@ function MapPage({ active }) {
             <button className="draw-btn del" onClick={clearCurrent}>🗑 취소</button>
           </div>
         </div>
+
+        {/* 허브 추가 패널 */}
         <div className="map-panel">
-          <div className="map-panel-title">📋 허브 관리</div>
-          {hubList.length === 0
-            ? <div style={{fontSize:12,color:'var(--text-dim)'}}>추가된 허브 없음</div>
-            : hubList.map(h => (
-              <div key={h.name} className="hub-mgr-item" style={{flexDirection:'column',alignItems:'stretch',gap:6,marginBottom:6}}>
-                <label style={{display:'flex',alignItems:'center',gap:6,cursor:'pointer'}}>
-                  <input type="checkbox" checked={hubVisible[h.name]!==false} onChange={()=>toggleHubVisible(h.name)}
-                    style={{width:15,height:15,accentColor:'#2563eb',cursor:'pointer'}} />
-                  <span className="hub-mgr-name">{h.name}</span>
-                </label>
-                <div style={{display:'flex',gap:4}}>
-                  <button className="btn btn-sm btn-danger" style={{fontSize:10,padding:'3px 7px'}} onClick={()=>deleteHub(h.name)}>삭제</button>
+          <div className="map-panel-title">➕ 허브 추가</div>
+          <input
+            value={hubAddName}
+            onChange={e=>setHubAddName(e.target.value)}
+            placeholder="허브명 입력 (필수)"
+            onKeyDown={e=>e.key==='Enter'&&addHub()}
+            style={{width:'100%',border:'1.5px solid var(--border)',borderRadius:8,padding:'9px 12px',fontFamily:'Pretendard',fontSize:13,fontWeight:600,outline:'none',marginBottom:6,color:'var(--text)'}}
+          />
+          {/* 브랜드 필수 선택 */}
+          <div style={{display:'flex',gap:6,marginBottom:10}}>
+            {BRANDS.map(b => {
+              const c = brandColor[b] || {};
+              const selected = hubAddBrand === b;
+              return (
+                <button key={b} onClick={()=>setHubAddBrand(b)}
+                  style={{flex:1,padding:'7px 4px',borderRadius:8,border:`1.5px solid ${selected?c.border:'var(--border)'}`,
+                    background:selected?c.bg:'var(--bg)',color:selected?c.color:'var(--text-dim)',
+                    fontFamily:'Pretendard',fontSize:11,fontWeight:700,cursor:'pointer',transition:'all 0.15s'}}>
+                  {b}
+                </button>
+              );
+            })}
+          </div>
+          <button onClick={addHub}
+            style={{width:'100%',padding:9,background:'var(--accent)',border:'none',borderRadius:8,color:'#fff',fontFamily:'Pretendard',fontSize:13,fontWeight:700,cursor:'pointer'}}>
+            + 허브 추가
+          </button>
+        </div>
+
+        {/* 허브 관리 패널 */}
+        <div className="map-panel">
+          <div className="map-panel-title" style={{display:'flex',justifyContent:'space-between',alignItems:'center'}}>
+            <span>📋 허브 관리</span>
+            <span style={{fontSize:10,color:'var(--text-dim)',fontWeight:400}}>{hubList.length}개</span>
+          </div>
+
+          {/* 허브 검색 */}
+          {hubList.length > 5 && (
+            <input
+              value={hubSearch}
+              onChange={e=>setHubSearch(e.target.value)}
+              placeholder="허브 검색..."
+              style={{width:'100%',border:'1.5px solid var(--border)',borderRadius:8,padding:'7px 10px',fontFamily:'Pretendard',fontSize:12,outline:'none',marginBottom:8,color:'var(--text)'}}
+            />
+          )}
+
+          <div style={{maxHeight:300,overflowY:'auto',display:'flex',flexDirection:'column',gap:5}}>
+            {filteredHubs.length === 0
+              ? <div style={{fontSize:12,color:'var(--text-dim)',textAlign:'center',padding:'12px 0'}}>
+                  {hubList.length === 0 ? '추가된 허브 없음' : '검색 결과 없음'}
                 </div>
-              </div>
-            ))
-          }
+              : filteredHubs.map(h => {
+                  const zone = savedZones[h.name];
+                  const brand = zone?.brand || h.brand || '';
+                  const surCount = (zone?.surPaths||[]).length;
+                  const hasZone = (zone?.zonePath||[]).length >= 3;
+                  const bc = brandColor[brand] || {};
+                  const visible = hubVisible[h.name] !== false;
+
+                  return (
+                    <div key={h.name} style={{background:'var(--bg)',border:'1px solid var(--border)',borderRadius:9,padding:'8px 10px'}}>
+                      {/* 상단: 체크박스 + 이름 + 배지들 */}
+                      <div style={{display:'flex',alignItems:'center',gap:6,marginBottom:5}}>
+                        <input type="checkbox" checked={visible} onChange={()=>toggleHubVisible(h.name)}
+                          style={{width:14,height:14,accentColor:'#2563eb',cursor:'pointer',flexShrink:0}} />
+                        <span style={{fontSize:12,fontWeight:700,flex:1,overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap'}}>{h.name}</span>
+                        {brand && (
+                          <span style={{fontSize:10,fontWeight:700,padding:'1px 6px',borderRadius:4,background:bc.bg,color:bc.color,border:`1px solid ${bc.border}`,flexShrink:0}}>
+                            {brand}
+                          </span>
+                        )}
+                        {surCount > 0 && (
+                          <span style={{fontSize:10,fontWeight:700,padding:'1px 6px',borderRadius:4,background:'#fff7ed',color:'#ea580c',border:'1px solid #fed7aa',flexShrink:0}}>
+                            할증 {surCount}
+                          </span>
+                        )}
+                        {!hasZone && (
+                          <span style={{fontSize:10,padding:'1px 6px',borderRadius:4,background:'#fef2f2',color:'var(--red)',border:'1px solid #fca5a5',flexShrink:0}}>
+                            미그림
+                          </span>
+                        )}
+                      </div>
+                      {/* 하단: 버튼 */}
+                      <div style={{display:'flex',gap:4}}>
+                        <button onClick={()=>setSelectedHub(h.name)}
+                          style={{flex:1,padding:'4px 0',fontSize:10,fontWeight:700,border:'1px solid #bfdbfe',background:'#eff6ff',color:'var(--accent)',borderRadius:6,cursor:'pointer'}}>
+                          선택
+                        </button>
+                        <button onClick={()=>deleteHub(h.name)}
+                          style={{flex:1,padding:'4px 0',fontSize:10,fontWeight:700,border:'1px solid #fca5a5',background:'#fef2f2',color:'var(--red)',borderRadius:6,cursor:'pointer'}}>
+                          삭제
+                        </button>
+                      </div>
+                    </div>
+                  );
+                })
+            }
+          </div>
         </div>
       </div>
+
       <div className={`map-status ${currentLayer}`}>{status}</div>
     </div>
   );
