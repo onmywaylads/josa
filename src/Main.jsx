@@ -33,9 +33,7 @@ function SearchPage() {
   const [addrInput, setAddrInput] = useState('');
   const [stats, setStats] = useState({total:0,possible:0,impossible:0,check:0});
 
-  useEffect(() => {
-    loadDB();
-  }, []);
+  useEffect(() => { loadDB(); }, []);
 
   async function loadDB() {
     try {
@@ -313,20 +311,19 @@ function MapPage({ active }) {
   const tempPolygonRef = useRef(null);
   const savedZonesRef = useRef({});
   const hubListRef = useRef([]);
+  const isDrawingRef = useRef(false);
+  const currentLayerRef = useRef('zone');
 
-  useEffect(() => {
-    savedZonesRef.current = savedZones;
-  }, [savedZones]);
-
-  useEffect(() => {
-    hubListRef.current = hubList;
-  }, [hubList]);
+  useEffect(() => { savedZonesRef.current = savedZones; }, [savedZones]);
+  useEffect(() => { hubListRef.current = hubList; }, [hubList]);
+  useEffect(() => { isDrawingRef.current = isDrawing; }, [isDrawing]);
+  useEffect(() => { currentLayerRef.current = currentLayer; }, [currentLayer]);
 
   useEffect(() => {
     if (!active) return;
     loadFromStorage();
     loadZonesFromSheet();
-    initMapWhenReady();
+    setTimeout(() => initMapWhenReady(), 500);
   }, [active]);
 
   function initMapWhenReady() {
@@ -341,7 +338,11 @@ function MapPage({ active }) {
   }
 
   function initMap() {
-    if (!mapRef.current || mapInstanceRef.current) return;
+    if (!mapRef.current) return;
+    if (mapInstanceRef.current) {
+      mapInstanceRef.current.relayout();
+      return;
+    }
     const map = new window.kakao.maps.Map(mapRef.current, {
       center: new window.kakao.maps.LatLng(37.5172, 127.0473),
       level: 8
@@ -349,6 +350,7 @@ function MapPage({ active }) {
     mapInstanceRef.current = map;
     window.kakao.maps.event.addListener(map, 'click', onMapClick);
     restorePolygonsOnMap(map, savedZonesRef.current, hubVisible);
+    setTimeout(() => map.relayout(), 100);
   }
 
   function restorePolygonsOnMap(map, zones, visible) {
@@ -380,13 +382,6 @@ function MapPage({ active }) {
     currentPathRef.current.push(new window.kakao.maps.LatLng(e.latLng.getLat(), e.latLng.getLng()));
     updateTempDraw();
   }
-
-  const isDrawingRef = useRef(false);
-  useEffect(() => { isDrawingRef.current = isDrawing; }, [isDrawing]);
-  const selectedHubRef = useRef('');
-  useEffect(() => { selectedHubRef.current = selectedHub; }, [selectedHub]);
-  const currentLayerRef = useRef('zone');
-  useEffect(() => { currentLayerRef.current = currentLayer; }, [currentLayer]);
 
   function updateTempDraw() {
     const map = mapInstanceRef.current;
@@ -552,7 +547,7 @@ function MapPage({ active }) {
   }
 
   return (
-    <div style={{position:'fixed',top:49,left:0,right:0,bottom:0,background:'#e5e7eb'}}>
+    <div style={{position:'fixed',top:49,left:0,right:0,bottom:0}}>
       <div ref={mapRef} style={{width:'100%',height:'100%'}} />
       <div className="map-toolbar">
         <div className="map-panel">
