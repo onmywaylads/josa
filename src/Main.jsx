@@ -552,7 +552,7 @@ function MapPage({ active }) {
   }
 
   return (
-    <div style={{position:'fixed',top:49,left:0,right:0,bottom:0}}>
+    <div style={{position:'fixed',top:49,left:0,right:0,bottom:0,background:'#e5e7eb'}}>
       <div ref={mapRef} style={{width:'100%',height:'100%'}} />
       <div className="map-toolbar">
         <div className="map-panel">
