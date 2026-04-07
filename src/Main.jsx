@@ -37,7 +37,6 @@ export default function Main({ user, onLogout }) {
   );
 }
 
-// ── 상점 조회 ──────────────────────────────────────────
 function SearchPage() {
   const [db, setDb] = useState([]);
   const [result, setResult] = useState(null);
@@ -199,51 +198,51 @@ function ResultCard({ result, onReset }) {
   );
 }
 
-// ── 유틸 함수들 ──────────────────────────────────────
+// ── 유틸 ──
 function parseDBRow(row) {
-  const brand = String(row['브랜드명']||'').trim();
-  const storeFull = String(row['상점명']||'').trim();
-  const hasFormat = storeFull.includes('[') && storeFull.includes(']');
-  const key = hasFormat ? storeFull : (storeFull ? `${brand}[${storeFull}]` : brand);
-  const storeMatch = storeFull.match(/\[(.+?)\]/);
-  const store = storeMatch ? storeMatch[1] : storeFull;
-  const addr = String(row['상점주소']||'').trim();
+  const brand=String(row['브랜드명']||'').trim();
+  const storeFull=String(row['상점명']||'').trim();
+  const hasFormat=storeFull.includes('[')&&storeFull.includes(']');
+  const key=hasFormat?storeFull:(storeFull?`${brand}[${storeFull}]`:brand);
+  const storeMatch=storeFull.match(/\[(.+?)\]/);
+  const store=storeMatch?storeMatch[1]:storeFull;
+  const addr=String(row['상점주소']||'').trim();
   return {
-    key, brand, store, address: addr, dong: extractDong(addr), lat:0, lng:0,
-    status: String(row['수행가능답변']||'확인필요').trim(),
-    hub: String(row['메인허브명']||'').trim(),
-    sharedHub: String(row['공유허브명']||'').trim(),
-    preDeductTotal: row['총판']!==undefined ? String(row['총판']).trim() : '',
-    preDeductHub: row['허브']!==undefined ? String(row['허브']).trim() : '',
-    hubOpen: String(row['허브오픈시간']||'').trim(),
-    hubClose: String(row['허브마감시간']||'').trim(),
-    deliveryCompany: String(row['수행배대사']||'').trim(),
-    hubManager: String(row['담당자2']||'').trim(),
-    memo: String(row['불가/보류사유']||'').trim(),
+    key,brand,store,address:addr,dong:extractDong(addr),lat:0,lng:0,
+    status:String(row['수행가능답변']||'확인필요').trim(),
+    hub:String(row['메인허브명']||'').trim(),
+    sharedHub:String(row['공유허브명']||'').trim(),
+    preDeductTotal:row['총판']!==undefined?String(row['총판']).trim():'',
+    preDeductHub:row['허브']!==undefined?String(row['허브']).trim():'',
+    hubOpen:String(row['허브오픈시간']||'').trim(),
+    hubClose:String(row['허브마감시간']||'').trim(),
+    deliveryCompany:String(row['수행배대사']||'').trim(),
+    hubManager:String(row['담당자2']||'').trim(),
+    memo:String(row['불가/보류사유']||'').trim(),
   };
 }
-function parseKey(raw) { const m=raw.match(/^(.+?)\[(.+?)\]$/); return m?{brand:m[1].trim(),store:m[2].trim()}:{brand:raw.trim(),store:''}; }
-function extractDong(a) { const m=(a||'').match(/([가-힣]+동|[가-힣]+가)\b/); return m?m[1]:''; }
-function norm(s) { return (s||'').replace(/\s/g,'').toLowerCase(); }
-function strSim(a,b) {
+function parseKey(raw){const m=raw.match(/^(.+?)\[(.+?)\]$/);return m?{brand:m[1].trim(),store:m[2].trim()}:{brand:raw.trim(),store:''};}
+function extractDong(a){const m=(a||'').match(/([가-힣]+동|[가-힣]+가)\b/);return m?m[1]:'';}
+function norm(s){return(s||'').replace(/\s/g,'').toLowerCase();}
+function strSim(a,b){
   const ex=s=>{const m=(s||'').match(/\[(.+?)\]/);return m?m[1]:s;};
   a=norm(ex(a));b=norm(ex(b));
-  if(!a||!b)return 0; if(a===b)return 1;
+  if(!a||!b)return 0;if(a===b)return 1;
   let max=0;
-  for(let i=0;i<a.length;i++) for(let j=i+1;j<=a.length;j++){const s=a.slice(i,j);if(b.includes(s)&&s.length>max)max=s.length;}
+  for(let i=0;i<a.length;i++)for(let j=i+1;j<=a.length;j++){const s=a.slice(i,j);if(b.includes(s)&&s.length>max)max=s.length;}
   return max>=4?1.0:max>=3?0.9:max>=2?0.8:0;
 }
 function haversine(la1,lo1,la2,lo2){const R=6371,d=Math.PI/180,dla=(la2-la1)*d,dlo=(lo2-lo1)*d,av=Math.sin(dla/2)**2+Math.cos(la1*d)*Math.cos(la2*d)*Math.sin(dlo/2)**2;return R*2*Math.atan2(Math.sqrt(av),Math.sqrt(1-av));}
 function distScore(km){if(km<=0.10)return 1.00;if(km<=0.15)return 0.95;if(km<=0.20)return 0.90;if(km<=0.30)return 0.85;if(km<=0.40)return 0.80;if(km<=0.50)return 0.75;if(km<=0.70)return 0.65;if(km<=1.00)return 0.55;if(km<=1.50)return 0.40;if(km<=2.00)return 0.25;if(km<=3.00)return 0.10;return 0;}
 function dongScore(inDong,itemDong,km,inAddr,itemAddr){
-  if(!inDong||!itemDong)return 0; if(inDong===itemDong)return 1;
+  if(!inDong||!itemDong)return 0;if(inDong===itemDong)return 1;
   const inGu=(inAddr||'').match(/([가-힣]+구)/)?.[1]||'';
   const itemGu=(itemAddr||'').match(/([가-힣]+구)/)?.[1]||'';
   const sameGu=inGu&&itemGu&&inGu===itemGu;
   if(km!==null){if(km<=0.10)return 0.95;if(km<=0.20)return 0.85;if(km<=0.30)return sameGu?0.80:0.75;if(km<=0.50)return sameGu?0.70:0.50;if(km<=1.00)return sameGu?0.50:0.20;}
   return sameGu?0.30:0;
 }
-function getCoordFromAddr(addr) {
+function getCoordFromAddr(addr){
   return new Promise(resolve=>{
     if(!window.kakao?.maps?.services){resolve(null);return;}
     const gc=new window.kakao.maps.services.Geocoder();
@@ -256,7 +255,7 @@ function getCoordFromAddr(addr) {
   });
 }
 
-// ── 권역 관리 ──────────────────────────────────────────
+// ── 권역 관리 ──
 function MapPage({ active }) {
   const mapRef = useRef(null);
   const mapInstanceRef = useRef(null);
@@ -265,7 +264,7 @@ function MapPage({ active }) {
   const [hubVisible, setHubVisible] = useState({});
   const [currentLayer, setCurrentLayer] = useState('zone');
   const [isDrawing, setIsDrawing] = useState(false);
-  const [status, setStatus] = useState('허브 관리에서 허브를 선택 후 그리기 시작');
+  const [status, setStatus] = useState('허브를 추가하고 선택 후 그리기 시작');
   const [hubAddName, setHubAddName] = useState('');
   const [hubAddBrand, setHubAddBrand] = useState('');
   const [selectedHub, setSelectedHub] = useState('');
@@ -278,13 +277,11 @@ function MapPage({ active }) {
   const hubListRef = useRef([]);
   const isDrawingRef = useRef(false);
   const currentLayerRef = useRef('zone');
-  const selectedHubRef = useRef('');
 
   useEffect(()=>{savedZonesRef.current=savedZones;},[savedZones]);
   useEffect(()=>{hubListRef.current=hubList;},[hubList]);
   useEffect(()=>{isDrawingRef.current=isDrawing;},[isDrawing]);
   useEffect(()=>{currentLayerRef.current=currentLayer;},[currentLayer]);
-  useEffect(()=>{selectedHubRef.current=selectedHub;},[selectedHub]);
 
   useEffect(()=>{
     loadFromStorage();
@@ -317,19 +314,18 @@ function MapPage({ active }) {
       const show=visible[hub]!==false;
       if(v.zonePolygon){try{v.zonePolygon.setMap(null);}catch(e){}}
       (v.surPolygons||[]).forEach(p=>{try{p.setMap(null);}catch(e){}});
-      v.zonePolygon=null; v.surPolygons=[];
+      v.zonePolygon=null;v.surPolygons=[];
       if(v.zonePath?.length>=3){
         v.zonePolygon=new window.kakao.maps.Polygon({
-          map, path:v.zonePath.map(p=>new window.kakao.maps.LatLng(p.lat,p.lng)),
+          map,path:v.zonePath.map(p=>new window.kakao.maps.LatLng(p.lat,p.lng)),
           strokeWeight:2,strokeColor:'#2563eb',strokeOpacity:1,fillColor:'#2563eb',fillOpacity:0.15
         });
         if(!show) v.zonePolygon.setMap(null);
-        // 폴리곤 클릭 시 허브 선택
         window.kakao.maps.event.addListener(v.zonePolygon,'click',()=>selectHub(hub));
       }
       v.surPolygons=(v.surPaths||[]).filter(sp=>sp?.length>=3).map(sp=>{
         const poly=new window.kakao.maps.Polygon({
-          map, path:sp.map(p=>new window.kakao.maps.LatLng(p.lat,p.lng)),
+          map,path:sp.map(p=>new window.kakao.maps.LatLng(p.lat,p.lng)),
           strokeWeight:2,strokeColor:'#ea580c',strokeOpacity:1,fillColor:'#ea580c',fillOpacity:0.25
         });
         if(!show) poly.setMap(null);
@@ -342,7 +338,6 @@ function MapPage({ active }) {
   function selectHub(name){
     setSelectedHub(name);
     setStatus(`[${name}] 선택됨 — 그리기 시작을 눌러주세요`);
-    // 허브 관리 패널에서 해당 허브로 스크롤
     const el=document.getElementById(`hub-item-${name}`);
     if(el) el.scrollIntoView({behavior:'smooth',block:'nearest'});
   }
@@ -380,7 +375,7 @@ function MapPage({ active }) {
     const map=mapInstanceRef.current;
     const color=currentLayer==='surcharge'?'#ea580c':'#2563eb';
     const polygon=new window.kakao.maps.Polygon({
-      map, path:currentPathRef.current,
+      map,path:currentPathRef.current,
       strokeWeight:2,strokeColor:color,strokeOpacity:1,
       fillColor:color,fillOpacity:currentLayer==='surcharge'?0.25:0.15
     });
@@ -409,7 +404,7 @@ function MapPage({ active }) {
     if(tempPolylineRef.current) tempPolylineRef.current.setMap(null);
     if(tempPolygonRef.current) tempPolygonRef.current.setMap(null);
     currentPathRef.current=[];
-    tempPolylineRef.current=null; tempPolygonRef.current=null;
+    tempPolylineRef.current=null;tempPolygonRef.current=null;
     setIsDrawing(false);
   }
 
@@ -417,16 +412,16 @@ function MapPage({ active }) {
     if(!hubAddName.trim()){alert('허브명을 입력해주세요!');return;}
     if(!hubAddBrand){alert('브랜드를 선택해주세요!');return;}
     if(hubList.find(h=>h.name===hubAddName.trim())){alert('이미 존재하는 허브입니다!');return;}
-    const next=[...hubList,{name:hubAddName.trim(),brand:hubAddBrand}];
+    const newName=hubAddName.trim();
+    const next=[...hubList,{name:newName,brand:hubAddBrand}];
     setHubList(next);
     setSavedZones(prev=>{
       const z={...prev};
-      if(!z[hubAddName.trim()]) z[hubAddName.trim()]={zonePolygon:null,surPolygons:[],zonePath:[],surPaths:[],brand:hubAddBrand};
+      if(!z[newName]) z[newName]={zonePolygon:null,surPolygons:[],zonePath:[],surPaths:[],brand:hubAddBrand};
       return z;
     });
-    setSelectedHub(hubAddName.trim());
-    setStatus(`[${hubAddName.trim()}] 추가됨 — 그리기 시작을 눌러주세요`);
-    setHubAddName(''); setHubAddBrand('');
+    selectHub(newName);
+    setHubAddName('');setHubAddBrand('');
     saveToStorageData(next,savedZonesRef.current);
     saveZonesToSheetData(next,savedZonesRef.current);
   }
@@ -441,8 +436,8 @@ function MapPage({ active }) {
     const nextList=hubList.filter(h=>h.name!==name);
     const nextZones={...savedZonesRef.current};
     delete nextZones[name];
-    setHubList(nextList); setSavedZones(nextZones);
-    if(selectedHub===name) setSelectedHub('');
+    setHubList(nextList);setSavedZones(nextZones);
+    if(selectedHub===name){setSelectedHub('');setStatus('허브를 선택해주세요');}
     saveToStorageData(nextList,nextZones);
     saveZonesToSheetData(nextList,nextZones);
   }
@@ -507,9 +502,9 @@ function MapPage({ active }) {
     }catch(e){}
   }
 
-  const filteredHubs = brandFilter==='전체' ? hubList : hubList.filter(h=>{
-    const brand = savedZones[h.name]?.brand || h.brand || '';
-    return brand === brandFilter;
+  const filteredHubs=brandFilter==='전체'?hubList:hubList.filter(h=>{
+    const brand=savedZones[h.name]?.brand||h.brand||'';
+    return brand===brandFilter;
   });
 
   return (
@@ -518,24 +513,60 @@ function MapPage({ active }) {
 
       <div className="map-toolbar">
 
-        {/* 권역 그리기 패널 */}
+        {/* ── 권역 그리기 패널 (허브 추가 + 그리기 통합) ── */}
         <div className="map-panel">
           <div className="map-panel-title">✏️ 권역 그리기</div>
 
-          {/* 선택된 허브 표시 */}
-          <div style={{
-            padding:'8px 10px',borderRadius:8,marginBottom:10,fontSize:12,fontWeight:700,
-            background: selectedHub ? '#eff6ff' : 'var(--bg)',
-            border: `1.5px solid ${selectedHub ? 'var(--accent)' : 'var(--border)'}`,
-            color: selectedHub ? 'var(--accent)' : 'var(--text-dim)'
-          }}>
-            {selectedHub ? `✅ ${selectedHub}` : '← 허브 관리에서 허브 선택'}
+          {/* 1. 허브명 입력 */}
+          <input
+            value={hubAddName} onChange={e=>setHubAddName(e.target.value)}
+            placeholder="새 허브명 입력" onKeyDown={e=>e.key==='Enter'&&addHub()}
+            style={{width:'100%',border:'1.5px solid var(--border)',borderRadius:8,padding:'8px 12px',
+              fontFamily:'Pretendard',fontSize:13,fontWeight:600,outline:'none',marginBottom:7,color:'var(--text)'}}
+          />
+
+          {/* 2. 브랜드 선택 */}
+          <div style={{display:'flex',gap:5,marginBottom:8}}>
+            {BRANDS.map(b=>{
+              const c=BRAND_COLOR[b]||{};
+              const sel=hubAddBrand===b;
+              return (
+                <button key={b} onClick={()=>setHubAddBrand(b)} style={{
+                  flex:1,padding:'6px 2px',borderRadius:7,cursor:'pointer',transition:'all 0.15s',
+                  border:`1.5px solid ${sel?c.border:'var(--border)'}`,
+                  background:sel?c.bg:'var(--bg)',color:sel?c.color:'var(--text-dim)',
+                  fontFamily:'Pretendard',fontSize:11,fontWeight:700
+                }}>{b}</button>
+              );
+            })}
           </div>
 
+          {/* 3. 허브 추가 버튼 */}
+          <button onClick={addHub} style={{
+            width:'100%',padding:'8px',background:'var(--accent)',border:'none',borderRadius:8,
+            color:'#fff',fontFamily:'Pretendard',fontSize:13,fontWeight:700,cursor:'pointer',marginBottom:12
+          }}>+ 허브 추가</button>
+
+          {/* 구분선 */}
+          <div style={{borderTop:'1px solid var(--border)',marginBottom:12}} />
+
+          {/* 4. 선택된 허브 표시 */}
+          <div style={{
+            padding:'8px 10px',borderRadius:8,marginBottom:10,fontSize:12,fontWeight:700,
+            background:selectedHub?'#eff6ff':'var(--bg)',
+            border:`1.5px solid ${selectedHub?'var(--accent)':'var(--border)'}`,
+            color:selectedHub?'var(--accent)':'var(--text-dim)'
+          }}>
+            {selectedHub?`✅ ${selectedHub}`:'← 허브 관리에서 허브 클릭'}
+          </div>
+
+          {/* 5. 레이어 탭 */}
           <div className="layer-tabs">
             <button className={`layer-tab zone ${currentLayer==='zone'?'active':''}`} onClick={()=>setCurrentLayer('zone')}>🔵 기본 권역</button>
             <button className={`layer-tab surcharge ${currentLayer==='surcharge'?'active':''}`} onClick={()=>setCurrentLayer('surcharge')}>🟠 할증 구역</button>
           </div>
+
+          {/* 6. 그리기 버튼들 */}
           <div className="draw-btns">
             <button className={`draw-btn ${isDrawing?(currentLayer==='surcharge'?'drawing-sur':'drawing'):''}`} onClick={toggleDraw}>
               {isDrawing?'⏹️ 그리기 중단':'✏️ 그리기 시작'}
@@ -546,34 +577,7 @@ function MapPage({ active }) {
           </div>
         </div>
 
-        {/* 허브 추가 패널 */}
-        <div className="map-panel">
-          <div className="map-panel-title">➕ 허브 추가</div>
-          <input
-            value={hubAddName} onChange={e=>setHubAddName(e.target.value)}
-            placeholder="허브명 입력" onKeyDown={e=>e.key==='Enter'&&addHub()}
-            style={{width:'100%',border:'1.5px solid var(--border)',borderRadius:8,padding:'8px 12px',fontFamily:'Pretendard',fontSize:13,fontWeight:600,outline:'none',marginBottom:8,color:'var(--text)'}}
-          />
-          <div style={{display:'flex',gap:5,marginBottom:8}}>
-            {BRANDS.map(b=>{
-              const c=BRAND_COLOR[b]||{};
-              const sel=hubAddBrand===b;
-              return (
-                <button key={b} onClick={()=>setHubAddBrand(b)} style={{
-                  flex:1,padding:'6px 2px',borderRadius:7,
-                  border:`1.5px solid ${sel?c.border:'var(--border)'}`,
-                  background:sel?c.bg:'var(--bg)',color:sel?c.color:'var(--text-dim)',
-                  fontFamily:'Pretendard',fontSize:11,fontWeight:700,cursor:'pointer',transition:'all 0.15s'
-                }}>{b}</button>
-              );
-            })}
-          </div>
-          <button onClick={addHub} style={{width:'100%',padding:9,background:'var(--accent)',border:'none',borderRadius:8,color:'#fff',fontFamily:'Pretendard',fontSize:13,fontWeight:700,cursor:'pointer'}}>
-            + 허브 추가
-          </button>
-        </div>
-
-        {/* 허브 관리 패널 */}
+        {/* ── 허브 관리 패널 ── */}
         <div className="map-panel">
           <div className="map-panel-title" style={{display:'flex',justifyContent:'space-between',alignItems:'center'}}>
             <span>📋 허브 관리</span>
@@ -587,11 +591,10 @@ function MapPage({ active }) {
               const sel=brandFilter===b;
               return (
                 <button key={b} onClick={()=>setBrandFilter(b)} style={{
-                  padding:'4px 8px',borderRadius:6,fontSize:10,fontWeight:700,cursor:'pointer',
+                  padding:'4px 8px',borderRadius:6,fontSize:10,fontWeight:700,cursor:'pointer',transition:'all 0.15s',
                   border:`1px solid ${sel?(b==='전체'?'var(--accent)':c.border):'var(--border)'}`,
                   background:sel?(b==='전체'?'var(--accent-light)':c.bg):'var(--bg)',
                   color:sel?(b==='전체'?'var(--accent)':c.color):'var(--text-dim)',
-                  transition:'all 0.15s'
                 }}>{b}</button>
               );
             })}
@@ -616,29 +619,30 @@ function MapPage({ active }) {
                     <div key={h.name} id={`hub-item-${h.name}`}
                       onClick={()=>selectHub(h.name)}
                       style={{
-                        background: isSelected ? '#eff6ff' : 'var(--bg)',
-                        border: `1.5px solid ${isSelected?'var(--accent)':'var(--border)'}`,
-                        borderRadius:9, padding:'8px 10px', cursor:'pointer',
-                        transition:'all 0.15s'
+                        background:isSelected?'#eff6ff':'var(--bg)',
+                        border:`1.5px solid ${isSelected?'var(--accent)':'var(--border)'}`,
+                        borderRadius:9,padding:'8px 10px',cursor:'pointer',transition:'all 0.15s'
                       }}>
-                      {/* 상단: 체크 + 이름 + 배지 */}
-                      <div style={{display:'flex',alignItems:'center',gap:6,marginBottom:6}}>
+                      <div style={{display:'flex',alignItems:'center',gap:6,marginBottom:5}}>
                         <input type="checkbox" checked={visible}
                           onChange={e=>{e.stopPropagation();toggleHubVisible(h.name);}}
                           onClick={e=>e.stopPropagation()}
                           style={{width:14,height:14,accentColor:'#2563eb',cursor:'pointer',flexShrink:0}} />
-                        <span style={{fontSize:12,fontWeight:700,flex:1,overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap',color:isSelected?'var(--accent)':'var(--text)'}}>{h.name}</span>
-                        {brand && (
-                          <span style={{fontSize:10,fontWeight:700,padding:'1px 5px',borderRadius:4,background:bc.bg,color:bc.color,border:`1px solid ${bc.border}`,flexShrink:0}}>{brand}</span>
+                        <span style={{fontSize:12,fontWeight:700,flex:1,overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap',color:isSelected?'var(--accent)':'var(--text)'}}>
+                          {h.name}
+                        </span>
+                        {brand&&(
+                          <span style={{fontSize:10,fontWeight:700,padding:'1px 5px',borderRadius:4,background:bc.bg,color:bc.color,border:`1px solid ${bc.border}`,flexShrink:0}}>
+                            {brand}
+                          </span>
                         )}
                       </div>
-                      {/* 하단: 상태 배지 + 삭제 */}
                       <div style={{display:'flex',alignItems:'center',gap:4}}>
                         {hasZone
-                          ? <span style={{fontSize:10,padding:'1px 6px',borderRadius:4,background:'#d1fae5',color:'#059669',border:'1px solid #6ee7b7'}}>권역 ✓</span>
-                          : <span style={{fontSize:10,padding:'1px 6px',borderRadius:4,background:'#fef2f2',color:'var(--red)',border:'1px solid #fca5a5'}}>미그림</span>
+                          ?<span style={{fontSize:10,padding:'1px 6px',borderRadius:4,background:'#d1fae5',color:'#059669',border:'1px solid #6ee7b7'}}>권역 ✓</span>
+                          :<span style={{fontSize:10,padding:'1px 6px',borderRadius:4,background:'#fef2f2',color:'var(--red)',border:'1px solid #fca5a5'}}>미그림</span>
                         }
-                        {surCount>0 && (
+                        {surCount>0&&(
                           <span style={{fontSize:10,padding:'1px 6px',borderRadius:4,background:'#fff7ed',color:'#ea580c',border:'1px solid #fed7aa'}}>할증 {surCount}</span>
                         )}
                         <button onClick={e=>{e.stopPropagation();deleteHub(h.name);}}
