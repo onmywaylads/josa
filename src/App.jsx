@@ -1,12 +1,15 @@
 import { useState, useEffect } from 'react';
 import Login from './Login';
 import Main from './Main';
+import Admin from './Admin';
 import './styles.css';
 
 const STORAGE_KEY = 'josa_user';
+const ADMIN_ID = 'UJWLF6KE1';
 
 export default function App() {
   const [auth, setAuth] = useState(null);
+  const [showAdmin, setShowAdmin] = useState(false);
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
@@ -36,6 +39,12 @@ export default function App() {
     }
   }, []);
 
+  function logout() {
+    localStorage.removeItem(STORAGE_KEY);
+    setAuth(false);
+    setShowAdmin(false);
+  }
+
   if (auth === null) return (
     <div style={{minHeight:'100vh',display:'flex',alignItems:'center',justifyContent:'center'}}>
       <div style={{color:'var(--text-dim)',fontSize:14}}>로딩 중...</div>
@@ -53,13 +62,23 @@ export default function App() {
           관리자 승인 후 접근 가능해요.<br/>
           승인 완료 후 다시 로그인해주세요.
         </div>
-        <button className="login-btn" style={{marginTop:8,background:'var(--bg)',color:'var(--text-mid)',border:'1px solid var(--border)'}}
-          onClick={()=>{localStorage.removeItem(STORAGE_KEY);setAuth(false);}}>
+        <button className="login-btn" style={{marginTop:16,background:'var(--bg)',color:'var(--text-mid)',border:'1px solid var(--border)'}}
+          onClick={logout}>
           다시 로그인
         </button>
       </div>
     </div>
   );
 
-  return <Main user={auth} onLogout={()=>{localStorage.removeItem(STORAGE_KEY);setAuth(false);}} />;
+  // 관리자 페이지
+  if (showAdmin) return <Admin user={auth} onBack={()=>setShowAdmin(false)} />;
+
+  return (
+    <Main
+      user={auth}
+      onLogout={logout}
+      isAdmin={auth.userId === ADMIN_ID}
+      onAdminClick={()=>setShowAdmin(true)}
+    />
+  );
 }
