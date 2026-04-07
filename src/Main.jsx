@@ -3,7 +3,7 @@ import { useEffect, useRef, useState } from 'react';
 const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwBt4hJMPjXRT2RaKhWyRCVYLg4vO6Bev_8gULP52OhWz6SRPDr3nQLayNulzF8kjsDWA/exec';
 const BRANDS = ['바로고', '모아라인', '딜버'];
 
-export default function Main({ user }) {
+export default function Main({ user, onLogout }) {
   const [tab, setTab] = useState('search');
 
   return (
@@ -12,7 +12,7 @@ export default function Main({ user }) {
         <button className={`nav-tab ${tab==='search'?'active':''}`} onClick={()=>setTab('search')}>🔍 상점 조회</button>
         <button className={`nav-tab ${tab==='map'?'active':''}`} onClick={()=>setTab('map')}>📐 권역 관리</button>
         <button className="nav-tab" style={{flex:'0 0 auto',padding:'16px 12px',fontSize:12,color:'var(--text-dim)'}}
-          onClick={()=>{sessionStorage.removeItem('josa_user');window.location.reload();}}>
+          onClick={()=>onLogout()}>
           {user.name} · 로그아웃
         </button>
       </nav>
