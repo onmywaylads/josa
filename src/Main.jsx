@@ -2,6 +2,11 @@ import { useEffect, useRef, useState } from 'react';
 
 const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwBt4hJMPjXRT2RaKhWyRCVYLg4vO6Bev_8gULP52OhWz6SRPDr3nQLayNulzF8kjsDWA/exec';
 const BRANDS = ['바로고', '모아라인', '딜버'];
+const BRAND_COLOR = {
+  '바로고':   {bg:'#eff6ff', color:'#2563eb', border:'#bfdbfe'},
+  '모아라인': {bg:'#f0fdf4', color:'#16a34a', border:'#bbf7d0'},
+  '딜버':     {bg:'#fdf4ff', color:'#9333ea', border:'#e9d5ff'},
+};
 
 export default function Main({ user, onLogout }) {
   const [tab, setTab] = useState('search');
@@ -22,7 +27,7 @@ export default function Main({ user, onLogout }) {
       </div>
 
       <div style={{
-        position: 'fixed', top: 49, left: 0, right: 0, bottom: 0,
+        position:'fixed', top:49, left:0, right:0, bottom:0,
         visibility: tab==='map' ? 'visible' : 'hidden',
         pointerEvents: tab==='map' ? 'auto' : 'none',
       }}>
@@ -32,6 +37,7 @@ export default function Main({ user, onLogout }) {
   );
 }
 
+// ── 상점 조회 ──────────────────────────────────────────
 function SearchPage() {
   const [db, setDb] = useState([]);
   const [result, setResult] = useState(null);
@@ -58,13 +64,11 @@ function SearchPage() {
   async function doSearch() {
     if(!storeInput.trim()) { alert('상점명을 입력해주세요.'); return; }
     if(!addrInput.trim()) { alert('주소를 입력해주세요.'); return; }
-    setLoading(true);
-    setResult(null);
+    setLoading(true); setResult(null);
     const inputCoord = await getCoordFromAddr(addrInput);
     const inDong = inputCoord?.dong || extractDong(addrInput) || '';
     const parsed = parseKey(storeInput);
-    const preScored = db.map(item=>({...item,_ns:strSim(parsed.store,item.store)}))
-      .sort((a,b)=>b._ns-a._ns).slice(0,30);
+    const preScored = db.map(item=>({...item,_ns:strSim(parsed.store,item.store)})).sort((a,b)=>b._ns-a._ns).slice(0,30);
     await Promise.all(preScored.map(async item=>{
       if((!item.lat||!item.lng)&&item.address){
         const c=await getCoordFromAddr(item.address);
@@ -87,10 +91,7 @@ function SearchPage() {
 
   return (
     <div className="wrap">
-      <div className="page-header">
-        <h1>바로고 북부광역사업부</h1>
-        <p>B2B 실수행 상점 조회 시스템</p>
-      </div>
+      <div className="page-header"><h1>바로고 북부광역사업부</h1><p>B2B 실수행 상점 조회 시스템</p></div>
       <div className="stats">
         <div className="stat"><div className="stat-n">{stats.total}</div><div className="stat-l">전체 상점</div></div>
         <div className="stat"><div className="stat-n" style={{color:'var(--green)'}}>{stats.possible}</div><div className="stat-l">수행 가능</div></div>
@@ -102,13 +103,11 @@ function SearchPage() {
         <div className="input-row">
           <div className="field">
             <div className="field-label">상점명</div>
-            <input className="inp big" value={storeInput} onChange={e=>setStoreInput(e.target.value)}
-              placeholder="맥도날드[강남점]" onKeyDown={e=>e.key==='Enter'&&doSearch()} />
+            <input className="inp big" value={storeInput} onChange={e=>setStoreInput(e.target.value)} placeholder="맥도날드[강남점]" onKeyDown={e=>e.key==='Enter'&&doSearch()} />
           </div>
           <div className="field">
             <div className="field-label">주소</div>
-            <input className="inp" value={addrInput} onChange={e=>setAddrInput(e.target.value)}
-              placeholder="서울시 강남구 강남대로 396" onKeyDown={e=>e.key==='Enter'&&doSearch()} />
+            <input className="inp" value={addrInput} onChange={e=>setAddrInput(e.target.value)} placeholder="서울시 강남구 강남대로 396" onKeyDown={e=>e.key==='Enter'&&doSearch()} />
           </div>
         </div>
         <button className="btn-primary" onClick={doSearch}>🔍 &nbsp;DB 매칭 조회</button>
@@ -132,12 +131,10 @@ function ResultCard({ result, onReset }) {
       </div>
     </div>
   );
-
   const d = displayItem.sd;
   const sc = v => v>=80?'possible':v>=50?'check':'impossible';
   const bc = v => v>=80?'var(--accent)':v>=70?'var(--yellow)':v>=50?'var(--orange)':'var(--red)';
   const label = v => v>=80?'수행 가능 O':v>=50?'확인 필요 △':'DB 업데이트 필요 X';
-
   return (
     <>
       <div className={`res-card ${sc(d.total)}`}>
@@ -170,10 +167,7 @@ function ResultCard({ result, onReset }) {
               <div className="spct" style={{color:bc(v)}}>{v}%</div>
             </div>
           ))}
-          <div className="stotal">
-            <div className="stotal-l">종합 매칭 신뢰도</div>
-            <div className="stotal-v">{d.total}%</div>
-          </div>
+          <div className="stotal"><div className="stotal-l">종합 매칭 신뢰도</div><div className="stotal-v">{d.total}%</div></div>
         </div>
       </div>
       <div className="action-row">
@@ -205,7 +199,7 @@ function ResultCard({ result, onReset }) {
   );
 }
 
-// ── 유틸 함수들 ──
+// ── 유틸 함수들 ──────────────────────────────────────
 function parseDBRow(row) {
   const brand = String(row['브랜드명']||'').trim();
   const storeFull = String(row['상점명']||'').trim();
@@ -215,8 +209,7 @@ function parseDBRow(row) {
   const store = storeMatch ? storeMatch[1] : storeFull;
   const addr = String(row['상점주소']||'').trim();
   return {
-    key, brand, store, address: addr, dong: extractDong(addr),
-    lat: 0, lng: 0,
+    key, brand, store, address: addr, dong: extractDong(addr), lat:0, lng:0,
     status: String(row['수행가능답변']||'확인필요').trim(),
     hub: String(row['메인허브명']||'').trim(),
     sharedHub: String(row['공유허브명']||'').trim(),
@@ -229,77 +222,41 @@ function parseDBRow(row) {
     memo: String(row['불가/보류사유']||'').trim(),
   };
 }
-
-function parseKey(raw) {
-  const m = raw.match(/^(.+?)\[(.+?)\]$/);
-  return m ? {brand:m[1].trim(), store:m[2].trim()} : {brand:raw.trim(), store:''};
-}
-
-function extractDong(a) {
-  const m = (a||'').match(/([가-힣]+동|[가-힣]+가)\b/);
-  return m ? m[1] : '';
-}
-
+function parseKey(raw) { const m=raw.match(/^(.+?)\[(.+?)\]$/); return m?{brand:m[1].trim(),store:m[2].trim()}:{brand:raw.trim(),store:''}; }
+function extractDong(a) { const m=(a||'').match(/([가-힣]+동|[가-힣]+가)\b/); return m?m[1]:''; }
 function norm(s) { return (s||'').replace(/\s/g,'').toLowerCase(); }
-
-function strSim(a, b) {
-  const extract = s => { const m=(s||'').match(/\[(.+?)\]/); return m?m[1]:s; };
-  a = norm(extract(a)); b = norm(extract(b));
-  if(!a||!b) return 0;
-  if(a===b) return 1;
-  let maxCommon = 0;
-  for(let i=0;i<a.length;i++)
-    for(let j=i+1;j<=a.length;j++){
-      const sub=a.slice(i,j);
-      if(b.includes(sub)&&sub.length>maxCommon) maxCommon=sub.length;
-    }
-  if(maxCommon>=4) return 1.0;
-  if(maxCommon>=3) return 0.9;
-  if(maxCommon>=2) return 0.8;
-  return 0;
+function strSim(a,b) {
+  const ex=s=>{const m=(s||'').match(/\[(.+?)\]/);return m?m[1]:s;};
+  a=norm(ex(a));b=norm(ex(b));
+  if(!a||!b)return 0; if(a===b)return 1;
+  let max=0;
+  for(let i=0;i<a.length;i++) for(let j=i+1;j<=a.length;j++){const s=a.slice(i,j);if(b.includes(s)&&s.length>max)max=s.length;}
+  return max>=4?1.0:max>=3?0.9:max>=2?0.8:0;
 }
-
-function haversine(la1,lo1,la2,lo2) {
-  const R=6371,d=Math.PI/180,dla=(la2-la1)*d,dlo=(lo2-lo1)*d;
-  const av=Math.sin(dla/2)**2+Math.cos(la1*d)*Math.cos(la2*d)*Math.sin(dlo/2)**2;
-  return R*2*Math.atan2(Math.sqrt(av),Math.sqrt(1-av));
-}
-
-function distScore(km) {
-  if(km<=0.10)return 1.00; if(km<=0.15)return 0.95; if(km<=0.20)return 0.90;
-  if(km<=0.30)return 0.85; if(km<=0.40)return 0.80; if(km<=0.50)return 0.75;
-  if(km<=0.70)return 0.65; if(km<=1.00)return 0.55; if(km<=1.50)return 0.40;
-  if(km<=2.00)return 0.25; if(km<=3.00)return 0.10; return 0;
-}
-
-function dongScore(inDong, itemDong, km, inAddr, itemAddr) {
-  if(!inDong||!itemDong) return 0;
-  if(inDong===itemDong) return 1;
+function haversine(la1,lo1,la2,lo2){const R=6371,d=Math.PI/180,dla=(la2-la1)*d,dlo=(lo2-lo1)*d,av=Math.sin(dla/2)**2+Math.cos(la1*d)*Math.cos(la2*d)*Math.sin(dlo/2)**2;return R*2*Math.atan2(Math.sqrt(av),Math.sqrt(1-av));}
+function distScore(km){if(km<=0.10)return 1.00;if(km<=0.15)return 0.95;if(km<=0.20)return 0.90;if(km<=0.30)return 0.85;if(km<=0.40)return 0.80;if(km<=0.50)return 0.75;if(km<=0.70)return 0.65;if(km<=1.00)return 0.55;if(km<=1.50)return 0.40;if(km<=2.00)return 0.25;if(km<=3.00)return 0.10;return 0;}
+function dongScore(inDong,itemDong,km,inAddr,itemAddr){
+  if(!inDong||!itemDong)return 0; if(inDong===itemDong)return 1;
   const inGu=(inAddr||'').match(/([가-힣]+구)/)?.[1]||'';
   const itemGu=(itemAddr||'').match(/([가-힣]+구)/)?.[1]||'';
   const sameGu=inGu&&itemGu&&inGu===itemGu;
-  if(km!==null){
-    if(km<=0.10)return 0.95; if(km<=0.20)return 0.85;
-    if(km<=0.30)return sameGu?0.80:0.75; if(km<=0.50)return sameGu?0.70:0.50;
-    if(km<=1.00)return sameGu?0.50:0.20;
-  }
+  if(km!==null){if(km<=0.10)return 0.95;if(km<=0.20)return 0.85;if(km<=0.30)return sameGu?0.80:0.75;if(km<=0.50)return sameGu?0.70:0.50;if(km<=1.00)return sameGu?0.50:0.20;}
   return sameGu?0.30:0;
 }
-
 function getCoordFromAddr(addr) {
-  return new Promise(resolve => {
-    if(!window.kakao?.maps?.services) { resolve(null); return; }
-    const gc = new window.kakao.maps.services.Geocoder();
-    gc.addressSearch(addr, (res, st) => {
+  return new Promise(resolve=>{
+    if(!window.kakao?.maps?.services){resolve(null);return;}
+    const gc=new window.kakao.maps.services.Geocoder();
+    gc.addressSearch(addr,(res,st)=>{
       if(st===window.kakao.maps.services.Status.OK){
         const r=res[0];
-        const dong=r.address?.region_3depth_name||r.road_address?.region_3depth_name||'';
-        resolve({lat:parseFloat(r.y), lng:parseFloat(r.x), dong});
+        resolve({lat:parseFloat(r.y),lng:parseFloat(r.x),dong:r.address?.region_3depth_name||r.road_address?.region_3depth_name||''});
       } else resolve(null);
     });
   });
 }
 
+// ── 권역 관리 ──────────────────────────────────────────
 function MapPage({ active }) {
   const mapRef = useRef(null);
   const mapInstanceRef = useRef(null);
@@ -308,11 +265,11 @@ function MapPage({ active }) {
   const [hubVisible, setHubVisible] = useState({});
   const [currentLayer, setCurrentLayer] = useState('zone');
   const [isDrawing, setIsDrawing] = useState(false);
-  const [status, setStatus] = useState('허브를 추가하고 선택 후 그리기 시작');
+  const [status, setStatus] = useState('허브 관리에서 허브를 선택 후 그리기 시작');
   const [hubAddName, setHubAddName] = useState('');
   const [hubAddBrand, setHubAddBrand] = useState('');
   const [selectedHub, setSelectedHub] = useState('');
-  const [hubSearch, setHubSearch] = useState('');
+  const [brandFilter, setBrandFilter] = useState('전체');
 
   const currentPathRef = useRef([]);
   const tempPolylineRef = useRef(null);
@@ -321,276 +278,264 @@ function MapPage({ active }) {
   const hubListRef = useRef([]);
   const isDrawingRef = useRef(false);
   const currentLayerRef = useRef('zone');
+  const selectedHubRef = useRef('');
 
-  useEffect(() => { savedZonesRef.current = savedZones; }, [savedZones]);
-  useEffect(() => { hubListRef.current = hubList; }, [hubList]);
-  useEffect(() => { isDrawingRef.current = isDrawing; }, [isDrawing]);
-  useEffect(() => { currentLayerRef.current = currentLayer; }, [currentLayer]);
+  useEffect(()=>{savedZonesRef.current=savedZones;},[savedZones]);
+  useEffect(()=>{hubListRef.current=hubList;},[hubList]);
+  useEffect(()=>{isDrawingRef.current=isDrawing;},[isDrawing]);
+  useEffect(()=>{currentLayerRef.current=currentLayer;},[currentLayer]);
+  useEffect(()=>{selectedHubRef.current=selectedHub;},[selectedHub]);
 
-  useEffect(() => {
+  useEffect(()=>{
     loadFromStorage();
     loadZonesFromSheet();
     initMapWhenReady();
-  }, []);
+  },[]);
 
-  useEffect(() => {
-    if (active && mapInstanceRef.current) {
-      setTimeout(() => mapInstanceRef.current.relayout(), 50);
-    }
-  }, [active]);
+  useEffect(()=>{
+    if(active&&mapInstanceRef.current) setTimeout(()=>mapInstanceRef.current.relayout(),50);
+  },[active]);
 
-  function initMapWhenReady() {
-    const tryInit = () => {
-      if (window.kakao && window.kakao.maps && window.kakaoMapReady && mapRef.current) {
-        initMap();
-      } else {
-        setTimeout(tryInit, 300);
-      }
+  function initMapWhenReady(){
+    const tryInit=()=>{
+      if(window.kakao&&window.kakao.maps&&window.kakaoMapReady&&mapRef.current) initMap();
+      else setTimeout(tryInit,300);
     };
     tryInit();
   }
 
-  function initMap() {
-    if (!mapRef.current || mapInstanceRef.current) return;
-    const map = new window.kakao.maps.Map(mapRef.current, {
-      center: new window.kakao.maps.LatLng(37.5172, 127.0473),
-      level: 8
-    });
-    mapInstanceRef.current = map;
-    window.kakao.maps.event.addListener(map, 'click', onMapClick);
-    restorePolygonsOnMap(map, savedZonesRef.current, hubVisible);
+  function initMap(){
+    if(!mapRef.current||mapInstanceRef.current) return;
+    const map=new window.kakao.maps.Map(mapRef.current,{center:new window.kakao.maps.LatLng(37.5172,127.0473),level:8});
+    mapInstanceRef.current=map;
+    window.kakao.maps.event.addListener(map,'click',onMapClick);
+    restorePolygonsOnMap(map,savedZonesRef.current,hubVisible);
   }
 
-  function restorePolygonsOnMap(map, zones, visible) {
-    Object.entries(zones).forEach(([hub, v]) => {
-      const show = visible[hub] !== false;
-      if (v.zonePolygon) { try { v.zonePolygon.setMap(null); } catch(e) {} }
-      (v.surPolygons||[]).forEach(p => { try { p.setMap(null); } catch(e) {} });
-      v.zonePolygon = null; v.surPolygons = [];
-      if (v.zonePath?.length >= 3) {
-        v.zonePolygon = new window.kakao.maps.Polygon({
-          map, path: v.zonePath.map(p => new window.kakao.maps.LatLng(p.lat, p.lng)),
-          strokeWeight:2, strokeColor:'#2563eb', strokeOpacity:1, fillColor:'#2563eb', fillOpacity:0.15
+  function restorePolygonsOnMap(map,zones,visible){
+    Object.entries(zones).forEach(([hub,v])=>{
+      const show=visible[hub]!==false;
+      if(v.zonePolygon){try{v.zonePolygon.setMap(null);}catch(e){}}
+      (v.surPolygons||[]).forEach(p=>{try{p.setMap(null);}catch(e){}});
+      v.zonePolygon=null; v.surPolygons=[];
+      if(v.zonePath?.length>=3){
+        v.zonePolygon=new window.kakao.maps.Polygon({
+          map, path:v.zonePath.map(p=>new window.kakao.maps.LatLng(p.lat,p.lng)),
+          strokeWeight:2,strokeColor:'#2563eb',strokeOpacity:1,fillColor:'#2563eb',fillOpacity:0.15
         });
-        if (!show) v.zonePolygon.setMap(null);
+        if(!show) v.zonePolygon.setMap(null);
+        // 폴리곤 클릭 시 허브 선택
+        window.kakao.maps.event.addListener(v.zonePolygon,'click',()=>selectHub(hub));
       }
-      v.surPolygons = (v.surPaths||[]).filter(sp => sp?.length >= 3).map(sp => {
-        const poly = new window.kakao.maps.Polygon({
-          map, path: sp.map(p => new window.kakao.maps.LatLng(p.lat, p.lng)),
-          strokeWeight:2, strokeColor:'#ea580c', strokeOpacity:1, fillColor:'#ea580c', fillOpacity:0.25
+      v.surPolygons=(v.surPaths||[]).filter(sp=>sp?.length>=3).map(sp=>{
+        const poly=new window.kakao.maps.Polygon({
+          map, path:sp.map(p=>new window.kakao.maps.LatLng(p.lat,p.lng)),
+          strokeWeight:2,strokeColor:'#ea580c',strokeOpacity:1,fillColor:'#ea580c',fillOpacity:0.25
         });
-        if (!show) poly.setMap(null);
+        if(!show) poly.setMap(null);
+        window.kakao.maps.event.addListener(poly,'click',()=>selectHub(hub));
         return poly;
       });
     });
   }
 
-  function onMapClick(e) {
-    if (!isDrawingRef.current) return;
-    currentPathRef.current.push(new window.kakao.maps.LatLng(e.latLng.getLat(), e.latLng.getLng()));
+  function selectHub(name){
+    setSelectedHub(name);
+    setStatus(`[${name}] 선택됨 — 그리기 시작을 눌러주세요`);
+    // 허브 관리 패널에서 해당 허브로 스크롤
+    const el=document.getElementById(`hub-item-${name}`);
+    if(el) el.scrollIntoView({behavior:'smooth',block:'nearest'});
+  }
+
+  function onMapClick(e){
+    if(!isDrawingRef.current) return;
+    currentPathRef.current.push(new window.kakao.maps.LatLng(e.latLng.getLat(),e.latLng.getLng()));
     updateTempDraw();
   }
 
-  function updateTempDraw() {
-    const map = mapInstanceRef.current;
-    if (!map) return;
-    if (tempPolylineRef.current) tempPolylineRef.current.setMap(null);
-    if (tempPolygonRef.current) tempPolygonRef.current.setMap(null);
-    const color = currentLayerRef.current === 'surcharge' ? '#ea580c' : '#2563eb';
-    const path = currentPathRef.current;
-    if (path.length >= 2) {
-      tempPolygonRef.current = new window.kakao.maps.Polygon({
-        map, path, strokeWeight:2, strokeColor:color, strokeOpacity:0.9, fillColor:color, fillOpacity:0.15
-      });
-    }
-    tempPolylineRef.current = new window.kakao.maps.Polyline({
-      map, path, strokeWeight:2, strokeColor:color, strokeOpacity:1
-    });
+  function updateTempDraw(){
+    const map=mapInstanceRef.current;
+    if(!map) return;
+    if(tempPolylineRef.current) tempPolylineRef.current.setMap(null);
+    if(tempPolygonRef.current) tempPolygonRef.current.setMap(null);
+    const color=currentLayerRef.current==='surcharge'?'#ea580c':'#2563eb';
+    const path=currentPathRef.current;
+    if(path.length>=2) tempPolygonRef.current=new window.kakao.maps.Polygon({map,path,strokeWeight:2,strokeColor:color,strokeOpacity:0.9,fillColor:color,fillOpacity:0.15});
+    tempPolylineRef.current=new window.kakao.maps.Polyline({map,path,strokeWeight:2,strokeColor:color,strokeOpacity:1});
   }
 
-  function toggleDraw() {
-    if (!selectedHub) { alert('허브를 먼저 선택해주세요!'); return; }
-    const next = !isDrawing;
+  function toggleDraw(){
+    if(!selectedHub){alert('허브 관리에서 허브를 먼저 선택해주세요!');return;}
+    const next=!isDrawing;
     setIsDrawing(next);
-    if (next) {
-      setStatus(`[${selectedHub}] ${currentLayer==='zone'?'🔵 기본 권역':'🟠 할증 구역'} 그리는 중 — 지도 클릭`);
-    } else {
-      setStatus('그리기 중단');
-    }
+    if(next) setStatus(`[${selectedHub}] ${currentLayer==='zone'?'🔵 기본 권역':'🟠 할증 구역'} 그리는 중 — 지도 클릭`);
+    else setStatus('그리기 중단');
   }
 
-  function undoLast() {
-    currentPathRef.current.pop();
-    updateTempDraw();
-  }
+  function undoLast(){currentPathRef.current.pop();updateTempDraw();}
 
-  function saveZone() {
-    if (!selectedHub) { alert('허브를 선택해주세요!'); return; }
-    if (currentPathRef.current.length < 3) { alert('최소 3개 이상 점을 찍어주세요!'); return; }
-    const map = mapInstanceRef.current;
-    const color = currentLayer === 'surcharge' ? '#ea580c' : '#2563eb';
-    const polygon = new window.kakao.maps.Polygon({
-      map, path: currentPathRef.current,
-      strokeWeight:2, strokeColor:color, strokeOpacity:1,
-      fillColor:color, fillOpacity: currentLayer==='surcharge' ? 0.25 : 0.15
+  function saveZone(){
+    if(!selectedHub){alert('허브를 선택해주세요!');return;}
+    if(currentPathRef.current.length<3){alert('최소 3개 이상 점을 찍어주세요!');return;}
+    const map=mapInstanceRef.current;
+    const color=currentLayer==='surcharge'?'#ea580c':'#2563eb';
+    const polygon=new window.kakao.maps.Polygon({
+      map, path:currentPathRef.current,
+      strokeWeight:2,strokeColor:color,strokeOpacity:1,
+      fillColor:color,fillOpacity:currentLayer==='surcharge'?0.25:0.15
     });
-    const pathData = currentPathRef.current.map(p => ({lat:p.getLat(), lng:p.getLng()}));
-    setSavedZones(prev => {
-      const next = {...prev};
-      if (!next[selectedHub]) next[selectedHub] = {zonePolygon:null, surPolygons:[], zonePath:[], surPaths:[], brand:''};
-      if (currentLayer === 'zone') {
-        if (next[selectedHub].zonePolygon) next[selectedHub].zonePolygon.setMap(null);
-        next[selectedHub].zonePolygon = polygon;
-        next[selectedHub].zonePath = pathData;
+    window.kakao.maps.event.addListener(polygon,'click',()=>selectHub(selectedHub));
+    const pathData=currentPathRef.current.map(p=>({lat:p.getLat(),lng:p.getLng()}));
+    setSavedZones(prev=>{
+      const next={...prev};
+      if(!next[selectedHub]) next[selectedHub]={zonePolygon:null,surPolygons:[],zonePath:[],surPaths:[],brand:''};
+      if(currentLayer==='zone'){
+        if(next[selectedHub].zonePolygon) next[selectedHub].zonePolygon.setMap(null);
+        next[selectedHub].zonePolygon=polygon;
+        next[selectedHub].zonePath=pathData;
       } else {
-        next[selectedHub].surPolygons = [...(next[selectedHub].surPolygons||[]), polygon];
-        next[selectedHub].surPaths = [...(next[selectedHub].surPaths||[]), pathData];
+        next[selectedHub].surPolygons=[...(next[selectedHub].surPolygons||[]),polygon];
+        next[selectedHub].surPaths=[...(next[selectedHub].surPaths||[]),pathData];
       }
-      saveToStorageData(hubListRef.current, next);
-      saveZonesToSheetData(hubListRef.current, next);
+      saveToStorageData(hubListRef.current,next);
+      saveZonesToSheetData(hubListRef.current,next);
       return next;
     });
     clearCurrent();
-    setIsDrawing(false);
     setStatus(`[${selectedHub}] ${currentLayer==='zone'?'기본 권역':'할증 구역'} 저장 완료! ✅`);
   }
 
-  function clearCurrent() {
-    if (tempPolylineRef.current) tempPolylineRef.current.setMap(null);
-    if (tempPolygonRef.current) tempPolygonRef.current.setMap(null);
-    currentPathRef.current = [];
-    tempPolylineRef.current = null;
-    tempPolygonRef.current = null;
+  function clearCurrent(){
+    if(tempPolylineRef.current) tempPolylineRef.current.setMap(null);
+    if(tempPolygonRef.current) tempPolygonRef.current.setMap(null);
+    currentPathRef.current=[];
+    tempPolylineRef.current=null; tempPolygonRef.current=null;
     setIsDrawing(false);
   }
 
-  function addHub() {
-    if (!hubAddName.trim()) { alert('허브명을 입력해주세요!'); return; }
-    if (!hubAddBrand) { alert('브랜드를 선택해주세요!'); return; }
-    if (hubList.find(h => h.name === hubAddName.trim())) { alert('이미 존재하는 허브입니다!'); return; }
-    const next = [...hubList, {name: hubAddName.trim(), brand: hubAddBrand}];
+  function addHub(){
+    if(!hubAddName.trim()){alert('허브명을 입력해주세요!');return;}
+    if(!hubAddBrand){alert('브랜드를 선택해주세요!');return;}
+    if(hubList.find(h=>h.name===hubAddName.trim())){alert('이미 존재하는 허브입니다!');return;}
+    const next=[...hubList,{name:hubAddName.trim(),brand:hubAddBrand}];
     setHubList(next);
-    setSelectedHub(hubAddName.trim());
-    setSavedZones(prev => {
-      const z = {...prev};
-      if (!z[hubAddName.trim()]) z[hubAddName.trim()] = {zonePolygon:null, surPolygons:[], zonePath:[], surPaths:[], brand: hubAddBrand};
+    setSavedZones(prev=>{
+      const z={...prev};
+      if(!z[hubAddName.trim()]) z[hubAddName.trim()]={zonePolygon:null,surPolygons:[],zonePath:[],surPaths:[],brand:hubAddBrand};
       return z;
     });
-    setHubAddName('');
-    setHubAddBrand('');
-    saveToStorageData(next, savedZonesRef.current);
-    saveZonesToSheetData(next, savedZonesRef.current);
+    setSelectedHub(hubAddName.trim());
+    setStatus(`[${hubAddName.trim()}] 추가됨 — 그리기 시작을 눌러주세요`);
+    setHubAddName(''); setHubAddBrand('');
+    saveToStorageData(next,savedZonesRef.current);
+    saveZonesToSheetData(next,savedZonesRef.current);
   }
 
-  function deleteHub(name) {
-    if (!confirm(`[${name}] 허브를 삭제할까요?`)) return;
-    const z = savedZonesRef.current[name];
-    if (z) {
-      if (z.zonePolygon) z.zonePolygon.setMap(null);
-      (z.surPolygons||[]).forEach(p => { try { p.setMap(null); } catch(e) {} });
+  function deleteHub(name){
+    if(!confirm(`[${name}] 허브를 삭제할까요?\n그려진 권역도 함께 삭제됩니다.`)) return;
+    const z=savedZonesRef.current[name];
+    if(z){
+      if(z.zonePolygon) z.zonePolygon.setMap(null);
+      (z.surPolygons||[]).forEach(p=>{try{p.setMap(null);}catch(e){}});
     }
-    const nextList = hubList.filter(h => h.name !== name);
-    const nextZones = {...savedZonesRef.current};
+    const nextList=hubList.filter(h=>h.name!==name);
+    const nextZones={...savedZonesRef.current};
     delete nextZones[name];
-    setHubList(nextList);
-    setSavedZones(nextZones);
-    saveToStorageData(nextList, nextZones);
-    saveZonesToSheetData(nextList, nextZones);
+    setHubList(nextList); setSavedZones(nextZones);
+    if(selectedHub===name) setSelectedHub('');
+    saveToStorageData(nextList,nextZones);
+    saveZonesToSheetData(nextList,nextZones);
   }
 
-  function toggleHubVisible(name) {
-    const next = {...hubVisible, [name]: hubVisible[name] === false ? true : false};
+  function toggleHubVisible(name){
+    const next={...hubVisible,[name]:hubVisible[name]===false?true:false};
     setHubVisible(next);
-    const map = mapInstanceRef.current;
-    if (!map) return;
-    const z = savedZonesRef.current[name];
-    if (!z) return;
-    const show = next[name];
-    if (show) {
-      if (z.zonePolygon) z.zonePolygon.setMap(map);
-      (z.surPolygons||[]).forEach(p => { try { p.setMap(map); } catch(e) {} });
+    const map=mapInstanceRef.current;
+    if(!map) return;
+    const z=savedZonesRef.current[name];
+    if(!z) return;
+    const show=next[name];
+    if(show){
+      if(z.zonePolygon) z.zonePolygon.setMap(map);
+      (z.surPolygons||[]).forEach(p=>{try{p.setMap(map);}catch(e){}});
     } else {
-      if (z.zonePolygon) z.zonePolygon.setMap(null);
-      (z.surPolygons||[]).forEach(p => { try { p.setMap(null); } catch(e) {} });
+      if(z.zonePolygon) z.zonePolygon.setMap(null);
+      (z.surPolygons||[]).forEach(p=>{try{p.setMap(null);}catch(e){}});
     }
   }
 
-  function loadFromStorage() {
-    try {
-      const raw = localStorage.getItem('barogo_data');
-      if (!raw) return;
-      const data = JSON.parse(raw);
+  function loadFromStorage(){
+    try{
+      const raw=localStorage.getItem('barogo_data');
+      if(!raw) return;
+      const data=JSON.parse(raw);
       setHubList(data.hubList||[]);
-      const zones = {};
-      Object.entries(data.zones||{}).forEach(([k,v]) => {
-        zones[k] = {zonePolygon:null, surPolygons:[], zonePath:v.zonePath||[], surPaths:v.surPaths||[], brand:v.brand||''};
+      const zones={};
+      Object.entries(data.zones||{}).forEach(([k,v])=>{
+        zones[k]={zonePolygon:null,surPolygons:[],zonePath:v.zonePath||[],surPaths:v.surPaths||[],brand:v.brand||''};
       });
       setSavedZones(zones);
-    } catch(e) {}
+    }catch(e){}
   }
 
-  async function loadZonesFromSheet() {
-    try {
-      const res = await fetch(SCRIPT_URL + '?action=getZones');
-      const data = await res.json();
+  async function loadZonesFromSheet(){
+    try{
+      const res=await fetch(SCRIPT_URL+'?action=getZones');
+      const data=await res.json();
       setHubList(data.hubList||[]);
-      const zones = {};
-      Object.entries(data.zones||{}).forEach(([k,v]) => {
-        zones[k] = {zonePolygon:null, surPolygons:[], zonePath:v.zonePath||[], surPaths:v.surPaths||(v.surPath?.length>=3?[v.surPath]:[]), brand:v.brand||''};
+      const zones={};
+      Object.entries(data.zones||{}).forEach(([k,v])=>{
+        zones[k]={zonePolygon:null,surPolygons:[],zonePath:v.zonePath||[],surPaths:v.surPaths||(v.surPath?.length>=3?[v.surPath]:[]),brand:v.brand||''};
       });
       setSavedZones(zones);
-      if (mapInstanceRef.current) restorePolygonsOnMap(mapInstanceRef.current, zones, hubVisible);
-    } catch(e) { console.log('시트 로드 실패', e); }
+      if(mapInstanceRef.current) restorePolygonsOnMap(mapInstanceRef.current,zones,hubVisible);
+    }catch(e){console.log('시트 로드 실패',e);}
   }
 
-  function saveToStorageData(hList, zones) {
-    try {
-      const data = {hubList: hList, zones: Object.fromEntries(Object.entries(zones).map(([k,v])=>[k,{zonePath:v.zonePath, surPaths:v.surPaths, brand:v.brand}]))};
-      localStorage.setItem('barogo_data', JSON.stringify(data));
-    } catch(e) {}
+  function saveToStorageData(hList,zones){
+    try{
+      const data={hubList:hList,zones:Object.fromEntries(Object.entries(zones).map(([k,v])=>[k,{zonePath:v.zonePath,surPaths:v.surPaths,brand:v.brand}]))};
+      localStorage.setItem('barogo_data',JSON.stringify(data));
+    }catch(e){}
   }
 
-  async function saveZonesToSheetData(hList, zones) {
-    try {
-      const zonesData = {};
-      Object.entries(zones).forEach(([k,v]) => {
-        zonesData[k] = {zonePath:v.zonePath||[], surPaths:v.surPaths||[], brand:v.brand||''};
-      });
-      await fetch(SCRIPT_URL, {method:'POST', body:JSON.stringify({action:'saveZones', zones:zonesData, hubList:hList})});
-    } catch(e) {}
+  async function saveZonesToSheetData(hList,zones){
+    try{
+      const zonesData={};
+      Object.entries(zones).forEach(([k,v])=>{zonesData[k]={zonePath:v.zonePath||[],surPaths:v.surPaths||[],brand:v.brand||''};});
+      await fetch(SCRIPT_URL,{method:'POST',body:JSON.stringify({action:'saveZones',zones:zonesData,hubList:hList})});
+    }catch(e){}
   }
 
-  // 브랜드별 색상
-  const brandColor = {
-    '바로고': {bg:'#eff6ff', color:'#2563eb', border:'#bfdbfe'},
-    '모아라인': {bg:'#f0fdf4', color:'#16a34a', border:'#bbf7d0'},
-    '딜버': {bg:'#fdf4ff', color:'#9333ea', border:'#e9d5ff'},
-  };
-
-  const filteredHubs = hubList.filter(h => h.name.includes(hubSearch));
+  const filteredHubs = brandFilter==='전체' ? hubList : hubList.filter(h=>{
+    const brand = savedZones[h.name]?.brand || h.brand || '';
+    return brand === brandFilter;
+  });
 
   return (
     <div style={{width:'100%',height:'100%',position:'relative'}}>
       <div ref={mapRef} style={{width:'100%',height:'100%'}} />
+
       <div className="map-toolbar">
 
-        {/* 그리기 패널 */}
+        {/* 권역 그리기 패널 */}
         <div className="map-panel">
           <div className="map-panel-title">✏️ 권역 그리기</div>
 
-          {/* 허브 선택 */}
-          <select className="hub-select" value={selectedHub} onChange={e=>setSelectedHub(e.target.value)}>
-            <option value="">— 허브 선택 —</option>
-            {hubList.map(h=><option key={h.name} value={h.name}>{h.name}</option>)}
-          </select>
+          {/* 선택된 허브 표시 */}
+          <div style={{
+            padding:'8px 10px',borderRadius:8,marginBottom:10,fontSize:12,fontWeight:700,
+            background: selectedHub ? '#eff6ff' : 'var(--bg)',
+            border: `1.5px solid ${selectedHub ? 'var(--accent)' : 'var(--border)'}`,
+            color: selectedHub ? 'var(--accent)' : 'var(--text-dim)'
+          }}>
+            {selectedHub ? `✅ ${selectedHub}` : '← 허브 관리에서 허브 선택'}
+          </div>
 
-          {/* 레이어 탭 */}
           <div className="layer-tabs">
             <button className={`layer-tab zone ${currentLayer==='zone'?'active':''}`} onClick={()=>setCurrentLayer('zone')}>🔵 기본 권역</button>
             <button className={`layer-tab surcharge ${currentLayer==='surcharge'?'active':''}`} onClick={()=>setCurrentLayer('surcharge')}>🟠 할증 구역</button>
           </div>
-
-          {/* 그리기 버튼 */}
           <div className="draw-btns">
             <button className={`draw-btn ${isDrawing?(currentLayer==='surcharge'?'drawing-sur':'drawing'):''}`} onClick={toggleDraw}>
               {isDrawing?'⏹️ 그리기 중단':'✏️ 그리기 시작'}
@@ -605,29 +550,25 @@ function MapPage({ active }) {
         <div className="map-panel">
           <div className="map-panel-title">➕ 허브 추가</div>
           <input
-            value={hubAddName}
-            onChange={e=>setHubAddName(e.target.value)}
-            placeholder="허브명 입력 (필수)"
-            onKeyDown={e=>e.key==='Enter'&&addHub()}
-            style={{width:'100%',border:'1.5px solid var(--border)',borderRadius:8,padding:'9px 12px',fontFamily:'Pretendard',fontSize:13,fontWeight:600,outline:'none',marginBottom:6,color:'var(--text)'}}
+            value={hubAddName} onChange={e=>setHubAddName(e.target.value)}
+            placeholder="허브명 입력" onKeyDown={e=>e.key==='Enter'&&addHub()}
+            style={{width:'100%',border:'1.5px solid var(--border)',borderRadius:8,padding:'8px 12px',fontFamily:'Pretendard',fontSize:13,fontWeight:600,outline:'none',marginBottom:8,color:'var(--text)'}}
           />
-          {/* 브랜드 필수 선택 */}
-          <div style={{display:'flex',gap:6,marginBottom:10}}>
-            {BRANDS.map(b => {
-              const c = brandColor[b] || {};
-              const selected = hubAddBrand === b;
+          <div style={{display:'flex',gap:5,marginBottom:8}}>
+            {BRANDS.map(b=>{
+              const c=BRAND_COLOR[b]||{};
+              const sel=hubAddBrand===b;
               return (
-                <button key={b} onClick={()=>setHubAddBrand(b)}
-                  style={{flex:1,padding:'7px 4px',borderRadius:8,border:`1.5px solid ${selected?c.border:'var(--border)'}`,
-                    background:selected?c.bg:'var(--bg)',color:selected?c.color:'var(--text-dim)',
-                    fontFamily:'Pretendard',fontSize:11,fontWeight:700,cursor:'pointer',transition:'all 0.15s'}}>
-                  {b}
-                </button>
+                <button key={b} onClick={()=>setHubAddBrand(b)} style={{
+                  flex:1,padding:'6px 2px',borderRadius:7,
+                  border:`1.5px solid ${sel?c.border:'var(--border)'}`,
+                  background:sel?c.bg:'var(--bg)',color:sel?c.color:'var(--text-dim)',
+                  fontFamily:'Pretendard',fontSize:11,fontWeight:700,cursor:'pointer',transition:'all 0.15s'
+                }}>{b}</button>
               );
             })}
           </div>
-          <button onClick={addHub}
-            style={{width:'100%',padding:9,background:'var(--accent)',border:'none',borderRadius:8,color:'#fff',fontFamily:'Pretendard',fontSize:13,fontWeight:700,cursor:'pointer'}}>
+          <button onClick={addHub} style={{width:'100%',padding:9,background:'var(--accent)',border:'none',borderRadius:8,color:'#fff',fontFamily:'Pretendard',fontSize:13,fontWeight:700,cursor:'pointer'}}>
             + 허브 추가
           </button>
         </div>
@@ -636,63 +577,72 @@ function MapPage({ active }) {
         <div className="map-panel">
           <div className="map-panel-title" style={{display:'flex',justifyContent:'space-between',alignItems:'center'}}>
             <span>📋 허브 관리</span>
-            <span style={{fontSize:10,color:'var(--text-dim)',fontWeight:400}}>{hubList.length}개</span>
+            <span style={{fontSize:10,color:'var(--text-dim)',fontWeight:400}}>{filteredHubs.length}개</span>
           </div>
 
-          {/* 허브 검색 */}
-          {hubList.length > 5 && (
-            <input
-              value={hubSearch}
-              onChange={e=>setHubSearch(e.target.value)}
-              placeholder="허브 검색..."
-              style={{width:'100%',border:'1.5px solid var(--border)',borderRadius:8,padding:'7px 10px',fontFamily:'Pretendard',fontSize:12,outline:'none',marginBottom:8,color:'var(--text)'}}
-            />
-          )}
+          {/* 브랜드 필터 탭 */}
+          <div style={{display:'flex',gap:4,marginBottom:10,flexWrap:'wrap'}}>
+            {['전체',...BRANDS].map(b=>{
+              const c=BRAND_COLOR[b]||{};
+              const sel=brandFilter===b;
+              return (
+                <button key={b} onClick={()=>setBrandFilter(b)} style={{
+                  padding:'4px 8px',borderRadius:6,fontSize:10,fontWeight:700,cursor:'pointer',
+                  border:`1px solid ${sel?(b==='전체'?'var(--accent)':c.border):'var(--border)'}`,
+                  background:sel?(b==='전체'?'var(--accent-light)':c.bg):'var(--bg)',
+                  color:sel?(b==='전체'?'var(--accent)':c.color):'var(--text-dim)',
+                  transition:'all 0.15s'
+                }}>{b}</button>
+              );
+            })}
+          </div>
 
-          <div style={{maxHeight:300,overflowY:'auto',display:'flex',flexDirection:'column',gap:5}}>
-            {filteredHubs.length === 0
-              ? <div style={{fontSize:12,color:'var(--text-dim)',textAlign:'center',padding:'12px 0'}}>
-                  {hubList.length === 0 ? '추가된 허브 없음' : '검색 결과 없음'}
+          {/* 허브 목록 */}
+          <div style={{maxHeight:320,overflowY:'auto',display:'flex',flexDirection:'column',gap:5}}>
+            {filteredHubs.length===0
+              ? <div style={{fontSize:12,color:'var(--text-dim)',textAlign:'center',padding:'16px 0'}}>
+                  {hubList.length===0?'추가된 허브 없음':'해당 브랜드 허브 없음'}
                 </div>
-              : filteredHubs.map(h => {
-                  const zone = savedZones[h.name];
-                  const brand = zone?.brand || h.brand || '';
-                  const surCount = (zone?.surPaths||[]).length;
-                  const hasZone = (zone?.zonePath||[]).length >= 3;
-                  const bc = brandColor[brand] || {};
-                  const visible = hubVisible[h.name] !== false;
+              : filteredHubs.map(h=>{
+                  const zone=savedZones[h.name];
+                  const brand=zone?.brand||h.brand||'';
+                  const surCount=(zone?.surPaths||[]).length;
+                  const hasZone=(zone?.zonePath||[]).length>=3;
+                  const bc=BRAND_COLOR[brand]||{};
+                  const visible=hubVisible[h.name]!==false;
+                  const isSelected=selectedHub===h.name;
 
                   return (
-                    <div key={h.name} style={{background:'var(--bg)',border:'1px solid var(--border)',borderRadius:9,padding:'8px 10px'}}>
-                      {/* 상단: 체크박스 + 이름 + 배지들 */}
-                      <div style={{display:'flex',alignItems:'center',gap:6,marginBottom:5}}>
-                        <input type="checkbox" checked={visible} onChange={()=>toggleHubVisible(h.name)}
+                    <div key={h.name} id={`hub-item-${h.name}`}
+                      onClick={()=>selectHub(h.name)}
+                      style={{
+                        background: isSelected ? '#eff6ff' : 'var(--bg)',
+                        border: `1.5px solid ${isSelected?'var(--accent)':'var(--border)'}`,
+                        borderRadius:9, padding:'8px 10px', cursor:'pointer',
+                        transition:'all 0.15s'
+                      }}>
+                      {/* 상단: 체크 + 이름 + 배지 */}
+                      <div style={{display:'flex',alignItems:'center',gap:6,marginBottom:6}}>
+                        <input type="checkbox" checked={visible}
+                          onChange={e=>{e.stopPropagation();toggleHubVisible(h.name);}}
+                          onClick={e=>e.stopPropagation()}
                           style={{width:14,height:14,accentColor:'#2563eb',cursor:'pointer',flexShrink:0}} />
-                        <span style={{fontSize:12,fontWeight:700,flex:1,overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap'}}>{h.name}</span>
+                        <span style={{fontSize:12,fontWeight:700,flex:1,overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap',color:isSelected?'var(--accent)':'var(--text)'}}>{h.name}</span>
                         {brand && (
-                          <span style={{fontSize:10,fontWeight:700,padding:'1px 6px',borderRadius:4,background:bc.bg,color:bc.color,border:`1px solid ${bc.border}`,flexShrink:0}}>
-                            {brand}
-                          </span>
-                        )}
-                        {surCount > 0 && (
-                          <span style={{fontSize:10,fontWeight:700,padding:'1px 6px',borderRadius:4,background:'#fff7ed',color:'#ea580c',border:'1px solid #fed7aa',flexShrink:0}}>
-                            할증 {surCount}
-                          </span>
-                        )}
-                        {!hasZone && (
-                          <span style={{fontSize:10,padding:'1px 6px',borderRadius:4,background:'#fef2f2',color:'var(--red)',border:'1px solid #fca5a5',flexShrink:0}}>
-                            미그림
-                          </span>
+                          <span style={{fontSize:10,fontWeight:700,padding:'1px 5px',borderRadius:4,background:bc.bg,color:bc.color,border:`1px solid ${bc.border}`,flexShrink:0}}>{brand}</span>
                         )}
                       </div>
-                      {/* 하단: 버튼 */}
-                      <div style={{display:'flex',gap:4}}>
-                        <button onClick={()=>setSelectedHub(h.name)}
-                          style={{flex:1,padding:'4px 0',fontSize:10,fontWeight:700,border:'1px solid #bfdbfe',background:'#eff6ff',color:'var(--accent)',borderRadius:6,cursor:'pointer'}}>
-                          선택
-                        </button>
-                        <button onClick={()=>deleteHub(h.name)}
-                          style={{flex:1,padding:'4px 0',fontSize:10,fontWeight:700,border:'1px solid #fca5a5',background:'#fef2f2',color:'var(--red)',borderRadius:6,cursor:'pointer'}}>
+                      {/* 하단: 상태 배지 + 삭제 */}
+                      <div style={{display:'flex',alignItems:'center',gap:4}}>
+                        {hasZone
+                          ? <span style={{fontSize:10,padding:'1px 6px',borderRadius:4,background:'#d1fae5',color:'#059669',border:'1px solid #6ee7b7'}}>권역 ✓</span>
+                          : <span style={{fontSize:10,padding:'1px 6px',borderRadius:4,background:'#fef2f2',color:'var(--red)',border:'1px solid #fca5a5'}}>미그림</span>
+                        }
+                        {surCount>0 && (
+                          <span style={{fontSize:10,padding:'1px 6px',borderRadius:4,background:'#fff7ed',color:'#ea580c',border:'1px solid #fed7aa'}}>할증 {surCount}</span>
+                        )}
+                        <button onClick={e=>{e.stopPropagation();deleteHub(h.name);}}
+                          style={{marginLeft:'auto',padding:'2px 8px',fontSize:10,fontWeight:700,border:'1px solid #fca5a5',background:'#fef2f2',color:'var(--red)',borderRadius:5,cursor:'pointer'}}>
                           삭제
                         </button>
                       </div>
