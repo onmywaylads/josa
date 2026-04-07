@@ -8,7 +8,7 @@ const BRAND_COLOR = {
   '딜버':     {bg:'#fdf4ff', color:'#9333ea', border:'#e9d5ff'},
 };
 
-export default function Main({ user, onLogout }) {
+export default function Main({ user, onLogout, isAdmin, onAdminClick }) {
   const [tab, setTab] = useState('search');
 
   return (
