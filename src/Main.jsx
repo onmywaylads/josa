@@ -15,10 +15,18 @@ export default function Main({ user }) {
           {user.name} · 로그아웃
         </button>
       </nav>
-      <div className={`page ${tab==='search'?'active':''}`} id="page-search">
+
+      {/* 상점 조회 */}
+      <div style={{display: tab==='search' ? 'block' : 'none'}}>
         <SearchPage />
       </div>
-      <div className={`page ${tab==='map'?'active':''}`} id="page-map">
+
+      {/* 권역 관리 - 항상 DOM에 존재, visibility로만 제어 */}
+      <div style={{
+        position: 'fixed', top: 49, left: 0, right: 0, bottom: 0,
+        visibility: tab==='map' ? 'visible' : 'hidden',
+        pointerEvents: tab==='map' ? 'auto' : 'none',
+      }}>
         <MapPage active={tab==='map'} />
       </div>
     </>
@@ -319,16 +327,23 @@ function MapPage({ active }) {
   useEffect(() => { isDrawingRef.current = isDrawing; }, [isDrawing]);
   useEffect(() => { currentLayerRef.current = currentLayer; }, [currentLayer]);
 
+  // 컴포넌트 마운트 시 바로 지도 초기화 시작
   useEffect(() => {
-    if (!active) return;
     loadFromStorage();
     loadZonesFromSheet();
-    setTimeout(() => initMapWhenReady(), 500);
+    initMapWhenReady();
+  }, []);
+
+  // 탭 전환 시 relayout
+  useEffect(() => {
+    if (active && mapInstanceRef.current) {
+      setTimeout(() => mapInstanceRef.current.relayout(), 50);
+    }
   }, [active]);
 
   function initMapWhenReady() {
     const tryInit = () => {
-      if (window.kakao && window.kakao.maps && window.kakaoMapReady) {
+      if (window.kakao && window.kakao.maps && window.kakaoMapReady && mapRef.current) {
         initMap();
       } else {
         setTimeout(tryInit, 300);
@@ -338,11 +353,7 @@ function MapPage({ active }) {
   }
 
   function initMap() {
-    if (!mapRef.current) return;
-    if (mapInstanceRef.current) {
-      mapInstanceRef.current.relayout();
-      return;
-    }
+    if (!mapRef.current || mapInstanceRef.current) return;
     const map = new window.kakao.maps.Map(mapRef.current, {
       center: new window.kakao.maps.LatLng(37.5172, 127.0473),
       level: 8
@@ -350,7 +361,6 @@ function MapPage({ active }) {
     mapInstanceRef.current = map;
     window.kakao.maps.event.addListener(map, 'click', onMapClick);
     restorePolygonsOnMap(map, savedZonesRef.current, hubVisible);
-    setTimeout(() => map.relayout(), 100);
   }
 
   function restorePolygonsOnMap(map, zones, visible) {
@@ -547,7 +557,7 @@ function MapPage({ active }) {
   }
 
   return (
-    <div style={{position:'fixed',top:49,left:0,right:0,bottom:0}}>
+    <div style={{width:'100%',height:'100%',position:'relative'}}>
       <div ref={mapRef} style={{width:'100%',height:'100%'}} />
       <div className="map-toolbar">
         <div className="map-panel">
