@@ -330,12 +330,14 @@ function MapPage({ active }) {
   }, [active]);
 
   function initMapWhenReady() {
-    if (window.kakaoMapReady) {
-      initMap();
-    } else {
-      window.pendingMapInit = true;
-      window._onKakaoReady = initMap;
-    }
+    const tryInit = () => {
+      if (window.kakao && window.kakao.maps && window.kakaoMapReady) {
+        initMap();
+      } else {
+        setTimeout(tryInit, 300);
+      }
+    };
+    tryInit();
   }
 
   function initMap() {
