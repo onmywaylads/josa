@@ -663,7 +663,7 @@ function MapPage({ active }) {
       <div ref={mapRef} style={{width:'100%',height:'100%'}} />
 
 
-      <div className="map-toolbar">
+      <div className="map-toolbar" style={{position:"relative",zIndex:9000}}>
         <div className="map-panel">
           <div className="map-panel-title">✏️ 권역 그리기</div>
           <input
