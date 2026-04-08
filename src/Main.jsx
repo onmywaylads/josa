@@ -434,7 +434,7 @@ function MapPage({ active }) {
         const lng = feature.properties.cx;
         const gu = feature.properties.gu || '';
         const content = `<div style="text-align:center;pointer-events:none;line-height:1.3;">
-          ${gu ? `<div style="font-size:10px;color:#111;font-weight:400;white-space:nowrap;">${gu}</div>` : ''}
+          ${gu ? `<div style="font-size:10px;color:#000;font-weight:400;white-space:nowrap;">${gu}</div>` : ''}
           <div style="font-size:13px;color:#000;font-weight:700;white-space:nowrap;letter-spacing:-0.3px;">${nm}</div>
         </div>`;
         const label = new window.kakao.maps.CustomOverlay({
@@ -659,7 +659,7 @@ function MapPage({ active }) {
       {emdOn && (
         <div style={{
           position:'absolute',top:0,left:0,right:0,bottom:0,
-          background:'rgba(255,255,255,0.45)',
+          background:'rgba(255,255,255,0.55)',
           pointerEvents:'none',
           zIndex:2,
         }} />
