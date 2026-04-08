@@ -420,10 +420,10 @@ function MapPage({ active }) {
           map,
           path,
           strokeWeight: 1,
-          strokeColor: '#2563EB',
-          strokeOpacity: 0.5,
-          fillColor: '#EFF6FF',
-          fillOpacity: 0.06,
+          strokeColor: '#666666',
+          strokeOpacity: 0.8,
+          fillColor: '#000000',
+          fillOpacity: 0,
         });
         emdPolygonsRef.current.push(poly);
 
@@ -434,7 +434,7 @@ function MapPage({ active }) {
       if(inBounds && cnt>0){
         const lat = sumLat/cnt;
         const lng = sumLng/cnt;
-        const content = `<div style="font-size:10px;color:#1e40af;font-weight:700;white-space:nowrap;background:rgba(255,255,255,0.8);padding:1px 5px;border-radius:3px;pointer-events:none;border:1px solid #bfdbfe;">${nm}</div>`;
+        const content = `<div style="font-size:12px;color:#333333;font-weight:600;white-space:nowrap;pointer-events:none;text-shadow:1px 1px 0 #fff,-1px 1px 0 #fff,1px -1px 0 #fff,-1px -1px 0 #fff;letter-spacing:-0.3px;">${nm}</div>`;
         const label = new window.kakao.maps.CustomOverlay({
           map,
           position: new window.kakao.maps.LatLng(lat,lng),
