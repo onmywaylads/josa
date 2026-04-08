@@ -1,12 +1,29 @@
 import { useEffect, useRef, useState } from 'react';
 
 const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwBt4hJMPjXRT2RaKhWyRCVYLg4vO6Bev_8gULP52OhWz6SRPDr3nQLayNulzF8kjsDWA/exec';
+const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL;
+const SUPABASE_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY;
+
 const BRANDS = ['바로고', '모아라인', '딜버'];
 const BRAND_COLOR = {
   '바로고':   {bg:'#eff6ff', color:'#2563eb', border:'#bfdbfe'},
   '모아라인': {bg:'#f0fdf4', color:'#16a34a', border:'#bbf7d0'},
   '딜버':     {bg:'#fdf4ff', color:'#9333ea', border:'#e9d5ff'},
 };
+
+async function sbFetch(path, options = {}) {
+  const res = await fetch(`${SUPABASE_URL}/rest/v1${path}`, {
+    ...options,
+    headers: {
+      'Content-Type': 'application/json',
+      'apikey': SUPABASE_KEY,
+      'Authorization': `Bearer ${SUPABASE_KEY}`,
+      ...options.headers,
+    },
+  });
+  const text = await res.text();
+  return text ? JSON.parse(text) : null;
+}
 
 export default function Main({ user, onLogout, isAdmin, onAdminClick }) {
   const [tab, setTab] = useState('search');
@@ -290,8 +307,7 @@ function MapPage({ active }) {
   useEffect(()=>{currentLayerRef.current=currentLayer;},[currentLayer]);
 
   useEffect(()=>{
-    loadFromStorage();
-    loadZonesFromSheet();
+    loadZonesFromSupabase();
     initMapWhenReady();
   },[]);
 
@@ -398,8 +414,7 @@ function MapPage({ active }) {
         next[selectedHub].surPolygons=[...(next[selectedHub].surPolygons||[]),polygon];
         next[selectedHub].surPaths=[...(next[selectedHub].surPaths||[]),pathData];
       }
-      saveToStorageData(hubListRef.current,next);
-      saveZonesToSheetData(hubListRef.current,next);
+      saveHubToSupabase(selectedHub, next[selectedHub]);
       return next;
     });
     clearCurrent();
@@ -414,11 +429,21 @@ function MapPage({ active }) {
     setIsDrawing(false);
   }
 
-  function addHub(){
+  async function addHub(){
     if(!hubAddName.trim()){alert('허브명을 입력해주세요!');return;}
     if(!hubAddBrand){alert('브랜드를 선택해주세요!');return;}
     if(hubList.find(h=>h.name===hubAddName.trim())){alert('이미 존재하는 허브입니다!');return;}
     const newName=hubAddName.trim();
+
+    // Supabase에 허브 추가
+    try {
+      await sbFetch('/hubs', {
+        method:'POST',
+        headers:{'Prefer':'resolution=ignore-duplicates,return=minimal'},
+        body:JSON.stringify({name:newName, brand:hubAddBrand, zone_path:[], sur_paths:[]})
+      });
+    } catch(e) { console.log('허브 추가 실패',e); }
+
     const next=[...hubList,{name:newName,brand:hubAddBrand}];
     setHubList(next);
     setSavedZones(prev=>{
@@ -428,12 +453,16 @@ function MapPage({ active }) {
     });
     selectHub(newName);
     setHubAddName('');setHubAddBrand('');
-    saveToStorageData(next,savedZonesRef.current);
-    saveZonesToSheetData(next,savedZonesRef.current);
   }
 
-  function deleteHub(name){
+  async function deleteHub(name){
     if(!confirm(`[${name}] 허브를 삭제할까요?\n그려진 권역도 함께 삭제됩니다.`)) return;
+
+    // Supabase에서 삭제
+    try {
+      await sbFetch(`/hubs?name=eq.${encodeURIComponent(name)}`, {method:'DELETE'});
+    } catch(e) { console.log('허브 삭제 실패',e); }
+
     const z=savedZonesRef.current[name];
     if(z){
       if(z.zonePolygon) z.zonePolygon.setMap(null);
@@ -444,8 +473,21 @@ function MapPage({ active }) {
     delete nextZones[name];
     setHubList(nextList);setSavedZones(nextZones);
     if(selectedHub===name){setSelectedHub('');setStatus('허브를 선택해주세요');}
-    saveToStorageData(nextList,nextZones);
-    saveZonesToSheetData(nextList,nextZones);
+  }
+
+  async function saveHubToSupabase(name, zone){
+    try {
+      const brand = hubListRef.current.find(h=>h.name===name)?.brand || zone.brand || '';
+      await sbFetch(`/hubs?name=eq.${encodeURIComponent(name)}`, {
+        method:'PATCH',
+        headers:{'Prefer':'return=minimal'},
+        body:JSON.stringify({
+          brand,
+          zone_path: zone.zonePath||[],
+          sur_paths: zone.surPaths||[],
+        })
+      });
+    } catch(e) { console.log('권역 저장 실패',e); }
   }
 
   function toggleHubVisible(name){
@@ -465,47 +507,24 @@ function MapPage({ active }) {
     }
   }
 
-  function loadFromStorage(){
-    try{
-      const raw=localStorage.getItem('barogo_data');
-      if(!raw) return;
-      const data=JSON.parse(raw);
-      setHubList(data.hubList||[]);
-      const zones={};
-      Object.entries(data.zones||{}).forEach(([k,v])=>{
-        zones[k]={zonePolygon:null,surPolygons:[],zonePath:v.zonePath||[],surPaths:v.surPaths||[],brand:v.brand||''};
+  async function loadZonesFromSupabase(){
+    try {
+      const data = await sbFetch('/hubs?order=created_at.asc');
+      if(!data) return;
+      const newHubList = data.map(h=>({name:h.name, brand:h.brand||''}));
+      const newZones = {};
+      data.forEach(h=>{
+        newZones[h.name]={
+          zonePolygon:null, surPolygons:[],
+          zonePath: h.zone_path||[],
+          surPaths: h.sur_paths||[],
+          brand: h.brand||''
+        };
       });
-      setSavedZones(zones);
-    }catch(e){}
-  }
-
-  async function loadZonesFromSheet(){
-    try{
-      const res=await fetch(SCRIPT_URL+'?action=getZones');
-      const data=await res.json();
-      setHubList(data.hubList||[]);
-      const zones={};
-      Object.entries(data.zones||{}).forEach(([k,v])=>{
-        zones[k]={zonePolygon:null,surPolygons:[],zonePath:v.zonePath||[],surPaths:v.surPaths||(v.surPath?.length>=3?[v.surPath]:[]),brand:v.brand||''};
-      });
-      setSavedZones(zones);
-      if(mapInstanceRef.current) restorePolygonsOnMap(mapInstanceRef.current,zones,hubVisible);
-    }catch(e){console.log('시트 로드 실패',e);}
-  }
-
-  function saveToStorageData(hList,zones){
-    try{
-      const data={hubList:hList,zones:Object.fromEntries(Object.entries(zones).map(([k,v])=>[k,{zonePath:v.zonePath,surPaths:v.surPaths,brand:v.brand}]))};
-      localStorage.setItem('barogo_data',JSON.stringify(data));
-    }catch(e){}
-  }
-
-  async function saveZonesToSheetData(hList,zones){
-    try{
-      const zonesData={};
-      Object.entries(zones).forEach(([k,v])=>{zonesData[k]={zonePath:v.zonePath||[],surPaths:v.surPaths||[],brand:v.brand||''};});
-      await fetch(SCRIPT_URL,{method:'POST',body:JSON.stringify({action:'saveZones',zones:zonesData,hubList:hList})});
-    }catch(e){}
+      setHubList(newHubList);
+      setSavedZones(newZones);
+      if(mapInstanceRef.current) restorePolygonsOnMap(mapInstanceRef.current, newZones, hubVisible);
+    } catch(e) { console.log('Supabase 로드 실패',e); }
   }
 
   const filteredHubs=brandFilter==='전체'?hubList:hubList.filter(h=>{
