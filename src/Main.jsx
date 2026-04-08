@@ -433,7 +433,7 @@ function MapPage({ active }) {
         const lat = feature.properties.cy;
         const lng = feature.properties.cx;
         const gu = feature.properties.gu || '';
-        const content = `<div style="text-align:center;pointer-events:none;line-height:1.3;background:rgba(255,255,255,0.88);padding:2px 6px;border-radius:3px;">
+        const content = `<div style="text-align:center;pointer-events:none;line-height:1.3;background:rgba(255,255,255,0.60);padding:2px 6px;border-radius:3px;">
           ${gu ? `<div style="font-size:10px;color:#000;font-weight:500;white-space:nowrap;">${gu}</div>` : ''}
           <div style="font-size:13px;color:#000;font-weight:700;white-space:nowrap;letter-spacing:-0.3px;">${nm}</div>
         </div>`;
@@ -441,7 +441,7 @@ function MapPage({ active }) {
           map,
           position: new window.kakao.maps.LatLng(lat,lng),
           content,
-          zIndex: 200,
+          zIndex: 9999,
           yAnchor: 0.5,
           xAnchor: 0.5,
         });
