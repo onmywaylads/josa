@@ -403,7 +403,6 @@ function MapPage({ active }) {
         ? [feature.geometry.coordinates]
         : feature.geometry.coordinates;
 
-      let sumLat=0, sumLng=0, cnt=0;
       let inBounds=false;
 
       coordsList.forEach(polygonCoords=>{
@@ -419,6 +418,7 @@ function MapPage({ active }) {
         const poly = new window.kakao.maps.Polygon({
           map,
           path,
+          zIndex: 100,
           strokeWeight: 1,
           strokeColor: '#666666',
           strokeOpacity: 0.8,
@@ -426,19 +426,18 @@ function MapPage({ active }) {
           fillOpacity: 0,
         });
         emdPolygonsRef.current.push(poly);
-
-        outer.forEach(([lng,lat])=>{ sumLat+=lat; sumLng+=lng; cnt++; });
       });
 
-      // 이름 라벨 (bounds 안에 있을 때만)
-      if(inBounds && cnt>0){
-        const lat = sumLat/cnt;
-        const lng = sumLng/cnt;
+      // 이름 라벨 - centroid 사용 (bounds 안에 있을 때만)
+      if(inBounds && feature.properties.cx && feature.properties.cy){
+        const lat = feature.properties.cy;
+        const lng = feature.properties.cx;
         const content = `<div style="font-size:12px;color:#333333;font-weight:600;white-space:nowrap;pointer-events:none;text-shadow:1px 1px 0 #fff,-1px 1px 0 #fff,1px -1px 0 #fff,-1px -1px 0 #fff;letter-spacing:-0.3px;">${nm}</div>`;
         const label = new window.kakao.maps.CustomOverlay({
           map,
           position: new window.kakao.maps.LatLng(lat,lng),
           content,
+          zIndex: 200,
           yAnchor: 0.5,
           xAnchor: 0.5,
         });
@@ -653,6 +652,14 @@ function MapPage({ active }) {
   return (
     <div style={{width:'100%',height:'100%',position:'relative'}}>
       <div ref={mapRef} style={{width:'100%',height:'100%'}} />
+      {emdOn && (
+        <div style={{
+          position:'absolute',top:0,left:0,right:0,bottom:0,
+          background:'rgba(255,255,255,0.22)',
+          pointerEvents:'none',
+          zIndex:2,
+        }} />
+      )}
 
       <div className="map-toolbar">
         <div className="map-panel">
