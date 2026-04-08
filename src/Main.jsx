@@ -16,6 +16,12 @@ export default function Main({ user, onLogout, isAdmin, onAdminClick }) {
       <nav className="nav">
         <button className={`nav-tab ${tab==='search'?'active':''}`} onClick={()=>setTab('search')}>🔍 상점 조회</button>
         <button className={`nav-tab ${tab==='map'?'active':''}`} onClick={()=>setTab('map')}>📐 권역 관리</button>
+        {isAdmin && (
+          <button className="nav-tab" style={{flex:'0 0 auto',padding:'16px 12px',fontSize:12,color:'var(--accent)',fontWeight:700}}
+            onClick={onAdminClick}>
+            👤 관리자
+          </button>
+        )}
         <button className="nav-tab" style={{flex:'0 0 auto',padding:'16px 12px',fontSize:12,color:'var(--text-dim)'}}
           onClick={()=>onLogout()}>
           {user.name} · 로그아웃
@@ -512,20 +518,14 @@ function MapPage({ active }) {
       <div ref={mapRef} style={{width:'100%',height:'100%'}} />
 
       <div className="map-toolbar">
-
-        {/* ── 권역 그리기 패널 (허브 추가 + 그리기 통합) ── */}
         <div className="map-panel">
           <div className="map-panel-title">✏️ 권역 그리기</div>
-
-          {/* 1. 허브명 입력 */}
           <input
             value={hubAddName} onChange={e=>setHubAddName(e.target.value)}
             placeholder="새 허브명 입력" onKeyDown={e=>e.key==='Enter'&&addHub()}
             style={{width:'100%',border:'1.5px solid var(--border)',borderRadius:8,padding:'8px 12px',
               fontFamily:'Pretendard',fontSize:13,fontWeight:600,outline:'none',marginBottom:7,color:'var(--text)'}}
           />
-
-          {/* 2. 브랜드 선택 */}
           <div style={{display:'flex',gap:5,marginBottom:8}}>
             {BRANDS.map(b=>{
               const c=BRAND_COLOR[b]||{};
@@ -540,17 +540,11 @@ function MapPage({ active }) {
               );
             })}
           </div>
-
-          {/* 3. 허브 추가 버튼 */}
           <button onClick={addHub} style={{
             width:'100%',padding:'8px',background:'var(--accent)',border:'none',borderRadius:8,
             color:'#fff',fontFamily:'Pretendard',fontSize:13,fontWeight:700,cursor:'pointer',marginBottom:12
           }}>+ 허브 추가</button>
-
-          {/* 구분선 */}
           <div style={{borderTop:'1px solid var(--border)',marginBottom:12}} />
-
-          {/* 4. 선택된 허브 표시 */}
           <div style={{
             padding:'8px 10px',borderRadius:8,marginBottom:10,fontSize:12,fontWeight:700,
             background:selectedHub?'#eff6ff':'var(--bg)',
@@ -559,14 +553,10 @@ function MapPage({ active }) {
           }}>
             {selectedHub?`✅ ${selectedHub}`:'← 허브 관리에서 허브 클릭'}
           </div>
-
-          {/* 5. 레이어 탭 */}
           <div className="layer-tabs">
             <button className={`layer-tab zone ${currentLayer==='zone'?'active':''}`} onClick={()=>setCurrentLayer('zone')}>🔵 기본 권역</button>
             <button className={`layer-tab surcharge ${currentLayer==='surcharge'?'active':''}`} onClick={()=>setCurrentLayer('surcharge')}>🟠 할증 구역</button>
           </div>
-
-          {/* 6. 그리기 버튼들 */}
           <div className="draw-btns">
             <button className={`draw-btn ${isDrawing?(currentLayer==='surcharge'?'drawing-sur':'drawing'):''}`} onClick={toggleDraw}>
               {isDrawing?'⏹️ 그리기 중단':'✏️ 그리기 시작'}
@@ -577,14 +567,11 @@ function MapPage({ active }) {
           </div>
         </div>
 
-        {/* ── 허브 관리 패널 ── */}
         <div className="map-panel">
           <div className="map-panel-title" style={{display:'flex',justifyContent:'space-between',alignItems:'center'}}>
             <span>📋 허브 관리</span>
             <span style={{fontSize:10,color:'var(--text-dim)',fontWeight:400}}>{filteredHubs.length}개</span>
           </div>
-
-          {/* 브랜드 필터 탭 */}
           <div style={{display:'flex',gap:4,marginBottom:10,flexWrap:'wrap'}}>
             {['전체',...BRANDS].map(b=>{
               const c=BRAND_COLOR[b]||{};
@@ -599,8 +586,6 @@ function MapPage({ active }) {
               );
             })}
           </div>
-
-          {/* 허브 목록 */}
           <div style={{maxHeight:320,overflowY:'auto',display:'flex',flexDirection:'column',gap:5}}>
             {filteredHubs.length===0
               ? <div style={{fontSize:12,color:'var(--text-dim)',textAlign:'center',padding:'16px 0'}}>
@@ -614,7 +599,6 @@ function MapPage({ active }) {
                   const bc=BRAND_COLOR[brand]||{};
                   const visible=hubVisible[h.name]!==false;
                   const isSelected=selectedHub===h.name;
-
                   return (
                     <div key={h.name} id={`hub-item-${h.name}`}
                       onClick={()=>selectHub(h.name)}
