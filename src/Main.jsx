@@ -303,6 +303,7 @@ function MapPage({ active }) {
   const [selectedHub, setSelectedHub] = useState('');
   const [brandFilter, setBrandFilter] = useState('전체');
   const [emdOn, setEmdOn] = useState(false); // 법정동 표시 토글
+  const [emdLabels, setEmdLabels] = useState([]); // React로 렌더링할 라벨 목록
 
   const currentPathRef = useRef([]);
   const tempPolylineRef = useRef(null);
@@ -357,6 +358,14 @@ function MapPage({ active }) {
     // 줌/이동 시 법정동 오버레이 갱신
     window.kakao.maps.event.addListener(map,'zoom_changed',handleEmdZoom);
     window.kakao.maps.event.addListener(map,'dragend',handleEmdZoom);
+    window.kakao.maps.event.addListener(map,'drag',()=>{
+      if(!emdOnRef.current||!emdDataRef.current) return;
+      const projection = mapInstanceRef.current.getProjection();
+      setEmdLabels(prev=>prev.map(l=>{
+        // drag 중엔 기존 lat/lng 없으므로 일단 유지 (dragend에서 갱신)
+        return l;
+      }));
+    });
 
     restorePolygonsOnMap(map,savedZonesRef.current,hubVisible);
   }
@@ -395,6 +404,7 @@ function MapPage({ active }) {
     const bounds = map.getBounds();
     const sw = bounds.getSouthWest();
     const ne = bounds.getNorthEast();
+    const labelData = [];
 
     emdDataRef.current.features.forEach(feature=>{
       const { nm } = feature.properties;
@@ -428,26 +438,24 @@ function MapPage({ active }) {
         emdPolygonsRef.current.push(poly);
       });
 
-      // 이름 라벨 - centroid 사용 (bounds 안에 있을 때만)
+      // 라벨 좌표 수집 (React로 렌더링)
       if(inBounds && feature.properties.cx && feature.properties.cy){
-        const lat = feature.properties.cy;
-        const lng = feature.properties.cx;
-        const gu = feature.properties.gu || '';
-        const content = `<div style="text-align:center;pointer-events:none;line-height:1.3;background:rgba(255,255,255,0.60);padding:2px 6px;border-radius:3px;">
-          ${gu ? `<div style="font-size:10px;color:#000;font-weight:500;white-space:nowrap;">${gu}</div>` : ''}
-          <div style="font-size:13px;color:#000;font-weight:700;white-space:nowrap;letter-spacing:-0.3px;">${nm}</div>
-        </div>`;
-        const label = new window.kakao.maps.CustomOverlay({
-          map,
-          position: new window.kakao.maps.LatLng(lat,lng),
-          content,
-          zIndex: 9999,
-          yAnchor: 0.5,
-          xAnchor: 0.5,
+        labelData.push({
+          nm: feature.properties.nm,
+          gu: feature.properties.gu||'',
+          lat: feature.properties.cy,
+          lng: feature.properties.cx,
         });
-        emdLabelsRef.current.push(label);
       }
     });
+
+    // lat/lng → 픽셀 좌표 변환 후 React state 업데이트
+    const projection = map.getProjection();
+    const labels = labelData.map(d=>{
+      const pt = projection.pointFromCoords(new window.kakao.maps.LatLng(d.lat,d.lng));
+      return {nm:d.nm, gu:d.gu, x:pt.x, y:pt.y};
+    });
+    setEmdLabels(labels);
   }
 
   // 법정동 오버레이 전부 제거
@@ -456,6 +464,7 @@ function MapPage({ active }) {
     emdLabelsRef.current.forEach(l=>{ try{ l.setMap(null); }catch(e){} });
     emdPolygonsRef.current=[];
     emdLabelsRef.current=[];
+    setEmdLabels([]);
   }
 
   function restorePolygonsOnMap(map,zones,visible){
@@ -663,6 +672,16 @@ function MapPage({ active }) {
           pointerEvents:'none',
           zIndex:2,
         }} />
+      )}
+      {emdOn && (
+        <div style={{position:'absolute',top:0,left:0,right:0,bottom:0,pointerEvents:'none',zIndex:10,overflow:'hidden'}}>
+          {emdLabels.map((label,i)=>(
+            <div key={i} style={{position:'absolute',left:label.x,top:label.y,transform:'translate(-50%,-50%)',textAlign:'center',lineHeight:'1.3'}}>
+              {label.gu&&<div style={{fontSize:10,color:'#000',fontWeight:500,whiteSpace:'nowrap'}}>{label.gu}</div>}
+              <div style={{fontSize:13,color:'#000',fontWeight:700,whiteSpace:'nowrap',letterSpacing:'-0.3px'}}>{label.nm}</div>
+            </div>
+          ))}
+        </div>
       )}
 
       <div className="map-toolbar">
