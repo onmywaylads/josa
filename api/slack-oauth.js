@@ -1,6 +1,6 @@
 const REDIRECT_URI = "https://josa-ten.vercel.app/api/slack-oauth";
-const SUPABASE_URL = process.env.VITE_SUPABASE_URL;
-const SUPABASE_KEY = process.env.VITE_SUPABASE_ANON_KEY;
+const SUPABASE_URL = process.env.SUPABASE_URL;
+const SUPABASE_KEY = process.env.SUPABASE_ANON_KEY;
 
 export default async function handler(req, res) {
   const code = req.query?.code;
