@@ -278,6 +278,16 @@ function getCoordFromAddr(addr){
   });
 }
 
+// ── 법정동 point-in-polygon ──
+function pointInPolygon([px,py], ring){
+  let inside=false;
+  for(let i=0,j=ring.length-1;i<ring.length;j=i++){
+    const[xi,yi]=ring[i],[xj,yj]=ring[j];
+    if(((yi>py)!==(yj>py))&&(px<(xj-xi)*(py-yi)/(yj-yi)+xi)) inside=!inside;
+  }
+  return inside;
+}
+
 // ── 권역 관리 ──
 function MapPage({ active }) {
   const mapRef = useRef(null);
@@ -292,6 +302,7 @@ function MapPage({ active }) {
   const [hubAddBrand, setHubAddBrand] = useState('');
   const [selectedHub, setSelectedHub] = useState('');
   const [brandFilter, setBrandFilter] = useState('전체');
+  const [emdOn, setEmdOn] = useState(false); // 법정동 표시 토글
 
   const currentPathRef = useRef([]);
   const tempPolylineRef = useRef(null);
@@ -301,10 +312,17 @@ function MapPage({ active }) {
   const isDrawingRef = useRef(false);
   const currentLayerRef = useRef('zone');
 
+  // 법정동 오버레이용 ref
+  const emdDataRef = useRef(null);       // 로드된 GeoJSON (한 번만 fetch)
+  const emdPolygonsRef = useRef([]);     // 카카오 폴리곤 객체들
+  const emdLabelsRef = useRef([]);       // 카카오 커스텀오버레이(이름 라벨)들
+  const emdOnRef = useRef(false);        // 토글 상태 ref (이벤트 클로저용)
+
   useEffect(()=>{savedZonesRef.current=savedZones;},[savedZones]);
   useEffect(()=>{hubListRef.current=hubList;},[hubList]);
   useEffect(()=>{isDrawingRef.current=isDrawing;},[isDrawing]);
   useEffect(()=>{currentLayerRef.current=currentLayer;},[currentLayer]);
+  useEffect(()=>{emdOnRef.current=emdOn;},[emdOn]);
 
   useEffect(()=>{
     loadZonesFromSupabase();
@@ -314,6 +332,13 @@ function MapPage({ active }) {
   useEffect(()=>{
     if(active&&mapInstanceRef.current) setTimeout(()=>mapInstanceRef.current.relayout(),50);
   },[active]);
+
+  // 법정동 토글 버튼 눌렀을 때
+  useEffect(()=>{
+    if(!mapInstanceRef.current) return;
+    if(emdOn) handleEmdZoom();
+    else clearEmdOverlay();
+  },[emdOn]);
 
   function initMapWhenReady(){
     const tryInit=()=>{
@@ -328,7 +353,106 @@ function MapPage({ active }) {
     const map=new window.kakao.maps.Map(mapRef.current,{center:new window.kakao.maps.LatLng(37.5172,127.0473),level:8});
     mapInstanceRef.current=map;
     window.kakao.maps.event.addListener(map,'click',onMapClick);
+
+    // 줌/이동 시 법정동 오버레이 갱신
+    window.kakao.maps.event.addListener(map,'zoom_changed',handleEmdZoom);
+    window.kakao.maps.event.addListener(map,'dragend',handleEmdZoom);
+
     restorePolygonsOnMap(map,savedZonesRef.current,hubVisible);
+  }
+
+  // 법정동 GeoJSON 로드 (최초 1회)
+  async function loadEmdData(){
+    if(emdDataRef.current) return;
+    try {
+      const res = await fetch('/emd_simplified.geojson');
+      emdDataRef.current = await res.json();
+    } catch(e){ console.log('법정동 GeoJSON 로드 실패',e); }
+  }
+
+  // 줌 변경 시 법정동 오버레이 처리
+  async function handleEmdZoom(){
+    if(!emdOnRef.current) return;
+    const map = mapInstanceRef.current;
+    if(!map) return;
+    const level = map.getLevel();
+
+    // 레벨 5~6 구간에서만 표시
+    if(level >= 5 && level <= 6){
+      await loadEmdData();
+      drawEmdOverlay();
+    } else {
+      clearEmdOverlay();
+    }
+  }
+
+  // 법정동 경계 + 이름 그리기
+  function drawEmdOverlay(){
+    const map = mapInstanceRef.current;
+    if(!map || !emdDataRef.current) return;
+    clearEmdOverlay();
+
+    const bounds = map.getBounds();
+    const sw = bounds.getSouthWest();
+    const ne = bounds.getNorthEast();
+
+    emdDataRef.current.features.forEach(feature=>{
+      const { nm } = feature.properties;
+      const geomType = feature.geometry.type;
+      const coordsList = geomType === 'Polygon'
+        ? [feature.geometry.coordinates]
+        : feature.geometry.coordinates;
+
+      let sumLat=0, sumLng=0, cnt=0;
+      let inBounds=false;
+
+      coordsList.forEach(polygonCoords=>{
+        const outer = polygonCoords[0];
+        // bounds 안에 있는 폴리곤만 그리기 (성능)
+        const hasPoint = outer.some(([lng,lat])=>
+          lat>=sw.getLat()&&lat<=ne.getLat()&&lng>=sw.getLng()&&lng<=ne.getLng()
+        );
+        if(!hasPoint) return;
+        inBounds = true;
+
+        const path = outer.map(([lng,lat])=>new window.kakao.maps.LatLng(lat,lng));
+        const poly = new window.kakao.maps.Polygon({
+          map,
+          path,
+          strokeWeight: 1,
+          strokeColor: '#2563EB',
+          strokeOpacity: 0.5,
+          fillColor: '#EFF6FF',
+          fillOpacity: 0.06,
+        });
+        emdPolygonsRef.current.push(poly);
+
+        outer.forEach(([lng,lat])=>{ sumLat+=lat; sumLng+=lng; cnt++; });
+      });
+
+      // 이름 라벨 (bounds 안에 있을 때만)
+      if(inBounds && cnt>0){
+        const lat = sumLat/cnt;
+        const lng = sumLng/cnt;
+        const content = `<div style="font-size:10px;color:#1e40af;font-weight:700;white-space:nowrap;background:rgba(255,255,255,0.8);padding:1px 5px;border-radius:3px;pointer-events:none;border:1px solid #bfdbfe;">${nm}</div>`;
+        const label = new window.kakao.maps.CustomOverlay({
+          map,
+          position: new window.kakao.maps.LatLng(lat,lng),
+          content,
+          yAnchor: 0.5,
+          xAnchor: 0.5,
+        });
+        emdLabelsRef.current.push(label);
+      }
+    });
+  }
+
+  // 법정동 오버레이 전부 제거
+  function clearEmdOverlay(){
+    emdPolygonsRef.current.forEach(p=>{ try{ p.setMap(null); }catch(e){} });
+    emdLabelsRef.current.forEach(l=>{ try{ l.setMap(null); }catch(e){} });
+    emdPolygonsRef.current=[];
+    emdLabelsRef.current=[];
   }
 
   function restorePolygonsOnMap(map,zones,visible){
@@ -434,8 +558,6 @@ function MapPage({ active }) {
     if(!hubAddBrand){alert('브랜드를 선택해주세요!');return;}
     if(hubList.find(h=>h.name===hubAddName.trim())){alert('이미 존재하는 허브입니다!');return;}
     const newName=hubAddName.trim();
-
-    // Supabase에 허브 추가
     try {
       await sbFetch('/hubs', {
         method:'POST',
@@ -443,7 +565,6 @@ function MapPage({ active }) {
         body:JSON.stringify({name:newName, brand:hubAddBrand, zone_path:[], sur_paths:[]})
       });
     } catch(e) { console.log('허브 추가 실패',e); }
-
     const next=[...hubList,{name:newName,brand:hubAddBrand}];
     setHubList(next);
     setSavedZones(prev=>{
@@ -457,12 +578,9 @@ function MapPage({ active }) {
 
   async function deleteHub(name){
     if(!confirm(`[${name}] 허브를 삭제할까요?\n그려진 권역도 함께 삭제됩니다.`)) return;
-
-    // Supabase에서 삭제
     try {
       await sbFetch(`/hubs?name=eq.${encodeURIComponent(name)}`, {method:'DELETE'});
     } catch(e) { console.log('허브 삭제 실패',e); }
-
     const z=savedZonesRef.current[name];
     if(z){
       if(z.zonePolygon) z.zonePolygon.setMap(null);
@@ -583,6 +701,28 @@ function MapPage({ active }) {
             <button className="draw-btn" onClick={undoLast}>↩️ 마지막 점 취소</button>
             <button className="draw-btn save" onClick={saveZone}>💾 저장</button>
             <button className="draw-btn del" onClick={clearCurrent}>🗑 취소</button>
+          </div>
+
+          {/* 법정동 경계 토글 */}
+          <div style={{borderTop:'1px solid var(--border)',marginTop:12,paddingTop:12}}>
+            <button
+              onClick={()=>setEmdOn(v=>!v)}
+              style={{
+                width:'100%',padding:'8px',borderRadius:8,cursor:'pointer',
+                fontFamily:'Pretendard',fontSize:12,fontWeight:700,
+                border:`1.5px solid ${emdOn?'#2563eb':'var(--border)'}`,
+                background:emdOn?'#eff6ff':'var(--bg)',
+                color:emdOn?'#2563eb':'var(--text-dim)',
+                transition:'all 0.15s',
+              }}
+            >
+              🗺️ 법정동 경계 {emdOn?'ON':'OFF'}
+            </button>
+            {emdOn && (
+              <div style={{fontSize:10,color:'var(--text-dim)',textAlign:'center',marginTop:4}}>
+                줌 레벨 5~6에서 경계선 표시
+              </div>
+            )}
           </div>
         </div>
 
