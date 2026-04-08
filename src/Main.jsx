@@ -405,20 +405,18 @@ function MapPage({ active }) {
     const bounds = map.getBounds();
     const sw = bounds.getSouthWest();
     const ne = bounds.getNorthEast();
-    const labelData = [];
 
     emdDataRef.current.features.forEach(feature=>{
-      const { nm } = feature.properties;
+      const { nm, cx, cy, gu } = feature.properties;
       const geomType = feature.geometry.type;
       const coordsList = geomType === 'Polygon'
         ? [feature.geometry.coordinates]
         : feature.geometry.coordinates;
 
-      let inBounds=false;
+      let inBounds = false;
 
       coordsList.forEach(polygonCoords=>{
         const outer = polygonCoords[0];
-        // bounds 안에 있는 폴리곤만 그리기 (성능)
         const hasPoint = outer.some(([lng,lat])=>
           lat>=sw.getLat()&&lat<=ne.getLat()&&lng>=sw.getLng()&&lng<=ne.getLng()
         );
@@ -427,8 +425,7 @@ function MapPage({ active }) {
 
         const path = outer.map(([lng,lat])=>new window.kakao.maps.LatLng(lat,lng));
         const poly = new window.kakao.maps.Polygon({
-          map,
-          path,
+          map, path,
           zIndex: 200,
           strokeWeight: 2,
           strokeColor: '#222222',
@@ -439,29 +436,14 @@ function MapPage({ active }) {
         emdPolygonsRef.current.push(poly);
       });
 
-      // 라벨 좌표 수집 (React로 렌더링)
-      if(inBounds && feature.properties.cx && feature.properties.cy){
-        labelData.push({
-          nm: feature.properties.nm,
-          gu: feature.properties.gu||'',
-          lat: feature.properties.cy,
-          lng: feature.properties.cx,
-        });
-      }
-    });
-
-    // lat/lng → 픽셀 좌표 변환 후 React state 업데이트
-    const projection = map.getProjection();
-      // 이름 라벨 (Kakao CustomOverlay - mapRef 안에서 자연스럽게 지도와 함께 이동)
-      if(inBounds && feature.properties.cx && feature.properties.cy){
-        const gu = feature.properties.gu||'';
+      if(inBounds && cx && cy){
         const labelContent = `<div style="text-align:center;line-height:1.3;pointer-events:none;">
           ${gu?`<div style="font-size:10px;color:#000;font-weight:500;white-space:nowrap;">${gu}</div>`:''}
           <div style="font-size:13px;color:#000;font-weight:700;white-space:nowrap;letter-spacing:-0.3px;">${nm}</div>
         </div>`;
         const label = new window.kakao.maps.CustomOverlay({
           map,
-          position: new window.kakao.maps.LatLng(feature.properties.cy, feature.properties.cx),
+          position: new window.kakao.maps.LatLng(cy, cx),
           content: labelContent,
           zIndex: 9999,
           yAnchor: 0.5,
