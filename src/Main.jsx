@@ -303,7 +303,6 @@ function MapPage({ active }) {
   const [selectedHub, setSelectedHub] = useState('');
   const [brandFilter, setBrandFilter] = useState('전체');
   const [emdOn, setEmdOn] = useState(false); // 법정동 표시 토글
-  const [emdLabels, setEmdLabels] = useState([]); // React로 렌더링할 라벨 목록
 
   const currentPathRef = useRef([]);
   const tempPolylineRef = useRef(null);
@@ -337,8 +336,14 @@ function MapPage({ active }) {
   // 법정동 토글 버튼 눌렀을 때
   useEffect(()=>{
     if(!mapInstanceRef.current) return;
-    if(emdOn) handleEmdZoom();
-    else clearEmdOverlay();
+    const whiteEl = document.getElementById('emd-white-overlay');
+    if(emdOn){
+      if(whiteEl) whiteEl.style.display='block';
+      handleEmdZoom();
+    } else {
+      if(whiteEl) whiteEl.style.display='none';
+      clearEmdOverlay();
+    }
   },[emdOn]);
 
   function initMapWhenReady(){
@@ -354,18 +359,14 @@ function MapPage({ active }) {
     const map=new window.kakao.maps.Map(mapRef.current,{center:new window.kakao.maps.LatLng(37.5172,127.0473),level:8});
     mapInstanceRef.current=map;
     window.kakao.maps.event.addListener(map,'click',onMapClick);
-
-    // 줌/이동 시 법정동 오버레이 갱신
     window.kakao.maps.event.addListener(map,'zoom_changed',handleEmdZoom);
     window.kakao.maps.event.addListener(map,'dragend',handleEmdZoom);
-    window.kakao.maps.event.addListener(map,'drag',()=>{
-      if(!emdOnRef.current||!emdDataRef.current) return;
-      const projection = mapInstanceRef.current.getProjection();
-      setEmdLabels(prev=>prev.map(l=>{
-        // drag 중엔 기존 lat/lng 없으므로 일단 유지 (dragend에서 갱신)
-        return l;
-      }));
-    });
+
+    // 흰막 div를 mapRef 안에 삽입 (Kakao 레이어들과 같은 stacking context)
+    const whiteEl = document.createElement('div');
+    whiteEl.id = 'emd-white-overlay';
+    whiteEl.style.cssText = 'position:absolute;top:0;left:0;width:100%;height:100%;background:rgba(255,255,255,0.60);pointer-events:none;z-index:150;display:none;';
+    mapRef.current.appendChild(whiteEl);
 
     restorePolygonsOnMap(map,savedZonesRef.current,hubVisible);
   }
@@ -428,7 +429,7 @@ function MapPage({ active }) {
         const poly = new window.kakao.maps.Polygon({
           map,
           path,
-          zIndex: 100,
+          zIndex: 200,
           strokeWeight: 2,
           strokeColor: '#222222',
           strokeOpacity: 1,
@@ -451,11 +452,24 @@ function MapPage({ active }) {
 
     // lat/lng → 픽셀 좌표 변환 후 React state 업데이트
     const projection = map.getProjection();
-    const labels = labelData.map(d=>{
-      const pt = projection.pointFromCoords(new window.kakao.maps.LatLng(d.lat,d.lng));
-      return {nm:d.nm, gu:d.gu, x:pt.x, y:pt.y};
+      // 이름 라벨 (Kakao CustomOverlay - mapRef 안에서 자연스럽게 지도와 함께 이동)
+      if(inBounds && feature.properties.cx && feature.properties.cy){
+        const gu = feature.properties.gu||'';
+        const labelContent = `<div style="text-align:center;line-height:1.3;pointer-events:none;">
+          ${gu?`<div style="font-size:10px;color:#000;font-weight:500;white-space:nowrap;">${gu}</div>`:''}
+          <div style="font-size:13px;color:#000;font-weight:700;white-space:nowrap;letter-spacing:-0.3px;">${nm}</div>
+        </div>`;
+        const label = new window.kakao.maps.CustomOverlay({
+          map,
+          position: new window.kakao.maps.LatLng(feature.properties.cy, feature.properties.cx),
+          content: labelContent,
+          zIndex: 9999,
+          yAnchor: 0.5,
+          xAnchor: 0.5,
+        });
+        emdLabelsRef.current.push(label);
+      }
     });
-    setEmdLabels(labels);
   }
 
   // 법정동 오버레이 전부 제거
@@ -464,7 +478,7 @@ function MapPage({ active }) {
     emdLabelsRef.current.forEach(l=>{ try{ l.setMap(null); }catch(e){} });
     emdPolygonsRef.current=[];
     emdLabelsRef.current=[];
-    setEmdLabels([]);
+
   }
 
   function restorePolygonsOnMap(map,zones,visible){
@@ -665,24 +679,7 @@ function MapPage({ active }) {
   return (
     <div style={{width:'100%',height:'100%',position:'relative'}}>
       <div ref={mapRef} style={{width:'100%',height:'100%'}} />
-      {emdOn && (
-        <div style={{
-          position:'absolute',top:0,left:0,right:0,bottom:0,
-          background:'rgba(255,255,255,0.60)',
-          pointerEvents:'none',
-          zIndex:2,
-        }} />
-      )}
-      {emdOn && (
-        <div style={{position:'absolute',top:0,left:0,right:0,bottom:0,pointerEvents:'none',zIndex:10,overflow:'hidden'}}>
-          {emdLabels.map((label,i)=>(
-            <div key={i} style={{position:'absolute',left:label.x,top:label.y,transform:'translate(-50%,-50%)',textAlign:'center',lineHeight:'1.3'}}>
-              {label.gu&&<div style={{fontSize:10,color:'#000',fontWeight:500,whiteSpace:'nowrap'}}>{label.gu}</div>}
-              <div style={{fontSize:13,color:'#000',fontWeight:700,whiteSpace:'nowrap',letterSpacing:'-0.3px'}}>{label.nm}</div>
-            </div>
-          ))}
-        </div>
-      )}
+
 
       <div className="map-toolbar">
         <div className="map-panel">
