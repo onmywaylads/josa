@@ -419,9 +419,9 @@ function MapPage({ active }) {
           map,
           path,
           zIndex: 100,
-          strokeWeight: 1,
-          strokeColor: '#666666',
-          strokeOpacity: 0.8,
+          strokeWeight: 2,
+          strokeColor: '#222222',
+          strokeOpacity: 1,
           fillColor: '#000000',
           fillOpacity: 0,
         });
@@ -432,7 +432,11 @@ function MapPage({ active }) {
       if(inBounds && feature.properties.cx && feature.properties.cy){
         const lat = feature.properties.cy;
         const lng = feature.properties.cx;
-        const content = `<div style="font-size:12px;color:#333333;font-weight:600;white-space:nowrap;pointer-events:none;text-shadow:1px 1px 0 #fff,-1px 1px 0 #fff,1px -1px 0 #fff,-1px -1px 0 #fff;letter-spacing:-0.3px;">${nm}</div>`;
+        const gu = feature.properties.gu || '';
+        const content = `<div style="text-align:center;pointer-events:none;line-height:1.2;">
+          ${gu ? `<div style="font-size:10px;color:#444;font-weight:400;white-space:nowrap;text-shadow:1px 1px 0 #fff,-1px -1px 0 #fff,-1px 1px 0 #fff,1px -1px 0 #fff;">${gu}</div>` : ''}
+          <div style="font-size:13px;color:#111;font-weight:700;white-space:nowrap;text-shadow:1px 1px 0 #fff,-1px -1px 0 #fff,-1px 1px 0 #fff,1px -1px 0 #fff;letter-spacing:-0.3px;">${nm}</div>
+        </div>`;
         const label = new window.kakao.maps.CustomOverlay({
           map,
           position: new window.kakao.maps.LatLng(lat,lng),
@@ -655,7 +659,7 @@ function MapPage({ active }) {
       {emdOn && (
         <div style={{
           position:'absolute',top:0,left:0,right:0,bottom:0,
-          background:'rgba(255,255,255,0.22)',
+          background:'rgba(255,255,255,0.35)',
           pointerEvents:'none',
           zIndex:2,
         }} />
