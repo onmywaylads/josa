@@ -309,6 +309,8 @@ function MapPage({ active }) {
   const [hubAddBrand, setHubAddBrand] = useState('');
   const [selectedHub, setSelectedHub] = useState('');
   const [brandFilter, setBrandFilter] = useState('전체');
+  const [editingHub, setEditingHub] = useState(null); // 수정 중인 허브명
+  const [editingName, setEditingName] = useState('');
   const [emdOn, setEmdOn] = useState(false); // 법정동 표시 토글
 
   const currentPathRef = useRef([]);
@@ -592,6 +594,29 @@ function MapPage({ active }) {
     setHubAddName('');setHubAddBrand('');
   }
 
+  async function renameHub(oldName, newName){
+    newName = newName.trim();
+    if(!newName || newName === oldName) { setEditingHub(null); return; }
+    if(hubList.find(h=>h.name===newName)){ alert('이미 존재하는 허브명이에요!'); return; }
+    try {
+      await sbFetch(`/hubs?name=eq.${encodeURIComponent(oldName)}`, {
+        method:'PATCH',
+        headers:{'Prefer':'return=minimal'},
+        body:JSON.stringify({name: newName})
+      });
+    } catch(e){ console.log('허브명 변경 실패',e); }
+    // 로컬 상태 업데이트
+    setHubList(prev=>prev.map(h=>h.name===oldName?{...h,name:newName}:h));
+    setSavedZones(prev=>{
+      const next={...prev};
+      next[newName]=next[oldName];
+      delete next[oldName];
+      return next;
+    });
+    if(selectedHub===oldName) setSelectedHub(newName);
+    setEditingHub(null);
+  }
+
   async function deleteHub(name){
     if(!confirm(`[${name}] 허브를 삭제할까요?\n그려진 권역도 함께 삭제됩니다.`)) return;
     try {
@@ -788,9 +813,23 @@ function MapPage({ active }) {
                           onChange={e=>{e.stopPropagation();toggleHubVisible(h.name);}}
                           onClick={e=>e.stopPropagation()}
                           style={{width:14,height:14,accentColor:'#2563eb',cursor:'pointer',flexShrink:0}} />
-                        <span style={{fontSize:12,fontWeight:700,flex:1,overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap',color:isSelected?'var(--accent)':'var(--text)'}}>
-                          {h.name}
-                        </span>
+                        {editingHub===h.name
+                          ? <input
+                              autoFocus
+                              value={editingName}
+                              onChange={e=>setEditingName(e.target.value)}
+                              onKeyDown={e=>{if(e.key==='Enter')renameHub(h.name,editingName);if(e.key==='Escape')setEditingHub(null);}}
+                              onBlur={()=>renameHub(h.name,editingName)}
+                              onClick={e=>e.stopPropagation()}
+                              style={{fontSize:12,fontWeight:700,flex:1,border:'1.5px solid var(--accent)',borderRadius:5,padding:'1px 6px',outline:'none',fontFamily:'Pretendard'}}
+                            />
+                          : <span
+                              style={{fontSize:12,fontWeight:700,flex:1,overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap',color:isSelected?'var(--accent)':'var(--text)',cursor:'text'}}
+                              onDoubleClick={e=>{e.stopPropagation();setEditingHub(h.name);setEditingName(h.name);}}
+                            >
+                              {h.name}
+                            </span>
+                        }
                         {brand&&(
                           <span style={{fontSize:10,fontWeight:700,padding:'1px 5px',borderRadius:4,background:bc.bg,color:bc.color,border:`1px solid ${bc.border}`,flexShrink:0}}>
                             {brand}
