@@ -372,7 +372,7 @@ function MapPage({ active }) {
     // 흰막 (카카오 캔버스보다 낮은 z-index로 설정)
     const whiteEl = document.createElement('div');
     whiteEl.id = 'emd-white-overlay';
-    whiteEl.style.cssText = 'position:absolute;top:0;left:0;width:100%;height:100%;background:rgba(255,255,255,0.45);pointer-events:none;z-index:150;display:none;';
+    whiteEl.style.cssText = 'position:absolute;top:0;left:0;width:100%;height:100%;background:rgba(255,255,255,0);pointer-events:none;z-index:1;display:none;';
     mapRef.current.appendChild(whiteEl);
 
     restorePolygonsOnMap(map,savedZonesRef.current,hubVisible);
@@ -403,7 +403,8 @@ function MapPage({ active }) {
     }
   }
 
-  // 법정동 경계 + 이름 그리기 (SVG CustomOverlay로 흰막 위에 표시)
+  // 법정동 경계 + 이름 그리기
+  // 폴리곤에 흰색 fill을 줘서 내부 배경을 희게 만들고, 경계선+이름은 진하게
   function drawEmdOverlay(){
     const map = mapInstanceRef.current;
     if(!map || !emdDataRef.current) return;
@@ -412,54 +413,7 @@ function MapPage({ active }) {
     const bounds = map.getBounds();
     const sw = bounds.getSouthWest();
     const ne = bounds.getNorthEast();
-    const proj = map.getProjection();
 
-    // 지도 컨테이너 크기
-    const mapEl = mapRef.current;
-    const W = mapEl.offsetWidth;
-    const H = mapEl.offsetHeight;
-
-    // 위경도 → 픽셀 변환
-    function latLngToXY(lat, lng) {
-      const point = proj.pointFromCoords(new window.kakao.maps.LatLng(lat, lng));
-      return [point.x, point.y];
-    }
-
-    // 전체 경계선을 하나의 SVG로 그리기
-    let pathStrings = '';
-
-    emdDataRef.current.features.forEach(feature=>{
-      const geomType = feature.geometry.type;
-      const coordsList = geomType === 'Polygon'
-        ? [feature.geometry.coordinates]
-        : feature.geometry.coordinates;
-
-      coordsList.forEach(polygonCoords=>{
-        const outer = polygonCoords[0];
-        const inBounds = outer.some(([lng,lat])=>
-          lat>=sw.getLat()&&lat<=ne.getLat()&&lng>=sw.getLng()&&lng<=ne.getLng()
-        );
-        if(!inBounds) return;
-
-        const pts = outer.map(([lng,lat])=>latLngToXY(lat,lng));
-        const d = pts.map((p,i)=>`${i===0?'M':'L'}${p[0].toFixed(1)},${p[1].toFixed(1)}`).join(' ')+'Z';
-        pathStrings += `<path d="${d}" fill="none" stroke="#111" stroke-width="2" stroke-opacity="1"/>`;
-      });
-    });
-
-    // SVG 오버레이 (지도 전체 크기)
-    const svgContent = `<svg xmlns="http://www.w3.org/2000/svg" width="${W}" height="${H}" style="position:absolute;top:0;left:0;pointer-events:none;z-index:9000;">${pathStrings}</svg>`;
-    const svgOverlay = new window.kakao.maps.CustomOverlay({
-      map,
-      position: map.getBounds().getSouthWest(),
-      content: svgContent,
-      xAnchor: 0,
-      yAnchor: 1,
-      zIndex: 9000,
-    });
-    emdPolygonsRef.current.push(svgOverlay);
-
-    // 법정동 이름 라벨 (CustomOverlay)
     emdDataRef.current.features.forEach(feature=>{
       const { nm, cx, cy } = feature.properties;
       const geomType = feature.geometry.type;
@@ -468,20 +422,38 @@ function MapPage({ active }) {
         : feature.geometry.coordinates;
 
       let inBounds = false;
+
       coordsList.forEach(polygonCoords=>{
         const outer = polygonCoords[0];
-        if(outer.some(([lng,lat])=>lat>=sw.getLat()&&lat<=ne.getLat()&&lng>=sw.getLng()&&lng<=ne.getLng())) inBounds=true;
+        const hasPoint = outer.some(([lng,lat])=>
+          lat>=sw.getLat()&&lat<=ne.getLat()&&lng>=sw.getLng()&&lng<=ne.getLng()
+        );
+        if(!hasPoint) return;
+        inBounds = true;
+
+        const path = outer.map(([lng,lat])=>new window.kakao.maps.LatLng(lat,lng));
+        // fillColor 흰색으로 배경 눌러주고 경계선 진하게
+        const poly = new window.kakao.maps.Polygon({
+          map, path,
+          zIndex: 200,
+          strokeWeight: 2,
+          strokeColor: '#111111',
+          strokeOpacity: 1,
+          fillColor: '#ffffff',
+          fillOpacity: 0.45,
+        });
+        emdPolygonsRef.current.push(poly);
       });
 
       if(inBounds && cx && cy){
-        const labelContent = `<div style="text-align:center;pointer-events:none;z-index:9100;">
-          <div style="font-size:13px;color:#111;font-weight:700;white-space:nowrap;letter-spacing:-0.3px;text-shadow:0 0 3px #fff,0 0 3px #fff,0 0 3px #fff;">${nm}</div>
+        const labelContent = `<div style="text-align:center;line-height:1.3;pointer-events:none;">
+          <div style="font-size:13px;color:#111;font-weight:700;white-space:nowrap;letter-spacing:-0.3px;">${nm}</div>
         </div>`;
         const label = new window.kakao.maps.CustomOverlay({
           map,
           position: new window.kakao.maps.LatLng(cy, cx),
           content: labelContent,
-          zIndex: 9100,
+          zIndex: 9999,
           yAnchor: 0.5,
           xAnchor: 0.5,
         });
