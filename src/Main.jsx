@@ -480,7 +480,7 @@ function MapPage({ active }) {
       if(v.zonePath?.length>=3){
         v.zonePolygon=new window.kakao.maps.Polygon({
           map,path:v.zonePath.map(p=>new window.kakao.maps.LatLng(p.lat,p.lng)),
-          strokeWeight:2,strokeColor:'#2563eb',strokeOpacity:1,fillColor:'#2563eb',fillOpacity:0.15
+          strokeWeight:2,strokeColor:'#2563eb',strokeOpacity:1,fillColor:'#2563eb',fillOpacity:0.15,zIndex:9500
         });
         if(!show) v.zonePolygon.setMap(null);
         window.kakao.maps.event.addListener(v.zonePolygon,'click',()=>selectHub(hub));
@@ -488,7 +488,7 @@ function MapPage({ active }) {
       v.surPolygons=(v.surPaths||[]).filter(sp=>sp?.length>=3).map(sp=>{
         const poly=new window.kakao.maps.Polygon({
           map,path:sp.map(p=>new window.kakao.maps.LatLng(p.lat,p.lng)),
-          strokeWeight:2,strokeColor:'#ea580c',strokeOpacity:1,fillColor:'#ea580c',fillOpacity:0.25
+          strokeWeight:2,strokeColor:'#ea580c',strokeOpacity:1,fillColor:'#ea580c',fillOpacity:0.25,zIndex:9500
         });
         if(!show) poly.setMap(null);
         window.kakao.maps.event.addListener(poly,'click',()=>selectHub(hub));
@@ -539,7 +539,7 @@ function MapPage({ active }) {
     const polygon=new window.kakao.maps.Polygon({
       map,path:currentPathRef.current,
       strokeWeight:2,strokeColor:color,strokeOpacity:1,
-      fillColor:color,fillOpacity:currentLayer==='surcharge'?0.25:0.15
+      fillColor:color,fillOpacity:currentLayer==='surcharge'?0.25:0.15,zIndex:9500
     });
     window.kakao.maps.event.addListener(polygon,'click',()=>selectHub(selectedHub));
     const pathData=currentPathRef.current.map(p=>({lat:p.getLat(),lng:p.getLng()}));
