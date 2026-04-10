@@ -369,10 +369,10 @@ function MapPage({ active }) {
     window.kakao.maps.event.addListener(map,'zoom_changed',handleEmdZoom);
     window.kakao.maps.event.addListener(map,'dragend',handleEmdZoom);
 
-    // 흰막 div를 mapRef 안에 삽입 (Kakao 레이어들과 같은 stacking context)
+    // 흰막 (카카오 캔버스보다 낮은 z-index로 설정)
     const whiteEl = document.createElement('div');
     whiteEl.id = 'emd-white-overlay';
-    whiteEl.style.cssText = 'position:absolute;top:0;left:0;width:100%;height:100%;background:rgba(255,255,255,0.60);pointer-events:none;z-index:150;display:none;';
+    whiteEl.style.cssText = 'position:absolute;top:0;left:0;width:100%;height:100%;background:rgba(255,255,255,0.35);pointer-events:none;z-index:1;display:none;';
     mapRef.current.appendChild(whiteEl);
 
     restorePolygonsOnMap(map,savedZonesRef.current,hubVisible);
@@ -434,8 +434,8 @@ function MapPage({ active }) {
         const poly = new window.kakao.maps.Polygon({
           map, path,
           zIndex: 200,
-          strokeWeight: 2,
-          strokeColor: '#222222',
+          strokeWeight: 3,
+          strokeColor: '#111111',
           strokeOpacity: 1,
           fillColor: '#000000',
           fillOpacity: 0,
