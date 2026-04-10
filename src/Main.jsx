@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
+import ResultMap from './ResultMap';
 
 const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwBt4hJMPjXRT2RaKhWyRCVYLg4vO6Bev_8gULP52OhWz6SRPDr3nQLayNulzF8kjsDWA/exec';
 const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL;
@@ -195,6 +196,12 @@ function ResultCard({ result, onReset }) {
       <div className="action-row">
         <button className="btn btn-outline" onClick={onReset}>↩ 다시</button>
       </div>
+      <ResultMap
+        lat={displayItem.lat}
+        lng={displayItem.lng}
+        hub={best.hub}
+        storeKey={displayItem.key}
+      />
       {others.length > 0 && (
         <div className="similar-card">
           <div className="card-label">유사 상점 후보</div>
