@@ -44,7 +44,7 @@ function drawEmd(map, emdData, emdPolygonsRef, emdLabelsRef) {
       const poly = new window.kakao.maps.Polygon({
         map, path, zIndex: 200,
         strokeWeight: 1, strokeColor: '#111111', strokeOpacity: 1,
-        fillColor: '#ffffff', fillOpacity: 0.55,
+        fillColor: '#ffffff', fillOpacity: 0.30,
       });
       emdPolygonsRef.current.push(poly);
     });
@@ -132,8 +132,8 @@ export default function ResultMap({ lat, lng, hub, storeKey, hasSurcharge }) {
       // 1. 2km 원
       const circle = new window.kakao.maps.Circle({
         map, center, radius: 2000,
-        strokeWeight: 2, strokeColor: '#94a3b8', strokeOpacity: 0.6, strokeStyle: 'dashed',
-        fillColor: '#f1f5f9', fillOpacity: 0.5,
+        strokeWeight: 2, strokeColor: '#2563eb', strokeOpacity: 0.8, strokeStyle: 'dashed',
+        fillColor: '#ffffff', fillOpacity: 0,
       });
       overlaysRef.current.push(circle);
 
