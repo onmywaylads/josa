@@ -43,15 +43,15 @@ function drawEmd(map, emdData, emdPolygonsRef, emdLabelsRef) {
       const path = outer.map(([lng, lat]) => new window.kakao.maps.LatLng(lat, lng));
       const poly = new window.kakao.maps.Polygon({
         map, path, zIndex: 200,
-        strokeWeight: 1.5, strokeColor: '#6b7280', strokeOpacity: 0.5,
-        fillColor: '#000000', fillOpacity: 0,
+        strokeWeight: 1, strokeColor: '#111111', strokeOpacity: 1,
+        fillColor: '#ffffff', fillOpacity: 0.55,
       });
       emdPolygonsRef.current.push(poly);
     });
 
     if (inBounds && cx && cy) {
       const labelContent = `<div style="text-align:center;line-height:1.3;pointer-events:none;">
-        <div style="font-size:12px;color:#9ca3af;font-weight:600;white-space:nowrap;letter-spacing:-0.3px;">${nm}</div>
+        <div style="font-size:13px;color:#111;font-weight:700;white-space:nowrap;letter-spacing:-0.3px;">${nm}</div>
       </div>`;
       const label = new window.kakao.maps.CustomOverlay({
         map, position: new window.kakao.maps.LatLng(cy, cx),
@@ -148,7 +148,7 @@ export default function ResultMap({ lat, lng, hub, storeKey, hasSurcharge }) {
               const poly = new window.kakao.maps.Polygon({
                 map, path: inter,
                 strokeWeight: 2, strokeColor: '#2563eb', strokeOpacity: 0.9,
-                fillColor: '#2563eb', fillOpacity: 0.35,
+                fillColor: '#2563eb', fillOpacity: 0.35, zIndex: 9500,
               });
               overlaysRef.current.push(poly);
             }
@@ -163,7 +163,7 @@ export default function ResultMap({ lat, lng, hub, storeKey, hasSurcharge }) {
                 const poly = new window.kakao.maps.Polygon({
                   map, path: inter,
                   strokeWeight: 2, strokeColor: '#dc2626', strokeOpacity: 1,
-                  fillColor: '#dc2626', fillOpacity: 0.4,
+                  fillColor: '#dc2626', fillOpacity: 0.4, zIndex: 9500,
                 });
                 overlaysRef.current.push(poly);
               }
@@ -216,7 +216,7 @@ export default function ResultMap({ lat, lng, hub, storeKey, hasSurcharge }) {
       <div style={{ fontSize: 12, color: 'var(--text-mid)', marginBottom: 8 }}>
         {storeKey} · 반경 2km{hasSurcharge ? <span style={{ color: 'var(--orange)', fontWeight: 700 }}> · ⚡ 할증 구역 포함</span> : ''}
       </div>
-      <div ref={mapRef} style={{ width: '100%', height: 500, borderRadius: 10, overflow: 'hidden', border: '1px solid var(--border)' }} />
+      <div ref={mapRef} style={{ width: '100%', height: 680, borderRadius: 10, overflow: 'hidden', border: '1px solid var(--border)' }} />
       <div style={{ display: 'flex', gap: 12, marginTop: 8, fontSize: 11, color: 'var(--text-mid)', flexWrap: 'wrap' }}>
         <span>⬜ 2km 반경</span>
         <span>🔵 수행 가능 권역</span>
