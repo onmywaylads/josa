@@ -436,11 +436,11 @@ function MapPage({ active }) {
         const poly = new window.kakao.maps.Polygon({
           map, path,
           zIndex: 200,
-          strokeWeight: 2,
+          strokeWeight: 1,
           strokeColor: '#111111',
           strokeOpacity: 1,
           fillColor: '#ffffff',
-          fillOpacity: 0.45,
+          fillOpacity: 0.55,
         });
         emdPolygonsRef.current.push(poly);
       });
