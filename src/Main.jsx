@@ -31,19 +31,19 @@ export default function Main({ user, onLogout, isAdmin, onAdminClick }) {
 
   return (
     <>
-      <nav className="nav" style={{paddingLeft:'5%',paddingRight:'5%'}}>
-          <button className={`nav-tab ${tab==='search'?'active':''}`} onClick={()=>setTab('search')}>🔍 상점 조회</button>
-          <button className={`nav-tab ${tab==='map'?'active':''}`} onClick={()=>setTab('map')}>📐 권역 관리</button>
-          {isAdmin && (
-            <button className="nav-tab" style={{flex:'0 0 auto',padding:'16px 12px',fontSize:12,color:'var(--accent)',fontWeight:700}}
-              onClick={onAdminClick}>
-              👤 관리자
-            </button>
-          )}
-          <button className="nav-tab" style={{flex:'0 0 auto',padding:'16px 12px',fontSize:12,color:'var(--text-dim)'}}
-            onClick={()=>onLogout()}>
-            {user.name} · 로그아웃
+      <nav className="nav">
+        <button className={`nav-tab ${tab==='search'?'active':''}`} onClick={()=>setTab('search')}>🔍 상점 조회</button>
+        <button className={`nav-tab ${tab==='map'?'active':''}`} onClick={()=>setTab('map')}>📐 권역 관리</button>
+        {isAdmin && (
+          <button className="nav-tab" style={{flex:'0 0 auto',padding:'16px 12px',fontSize:12,color:'var(--accent)',fontWeight:700}}
+            onClick={onAdminClick}>
+            👤 관리자
           </button>
+        )}
+        <button className="nav-tab" style={{flex:'0 0 auto',padding:'16px 12px',fontSize:12,color:'var(--text-dim)'}}
+          onClick={()=>onLogout()}>
+          {user.name} · 로그아웃
+        </button>
       </nav>
 
       <div style={{display: tab==='search' ? 'block' : 'none'}}>
@@ -113,7 +113,7 @@ function SearchPage() {
   }
 
   return (
-    <div style={{padding:'24px 5% 80px'}}>
+    <div style={{padding:'24px 10% 80px'}}>
       <div className="page-header"><h1>바로고 북부광역사업부</h1><p>B2B 실수행 상점 조회 시스템</p></div>
       <div className="stats">
         <div className="stat"><div className="stat-n">{stats.total}</div><div className="stat-l">전체 상점</div></div>
