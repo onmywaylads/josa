@@ -43,7 +43,7 @@ function drawEmd(map, emdData, emdPolygonsRef, emdLabelsRef) {
       const path = outer.map(([lng, lat]) => new window.kakao.maps.LatLng(lat, lng));
       const poly = new window.kakao.maps.Polygon({
         map, path, zIndex: 200,
-        strokeWeight: 1, strokeColor: '#111111', strokeOpacity: 1,
+        strokeWeight: 0.5, strokeColor: '#555555', strokeOpacity: 0.8,
         fillColor: '#ffffff', fillOpacity: 0.30,
       });
       emdPolygonsRef.current.push(poly);
@@ -132,7 +132,7 @@ export default function ResultMap({ lat, lng, hub, storeKey, hasSurcharge }) {
       // 1. 2km 원
       const circle = new window.kakao.maps.Circle({
         map, center, radius: 2000,
-        strokeWeight: 2, strokeColor: '#2563eb', strokeOpacity: 0.8, strokeStyle: 'dashed',
+        strokeWeight: 3, strokeColor: '#2563eb', strokeOpacity: 1, strokeStyle: 'dashed',
         fillColor: '#ffffff', fillOpacity: 0,
       });
       overlaysRef.current.push(circle);
@@ -154,21 +154,7 @@ export default function ResultMap({ lat, lng, hub, storeKey, hasSurcharge }) {
             }
           }
 
-          // 할증 구역(들) ∩ 2km → 빨간색
-          const surPaths = zoneData.sur_paths || [];
-          for (const surPath of surPaths) {
-            if (surPath?.length >= 3) {
-              const inter = turfIntersect(surPath, lat, lng, 2.0);
-              if (inter) {
-                const poly = new window.kakao.maps.Polygon({
-                  map, path: inter,
-                  strokeWeight: 2, strokeColor: '#dc2626', strokeOpacity: 1,
-                  fillColor: '#dc2626', fillOpacity: 0.4, zIndex: 9500,
-                });
-                overlaysRef.current.push(poly);
-              }
-            }
-          }
+
         }
         setZoneLoaded(true);
       }
