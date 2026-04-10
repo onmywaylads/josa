@@ -31,8 +31,8 @@ export default function Main({ user, onLogout, isAdmin, onAdminClick }) {
 
   return (
     <>
-      <nav className="nav" style={{justifyContent:'center'}}>
-        <div style={{display:'flex',width:'100%',maxWidth:1200}}>
+      <nav className="nav">
+        <div style={{display:'flex',width:'min(1200px, calc(100% - 48px))',marginLeft:'max(24px, calc(50% - 600px))'}}>
           <button className={`nav-tab ${tab==='search'?'active':''}`} onClick={()=>setTab('search')}>🔍 상점 조회</button>
           <button className={`nav-tab ${tab==='map'?'active':''}`} onClick={()=>setTab('map')}>📐 권역 관리</button>
           {isAdmin && (
@@ -48,7 +48,7 @@ export default function Main({ user, onLogout, isAdmin, onAdminClick }) {
         </div>
       </nav>
 
-      <div style={{display: tab==='search' ? 'flex' : 'none', justifyContent:'center'}}>
+      <div style={{display: tab==='search' ? 'block' : 'none'}}>
         <SearchPage />
       </div>
 
@@ -115,7 +115,7 @@ function SearchPage() {
   }
 
   return (
-    <div style={{width:'100%',maxWidth:1200,padding:'24px 24px 80px'}}>
+    <div style={{width:'min(1200px, calc(100% - 48px))',marginLeft:'max(24px, calc(50% - 600px))',padding:'24px 0 80px'}}>
       <div className="page-header"><h1>바로고 북부광역사업부</h1><p>B2B 실수행 상점 조회 시스템</p></div>
       <div className="stats">
         <div className="stat"><div className="stat-n">{stats.total}</div><div className="stat-l">전체 상점</div></div>
