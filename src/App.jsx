@@ -19,7 +19,7 @@ export default function App() {
     const approved = params.get('approved');
 
     if (userId) {
-      window.history.replaceState({}, '', '/josa/');
+      window.history.replaceState({}, '', '/');
       if (approved === 'true') {
         const user = { userId, name, email };
         localStorage.setItem(STORAGE_KEY, JSON.stringify(user));
