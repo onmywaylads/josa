@@ -31,19 +31,21 @@ export default function Main({ user, onLogout, isAdmin, onAdminClick }) {
 
   return (
     <>
-      <nav className="nav">
-        <button className={`nav-tab ${tab==='search'?'active':''}`} onClick={()=>setTab('search')}>🔍 상점 조회</button>
-        <button className={`nav-tab ${tab==='map'?'active':''}`} onClick={()=>setTab('map')}>📐 권역 관리</button>
-        {isAdmin && (
-          <button className="nav-tab" style={{flex:'0 0 auto',padding:'16px 12px',fontSize:12,color:'var(--accent)',fontWeight:700}}
-            onClick={onAdminClick}>
-            👤 관리자
+      <nav className="nav" style={{justifyContent:'center'}}>
+        <div style={{display:'flex',width:'100%',maxWidth:1200}}>
+          <button className={`nav-tab ${tab==='search'?'active':''}`} onClick={()=>setTab('search')}>🔍 상점 조회</button>
+          <button className={`nav-tab ${tab==='map'?'active':''}`} onClick={()=>setTab('map')}>📐 권역 관리</button>
+          {isAdmin && (
+            <button className="nav-tab" style={{flex:'0 0 auto',padding:'16px 12px',fontSize:12,color:'var(--accent)',fontWeight:700}}
+              onClick={onAdminClick}>
+              👤 관리자
+            </button>
+          )}
+          <button className="nav-tab" style={{flex:'0 0 auto',padding:'16px 12px',fontSize:12,color:'var(--text-dim)'}}
+            onClick={()=>onLogout()}>
+            {user.name} · 로그아웃
           </button>
-        )}
-        <button className="nav-tab" style={{flex:'0 0 auto',padding:'16px 12px',fontSize:12,color:'var(--text-dim)'}}
-          onClick={()=>onLogout()}>
-          {user.name} · 로그아웃
-        </button>
+        </div>
       </nav>
 
       <div style={{display: tab==='search' ? 'flex' : 'none', justifyContent:'center'}}>
