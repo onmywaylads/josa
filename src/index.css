@@ -1,3 +1,4 @@
+body { zoom: 0.75; }
 :root {
   --bg:#f5f6fa; --white:#ffffff; --border:#e4e8f0; --border2:#d0d6e2;
   --accent:#2563eb; --accent-light:#eff6ff; --accent2:#1d4ed8;
