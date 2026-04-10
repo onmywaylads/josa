@@ -46,7 +46,7 @@ export default function Main({ user, onLogout, isAdmin, onAdminClick }) {
         </button>
       </nav>
 
-      <div style={{display: tab==='search' ? 'block' : 'none'}}>
+      <div style={{display: tab==='search' ? 'flex' : 'none', justifyContent:'center'}}>
         <SearchPage />
       </div>
 
@@ -113,7 +113,7 @@ function SearchPage() {
   }
 
   return (
-    <div style={{maxWidth:1200,margin:'0 auto',padding:'24px 24px 80px'}}>
+    <div style={{width:'100%',maxWidth:1200,padding:'24px 24px 80px'}}>
       <div className="page-header"><h1>바로고 북부광역사업부</h1><p>B2B 실수행 상점 조회 시스템</p></div>
       <div className="stats">
         <div className="stat"><div className="stat-n">{stats.total}</div><div className="stat-l">전체 상점</div></div>
