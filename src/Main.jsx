@@ -46,7 +46,7 @@ export default function Main({ user, onLogout, isAdmin, onAdminClick }) {
         </button>
       </nav>
 
-      <div style={{display: tab==='search' ? 'block' : 'none'}}>
+      <div style={{display: tab==='search' ? 'block' : 'none', width:'100%'}}>
         <SearchPage />
       </div>
 
