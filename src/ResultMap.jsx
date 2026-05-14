@@ -174,9 +174,9 @@ export default function ResultMap({ lat, lng, hub, storeKey, hasSurcharge }) {
         for (const surPath of surPaths) {
           if (surPath?.length >= 3) {
             const inter = turfIntersect(surPath, lat, lng, 2.0);
-            const path = inter || surPath.map(p => new window.kakao.maps.LatLng(p.lat, p.lng));
+            if (!inter) continue; // 2km 원 밖이면 스킵
             const poly = new window.kakao.maps.Polygon({
-              map, path,
+              map, path: inter,
               strokeWeight: 2, strokeColor: '#dc2626', strokeOpacity: 1,
               fillColor: '#dc2626', fillOpacity: 0.4, zIndex: 9500,
             });
