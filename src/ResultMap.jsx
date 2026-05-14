@@ -26,7 +26,7 @@ function drawEmd(map, emdData, emdPolygonsRef, emdLabelsRef) {
   const ne = bounds.getNorthEast();
 
   emdData.features.forEach(feature => {
-    const { nm, cx, cy, gu } = feature.properties;
+    const { nm, cx, cy } = feature.properties;
     const geomType = feature.geometry.type;
     const coordsList = geomType === 'Polygon'
       ? [feature.geometry.coordinates]
@@ -62,10 +62,11 @@ function drawEmd(map, emdData, emdPolygonsRef, emdLabelsRef) {
   });
 }
 
-async function fetchHubZone(hubName) {
+// ── 핵심 변경: 허브명이 아닌 좌표로 Supabase에서 직접 찾기 ──
+async function fetchHubZoneByCoord(lat, lng) {
   try {
     const res = await fetch(
-      `${SUPABASE_URL}/rest/v1/hubs?name=eq.${encodeURIComponent(hubName)}&select=zone_path,sur_paths`,
+      `${SUPABASE_URL}/rest/v1/hubs?select=name,zone_path,sur_paths`,
       {
         headers: {
           'apikey': SUPABASE_KEY,
@@ -73,8 +74,22 @@ async function fetchHubZone(hubName) {
         }
       }
     );
-    const data = await res.json();
-    if (data && data[0]) return data[0];
+    const hubs = await res.json();
+    if (!Array.isArray(hubs)) return null;
+
+    const point = window.turf.point([lng, lat]);
+
+    for (const hub of hubs) {
+      if (!hub.zone_path || hub.zone_path.length < 3) continue;
+      try {
+        const coords = hub.zone_path.map(p => [p.lng, p.lat]);
+        coords.push(coords[0]); // 닫기
+        const polygon = window.turf.polygon([coords]);
+        if (window.turf.booleanPointInPolygon(point, polygon)) {
+          return hub; // name, zone_path, sur_paths 포함
+        }
+      } catch (e) { /* 개별 허브 오류 무시 */ }
+    }
     return null;
   } catch (e) {
     console.log('허브 존 조회 실패', e);
@@ -103,7 +118,7 @@ export default function ResultMap({ lat, lng, hub, storeKey, hasSurcharge }) {
   const overlaysRef = useRef([]);
   const emdPolygonsRef = useRef([]);
   const emdLabelsRef = useRef([]);
-  const [zoneLoaded, setZoneLoaded] = useState(false);
+  const [matchedHub, setMatchedHub] = useState(null);
 
   useEffect(() => {
     if (!lat || !lng) return;
@@ -118,7 +133,6 @@ export default function ResultMap({ lat, lng, hub, storeKey, hasSurcharge }) {
 
       const center = new window.kakao.maps.LatLng(lat, lng);
 
-      // 지도 초기화 (처음 한 번만)
       if (!mapInstanceRef.current) {
         mapInstanceRef.current = new window.kakao.maps.Map(mapRef.current, { center, level: 6 });
       } else {
@@ -137,39 +151,40 @@ export default function ResultMap({ lat, lng, hub, storeKey, hasSurcharge }) {
       });
       overlaysRef.current.push(circle);
 
-      // 2. 허브 권역 데이터 조회 & 폴리곤 그리기
-      if (hub) {
-        const zoneData = await fetchHubZone(hub);
-        if (zoneData) {
-          // 기본 권역 ∩ 2km → 파란색
-          if (zoneData.zone_path?.length >= 3) {
-            const inter = turfIntersect(zoneData.zone_path, lat, lng, 2.0);
-            if (inter) {
-              const poly = new window.kakao.maps.Polygon({
-                map, path: inter,
-                strokeWeight: 2, strokeColor: '#2563eb', strokeOpacity: 0.9,
-                fillColor: '#2563eb', fillOpacity: 0.35, zIndex: 9500,
-              });
-              overlaysRef.current.push(poly);
-            }
-          }
+      // 2. Supabase 전체 허브에서 좌표로 매칭 (구글 시트 허브명 무관)
+      const zoneData = await fetchHubZoneByCoord(lat, lng);
+      if (zoneData) {
+        setMatchedHub(zoneData.name);
 
-          // 할증 구역(들) ∩ 2km → 빨간색
-          const surPaths = zoneData.sur_paths || [];
-          for (const surPath of surPaths) {
-            if (surPath?.length >= 3) {
-              const inter = turfIntersect(surPath, lat, lng, 2.0);
-              const path = inter || surPath.map(p => new window.kakao.maps.LatLng(p.lat, p.lng));
-              const poly = new window.kakao.maps.Polygon({
-                map, path,
-                strokeWeight: 2, strokeColor: '#dc2626', strokeOpacity: 1,
-                fillColor: '#dc2626', fillOpacity: 0.4, zIndex: 9500,
-              });
-              overlaysRef.current.push(poly);
-            }
+        // 기본 권역 ∩ 2km → 파란색
+        if (zoneData.zone_path?.length >= 3) {
+          const inter = turfIntersect(zoneData.zone_path, lat, lng, 2.0);
+          if (inter) {
+            const poly = new window.kakao.maps.Polygon({
+              map, path: inter,
+              strokeWeight: 2, strokeColor: '#2563eb', strokeOpacity: 0.9,
+              fillColor: '#2563eb', fillOpacity: 0.35, zIndex: 9500,
+            });
+            overlaysRef.current.push(poly);
           }
         }
-        setZoneLoaded(true);
+
+        // 할증 구역(들) ∩ 2km → 빨간색
+        const surPaths = zoneData.sur_paths || [];
+        for (const surPath of surPaths) {
+          if (surPath?.length >= 3) {
+            const inter = turfIntersect(surPath, lat, lng, 2.0);
+            const path = inter || surPath.map(p => new window.kakao.maps.LatLng(p.lat, p.lng));
+            const poly = new window.kakao.maps.Polygon({
+              map, path,
+              strokeWeight: 2, strokeColor: '#dc2626', strokeOpacity: 1,
+              fillColor: '#dc2626', fillOpacity: 0.4, zIndex: 9500,
+            });
+            overlaysRef.current.push(poly);
+          }
+        }
+      } else {
+        setMatchedHub(null);
       }
 
       // 3. 마커 + 인포윈도우
@@ -203,7 +218,7 @@ export default function ResultMap({ lat, lng, hub, storeKey, hasSurcharge }) {
       emdPolygonsRef.current.forEach(p => { try { p.setMap(null); } catch (e) {} });
       emdLabelsRef.current.forEach(l => { try { l.setMap(null); } catch (e) {} });
     };
-  }, [lat, lng, hub, storeKey, hasSurcharge]);
+  }, [lat, lng, storeKey, hasSurcharge]);
 
   if (!lat || !lng) return null;
 
@@ -213,7 +228,10 @@ export default function ResultMap({ lat, lng, hub, storeKey, hasSurcharge }) {
         🗺 권역 지도
       </div>
       <div style={{ fontSize: 12, color: 'var(--text-mid)', marginBottom: 8 }}>
-        {storeKey} · 반경 2km{hasSurcharge ? <span style={{ color: 'var(--orange)', fontWeight: 700 }}> · ⚡ 할증 구역 포함</span> : ''}
+        {storeKey} · 반경 2km
+        {matchedHub && <span style={{ color: 'var(--accent)', fontWeight: 700 }}> · {matchedHub} 권역</span>}
+        {matchedHub === null && <span style={{ color: 'var(--text-dim)' }}> · 권역 미설정 구역</span>}
+        {hasSurcharge ? <span style={{ color: 'var(--orange)', fontWeight: 700 }}> · ⚡ 할증 구역 포함</span> : ''}
       </div>
       <div ref={mapRef} style={{ width: '100%', height: 680, borderRadius: 10, overflow: 'hidden', border: '1px solid var(--border)' }} />
       <div style={{ display: 'flex', gap: 12, marginTop: 8, fontSize: 11, color: 'var(--text-mid)', flexWrap: 'wrap' }}>
